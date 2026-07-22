@@ -23,22 +23,18 @@ use core::{
 };
 use num_traits::{PrimInt, Unsigned};
 
-/// The default set, using a usize for internal storage.
+/// The default [`BitSet`], which uses a [`usize`] for internal storage.
 ///
 /// On 64 bit systems, this set can store integers between 0 and 63 (inclusive).
+/// For numbers up to 127, use [`BitSet<u128>`] at a potential performance cost.
 pub type Set = BitSet<usize>;
-
-/// The largest set that this crate offers, storing integers between 0 and 127 (inclusive).
-///
-/// On 64 bit systems, operations on [`BigSet`] should be slower than on [`Set`].
-pub type BigSet = BitSet<u128>;
 
 /// Default type for the input and output of numbers stored in a [`BitSet`].
 pub type Element = usize;
 
-/// A primitive integer type that [`BitSet`] can use internally.
+/// A primitive integer type that [`BitSet`] can use for storage.
 pub trait Word =
-    PrimInt + Unsigned + AddAssign + BitAndAssign + BitOrAssign + Shl<usize, Output = Self>;
+    PrimInt + Unsigned + AddAssign + BitAndAssign + BitOrAssign + Shl<Element, Output = Self>;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct BitSet<W: Word>(W);
