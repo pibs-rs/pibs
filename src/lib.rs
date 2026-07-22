@@ -18,6 +18,7 @@ use alloc::vec::Vec;
 
 use core::{
     any::type_name,
+    fmt::Debug,
     ops::{Add, AddAssign, BitAndAssign, BitOrAssign, Range, RangeInclusive, Shl, Sub},
 };
 use num_traits::{PrimInt, Unsigned};
@@ -32,7 +33,7 @@ pub type Set = BitSet<usize>;
 /// On 64 bit systems, operations on [`BigSet`] should be slower than on [`Set`].
 pub type BigSet = BitSet<u128>;
 
-/// Element stored in a [`BitSet`].
+/// Default type for the input and output of numbers stored in a [`BitSet`].
 pub type Element = usize;
 
 /// A primitive integer type that [`BitSet`] can use internally.
@@ -243,6 +244,69 @@ impl<W: Word> Sub<Element> for BitSet<W> {
     }
 }
 
+// --------------------
+// From implementations
+// --------------------
+
+// impl<W: Word> FromIterator<Element> for BitSet<W> {
+//     #[inline]
+//     fn from_iter<T: IntoIterator<Item = Element>>(iter: T) -> Self {
+//         let mut word = W::zero();
+//         for e in iter {
+//             Self::debug_bound_check(e);
+//             word += W::one() << e;
+//         }
+//         Self(word)
+//     }
+// }
+
+impl<W: Word, T> FromIterator<T> for BitSet<W>
+where
+    T: TryInto<Element>,
+    <T as TryInto<usize>>::Error: Debug,
+{
+    /// Create a [`BitSet`] from an integer iterator.
+    ///
+    /// # Example
+    /// ```
+    /// let iter = core::iter::once(0).chain(core::iter::once(5));
+    /// let set = pitset::Set::from_iter(iter);
+    /// assert_eq!(set.into_vec(), vec![0, 5]);
+    /// ```
+    #[inline]
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        let mut word = W::zero();
+
+        for e in iter {
+            let e = e
+                .try_into()
+                .expect("failed to load an element from an iterator");
+            Self::debug_bound_check(e);
+            word += W::one() << e;
+        }
+
+        Self(word)
+    }
+}
+
+impl<W: Word, T> From<Vec<T>> for BitSet<W>
+where
+    T: TryInto<Element>,
+    <T as TryInto<usize>>::Error: Debug,
+{
+    /// Create a [`BitSet`] from an integer vector.
+    ///
+    /// # Example
+    /// ```
+    /// let set: pitset::Set = vec![2, 4, 6].into();
+    /// assert_eq!(set.into_vec(), vec![2, 4, 6]);
+    /// ```
+    #[inline]
+    fn from(vec: Vec<T>) -> Self {
+        vec.into_iter().collect()
+    }
+}
+
 impl<W: Word> From<Range<Element>> for BitSet<W> {
     /// Create a [`BitSet`] from an exclusive range.
     ///
@@ -287,16 +351,9 @@ impl<W: Word> From<RangeInclusive<Element>> for BitSet<W> {
     }
 }
 
-impl<W: Word> FromIterator<Element> for BitSet<W> {
-    #[inline]
-    fn from_iter<T: IntoIterator<Item = Element>>(iter: T) -> Self {
-        let mut word = W::zero();
-        for e in iter {
-            word += W::one() << e;
-        }
-        Self(word)
-    }
-}
+// --------------------
+// Into implementations
+// --------------------
 
 impl<W: Word> IntoIterator for BitSet<W> {
     type Item = usize;
@@ -307,6 +364,10 @@ impl<W: Word> IntoIterator for BitSet<W> {
         self.iter()
     }
 }
+
+// ---------
+// Iterators
+// ---------
 
 pub struct BitSetIter<W: Word>(W);
 
@@ -323,6 +384,10 @@ impl<W: Word> Iterator for BitSetIter<W> {
         Some(item)
     }
 }
+
+// --------------------------------------
+// From implementations for foreign types
+// --------------------------------------
 
 #[cfg(feature = "alloc")]
 impl<W: Word> From<BitSet<W>> for Vec<Element> {
