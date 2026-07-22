@@ -47,7 +47,7 @@ impl<W: Word> BitSet<W> {
     pub const MAX: usize = Self::BITS - 1;
 
     #[inline(always)]
-    fn bound_check(e: Element) {
+    fn debug_bound_check(e: Element) {
         debug_assert!(
             e <= Self::MAX,
             "element {} out of bounds for {}: maximum is {}",
@@ -69,13 +69,13 @@ impl<W: Word> BitSet<W> {
 
     #[inline]
     pub fn insert(&mut self, e: Element) {
-        Self::bound_check(e);
+        Self::debug_bound_check(e);
         self.0 |= W::one() << e;
     }
 
     #[inline]
     pub fn remove(&mut self, e: Element) {
-        Self::bound_check(e);
+        Self::debug_bound_check(e);
         self.0 &= !(W::one() << e);
     }
 
@@ -86,7 +86,7 @@ impl<W: Word> BitSet<W> {
 
     #[inline]
     pub fn contains(&self, e: Element) -> bool {
-        Self::bound_check(e);
+        Self::debug_bound_check(e);
         (self.0 >> e) & W::one() == W::one()
     }
 
@@ -146,7 +146,7 @@ impl<W: Word> BitSet<W> {
     /// Ordinal position of an element in the set counted from zero, assuming it exists.
     #[inline]
     pub fn position_unchecked(&self, e: Element) -> usize {
-        Self::bound_check(e);
+        Self::debug_bound_check(e);
         (self.0 & ((W::one() << e) - W::one())).count_ones() as usize
     }
 
@@ -159,7 +159,7 @@ impl<W: Word> BitSet<W> {
     /// Ordinal position of an element in the set from one, assuming it exists.
     #[inline]
     pub fn rank_unchecked(&self, e: Element) -> usize {
-        Self::bound_check(e);
+        Self::debug_bound_check(e);
         self.position_unchecked(e) + 1
     }
 
@@ -185,7 +185,7 @@ impl<W: Word> BitSet<W> {
     /// If `e` exceeds [`BitSet::MAX`].
     #[inline]
     pub fn singleton(e: Element) -> Self {
-        Self::bound_check(e);
+        Self::debug_bound_check(e);
         Self(W::one() << e)
     }
 
@@ -259,7 +259,7 @@ impl<W: Word> From<Range<Element>> for BitSet<W> {
         if range.is_empty() {
             return Self(W::zero());
         }
-        Self::bound_check(range.end - 1);
+        Self::debug_bound_check(range.end - 1);
         Self(((W::one() << (range.end - range.start)) - W::one()) << range.start)
     }
 }
@@ -282,7 +282,7 @@ impl<W: Word> From<RangeInclusive<Element>> for BitSet<W> {
         }
         let start = *range.start();
         let end = range.last().unwrap() + 1;
-        Self::bound_check(end - 1);
+        Self::debug_bound_check(end - 1);
         Self(((W::one() << (end - start)) - W::one()) << start)
     }
 }
