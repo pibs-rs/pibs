@@ -8,6 +8,13 @@
 //! set abstraction, consider ... instead.
 
 #![feature(trait_alias)]
+#![no_std]
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
+#[cfg(feature = "alloc")]
+use alloc::vec::Vec;
 
 use core::{
     any::type_name,
@@ -193,6 +200,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     /// assert_eq!(pitset::Set::from(1..=3).to_vec(), vec![1, 2, 3]);
     /// ```
+    #[cfg(feature = "alloc")]
     #[inline]
     pub fn to_vec(&self) -> Vec<Element> {
         self.iter().collect()
@@ -204,6 +212,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     /// assert_eq!(pitset::Set::from(1..=3).into_vec(), vec![1, 2, 3]);
     /// ```
+    #[cfg(feature = "alloc")]
     #[inline]
     pub fn into_vec(self) -> Vec<Element> {
         self.into_iter().collect()
@@ -315,6 +324,7 @@ impl<W: Word> Iterator for BitSetIter<W> {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<W: Word> From<BitSet<W>> for Vec<Element> {
     /// Create a [`Vec`] from a [`BitSet`].
     ///
