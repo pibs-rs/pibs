@@ -588,7 +588,6 @@ where
 // From implementations
 // --------------------
 
-// TODO: Implement this for more collections?
 impl<W: Word, T> From<Vec<T>> for BitSet<W>
 where
     T: PrimInt + TryInto<Element>,
@@ -619,7 +618,6 @@ where
     }
 }
 
-// TODO: Implement this for more references to collections?
 impl<W: Word, T> From<&Vec<T>> for BitSet<W>
 where
     T: PrimInt + TryInto<Element>,
@@ -711,7 +709,7 @@ impl<W: Word> Iterator for BitSetIter<W> {
         if self.0 == W::zero() {
             return None;
         }
-        let item = self.0.trailing_zeros() as Element;
+        let item = self.0.trailing_zeros() as Self::Item;
         self.0 &= self.0 - W::one();
         Some(item)
     }
@@ -721,7 +719,6 @@ impl<W: Word> Iterator for BitSetIter<W> {
 // Implementations for foreign types
 // ---------------------------------
 
-// TODO: Implement this for more collections?
 #[cfg(feature = "alloc")]
 impl<W: Word, T> From<BitSet<W>> for Vec<T>
 where
