@@ -489,10 +489,6 @@ impl<W: Word> IntoIterator for BitSet<W> {
     }
 }
 
-// --------------------
-// From implementations
-// --------------------
-
 impl<W: Word, T> FromIterator<T> for BitSet<W>
 where
     T: PrimInt + TryInto<Element>,
@@ -537,6 +533,11 @@ where
     }
 }
 
+// --------------------
+// From implementations
+// --------------------
+
+// TODO: Implement this for more collections?
 impl<W: Word, T> From<Vec<T>> for BitSet<W>
 where
     T: PrimInt + TryInto<Element>,
@@ -564,6 +565,37 @@ where
     #[inline]
     fn from(vec: Vec<T>) -> Self {
         vec.into_iter().collect()
+    }
+}
+
+// TODO: Implement this for more references to collections?
+impl<W: Word, T> From<&Vec<T>> for BitSet<W>
+where
+    T: PrimInt + TryInto<Element>,
+{
+    /// Create a [`BitSet`] from an integer vector by reference.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// let vec = vec![2, 4, 6];
+    /// let set = Set::from(&vec);
+    /// assert_eq!(set.into_vec(), vec);
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// If an element cannot be represented in the bitset.
+    /// ```should_panic
+    /// # use pitset::Set;
+    /// Set::from(&vec![-1]);
+    /// ```
+    /// ```should_panic
+    /// # use pitset::Set;
+    /// Set::from(&vec![10_000]);
+    #[inline]
+    fn from(vec: &Vec<T>) -> Self {
+        vec.iter().copied().collect()
     }
 }
 
@@ -638,6 +670,7 @@ impl<W: Word> Iterator for BitSetIter<W> {
 // Implementations for foreign types
 // ---------------------------------
 
+// TODO: Implement this for more collections?
 #[cfg(feature = "alloc")]
 impl<W: Word, T> From<BitSet<W>> for Vec<T>
 where
