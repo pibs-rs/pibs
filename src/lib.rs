@@ -4,10 +4,11 @@
 //!
 //! The focus of this crate are
 //! 1. **minimal overhead** over bitwise operations (no allocation or block management) and
-//! 2. a rich interface for **mathematical operations** that involve sets of non-negative integers.
+//! 2. a rich interface for **mathematical operations** that involve sets of (small) non-negative
+//!    integers.
 //!
 //! We recommend this crate over alternatives when bitset operations are a performance bottleneck
-//! and all numbers to be stored lie between 0 and 127 (inclusive).
+//! and all numbers to be stored naturally lie between 0 and 127 (inclusive).
 //!
 //! # Alternatives
 //!
@@ -17,6 +18,7 @@
 //! If you don't know your largest number ahead of time, [bit-set](https://docs.rs/bit_set) may
 //! be what you are looking for. If you want minimal overhead but only need bit manipulation as
 //! opposed to mathematical set abstraction, consider [bittle](https://docs.rs/bittle).
+// TODO: Add Examples section.
 
 #![feature(trait_alias)]
 #![no_std]
@@ -54,12 +56,43 @@ pub trait Word =
     PrimInt + Unsigned + AddAssign + BitAndAssign + BitOrAssign + Shl<Element, Output = Self>;
 
 /// A high-performance generic bitset that uses a single primitive integer for storage.
+///
+/// # Documentation conventions
+/// The examples below use the following imports.
+/// ```
+/// use pitset::{BitSet, Set};
+/// ```
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct BitSet<W: Word>(W);
 
 impl<W: Word> BitSet<W> {
+    /// The number of bits in the [primitive integer type](Word) `W`.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::BitSet;
+    /// assert_eq!(BitSet::<u32>::BITS, 32);
+    /// ```
     pub const BITS: usize = size_of::<W>() * 8;
-    pub const MAX: usize = Self::BITS - 1;
+
+    /// The smallest integer that can be stored in the set.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// assert_eq!(Set::MIN, 0);
+    /// ```
+    pub const MIN: Element = 0;
+
+    /// The largest integer that can be stored in the set.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::BitSet;
+    /// assert_eq!(BitSet::<u64>::MAX, 63);
+    /// assert_eq!(BitSet::<u128>::MAX, 127);
+    /// ```
+    pub const MAX: Element = Self::BITS - 1;
 
     // -------
     // Helpers
@@ -80,16 +113,79 @@ impl<W: Word> BitSet<W> {
     // Queries
     // -------
 
+    /// Number of elements in the set.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// assert_eq!(Set::interval(4, 6).len(), 3);
+    /// ```
     #[inline]
     pub fn len(self) -> usize {
         self.0.count_ones() as usize
     }
 
+    /// The smallest element in the set, if any.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// assert_eq!(Set::new().min(), None);
+    /// assert_eq!(Set::interval(4, 6).min(), Some(4));
+    /// ```
+    #[inline]
+    pub fn min(self) -> Option<Element> {
+        if self.is_empty() {
+            None
+        } else {
+            Some(self.0.trailing_zeros() as Element)
+        }
+    }
+
+    /// The largest element in the set, if any.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// assert_eq!(Set::new().max(), None);
+    /// assert_eq!(Set::interval(4, 6).max(), Some(6));
+    /// ```
+    #[inline]
+    pub fn max(self) -> Option<Element> {
+        if self.is_empty() {
+            None
+        } else {
+            Some((Self::MAX - self.0.leading_zeros() as usize) as Element)
+        }
+    }
+
+    /// The largest element in the set, if any.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// assert!(Set::new().is_empty());
+    /// ```
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.0 == W::zero()
     }
 
+    /// Whether an element is contained in the set.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// assert!(Set::singleton(5).contains(5));
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// If the element exceeds [`Self::MAX`].
+    /// ```should_panic
+    /// # use pitset::BitSet;
+    /// BitSet::<u8>::singleton(5).contains(8);
+    /// ```
     #[inline]
     pub fn contains(&self, e: Element) -> bool {
         Self::debug_bound_check(e);
@@ -109,6 +205,29 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn is_disjoint(&self, other: &Self) -> bool {
         self.0 & other.0 == W::zero()
+    }
+
+    /// Whether the elements form a contiguous interval.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// let mut set = Set::interval(4, 6);
+    /// assert!(set.is_interval());
+    /// set.remove(5);
+    /// assert!(!set.is_interval());
+    ///
+    /// // Empty sets and singletons are intervals.
+    /// assert!(Set::singleton(5).is_interval());
+    /// assert!(Set::new().is_interval());
+    /// ```
+    #[inline]
+    pub fn is_interval(&self) -> bool {
+        if self.is_empty() {
+            true
+        } else {
+            1 + self.max().unwrap() - self.min().unwrap() == self.len()
+        }
     }
 
     // --------------
@@ -152,11 +271,12 @@ impl<W: Word> BitSet<W> {
         Self(self.0 ^ other.0)
     }
 
-    /// Ordinal position of an element in the set counted from zero.
+    /// Ordinal position of an element in the set, counted from zero.
     ///
     /// # Example
     /// ```
-    /// let set: pitset::Set = (4..=6).into();
+    /// # use pitset::Set;
+    /// let set: Set = (4..=6).into();
     /// assert_eq!(set.position(3), None);
     /// assert_eq!(set.position(4), Some(0));
     /// assert_eq!(set.position(6), Some(2));
@@ -170,23 +290,40 @@ impl<W: Word> BitSet<W> {
         }
     }
 
-    /// Ordinal position of an element in the set counted from zero, assuming it exists.
+    /// Ordinal position of an element assumed to be in the set, counted from zero.
+    ///
+    /// # Undefined behavior
+    ///
+    /// If the element is not in the set.
     #[inline]
     pub fn position_unchecked(&self, e: Element) -> usize {
-        Self::debug_bound_check(e);
+        debug_assert!(self.contains(e));
         (self.0 & ((W::one() << e) - W::one())).count_ones() as usize
     }
 
-    /// Ordinal position of an element in the set counted from one.
+    /// Ordinal position of an element in the set, counted from one.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// let set: Set = (4..=6).into();
+    /// assert_eq!(set.rank(3), None);
+    /// assert_eq!(set.rank(4), Some(1));
+    /// assert_eq!(set.rank(6), Some(3));
+    /// ```
     #[inline]
     pub fn rank(&self, e: Element) -> Option<usize> {
         self.position(e).and_then(|p| Some(p + 1))
     }
 
-    /// Ordinal position of an element in the set from one, assuming it exists.
+    /// Ordinal position of an element assumed to be in the set, counted from one.
+    ///
+    /// # Undefined behavior
+    ///
+    /// If the element is not in the set.
     #[inline]
     pub fn rank_unchecked(&self, e: Element) -> usize {
-        Self::debug_bound_check(e);
+        debug_assert!(self.contains(e));
         self.position_unchecked(e) + 1
     }
 
@@ -198,7 +335,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// use pitset::Set;
+    /// # use pitset::Set;
     /// assert!(Set::new().is_empty());
     /// ```
     #[inline]
@@ -210,7 +347,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// use pitset::Set;
+    /// # use pitset::Set;
     /// assert_eq!(Set::singleton(5).into_vec(), vec![5]);
     /// ```
     ///
@@ -222,9 +359,47 @@ impl<W: Word> BitSet<W> {
         Self(W::one() << e)
     }
 
+    /// Create a contiguous interval.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// assert_eq!(Set::interval(1, 3).into_vec(), vec![1, 2, 3]);
+    /// assert!(Set::interval(3, 1).is_empty());
+    /// ```
+    #[inline]
+    pub fn interval(first: Element, last: Element) -> Self {
+        (first..=last).into()
+    }
+
     // ------------------
     // Conversion methods
     // ------------------
+
+    /// A copy of the internal storage word.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::BitSet;
+    /// let set = BitSet::<u8>::from(vec![0, 2, 4]);
+    /// assert_eq!(set.word(), 1u8 + 4u8 + 16u8);
+    /// ```
+    pub fn word(&self) -> W {
+        self.0
+    }
+
+    /// A writable reference to the internal storage word.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// let mut set = Set::new();
+    /// *set.word_mut() |= 1 + 4 + 16; // Set bits with index 0, 2, and 4.
+    /// assert_eq!(set.into_vec(), vec![0, 2, 4]);
+    /// ```
+    pub fn word_mut(&mut self) -> &mut W {
+        &mut self.0
+    }
 
     #[inline]
     pub fn iter(self) -> BitSetIter<W> {
@@ -235,7 +410,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// use pitset::Set;
+    /// # use pitset::Set;
     /// assert_eq!(Set::from(1..=3).to_vec(), vec![1, 2, 3]);
     /// ```
     #[cfg(feature = "alloc")]
@@ -248,7 +423,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// use pitset::Set;
+    /// # use pitset::Set;
     /// assert_eq!(Set::from(1..=3).into_vec(), vec![1, 2, 3]);
     /// ```
     #[cfg(feature = "alloc")]
@@ -309,7 +484,7 @@ where
     ///
     /// # Example
     /// ```
-    /// use pitset::Set;
+    /// # use pitset::Set;
     /// let iter = core::iter::once(0).chain(core::iter::once(5));
     /// let set = Set::from_iter(iter);
     /// assert_eq!(set.into_vec(), vec![0, 5]);
@@ -339,7 +514,7 @@ where
     ///
     /// # Example
     /// ```
-    /// use pitset::Set;
+    /// # use pitset::Set;
     /// let set: Set = vec![2, 4, 6].into();
     /// assert_eq!(set.into_vec(), vec![2, 4, 6]);
     /// ```
@@ -354,7 +529,7 @@ impl<W: Word> From<Range<Element>> for BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// use pitset::Set;
+    /// # use pitset::Set;
     /// for range in [(2..5), (2..3), (2..2), (2..1)] {
     ///     let set: Set = range.clone().into();
     ///     let vec: Vec<_> = range.collect();
@@ -376,7 +551,7 @@ impl<W: Word> From<RangeInclusive<Element>> for BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// use pitset::Set;
+    /// # use pitset::Set;
     /// for range in [(2..=4), (2..=2), (2..=1)] {
     ///     let set: Set = range.clone().into();
     ///     let vec: Vec<_> = range.collect();
@@ -427,7 +602,7 @@ impl<W: Word> From<BitSet<W>> for Vec<Element> {
     ///
     /// # Example
     /// ```
-    /// use pitset::Set;
+    /// # use pitset::Set;
     /// let v: Vec<_> = Set::from(1..=3).into();
     /// assert_eq!(v, vec![1, 2, 3]);
     /// ```
