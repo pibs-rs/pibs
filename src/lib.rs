@@ -7,8 +7,8 @@
 //! 2. a rich interface for **mathematical operations** that involve sets of (small) non-negative
 //!    integers.
 //!
-//! We recommend this crate over alternatives when bitset operations are a performance bottleneck
-//! and all numbers to be stored naturally lie between 0 and 127 (inclusive).
+//! It is best suited when bitset operations are performance critical and all elements naturally lie
+//! between 0 and 127 (inclusive).
 //!
 //! # Alternatives
 //!
@@ -372,6 +372,19 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn interval(first: Element, last: Element) -> Self {
         (first..=last).into()
+    }
+
+    /// Create a bitset from the underlying primitive type `W`.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// assert_eq!(Set::from_word(1 + 4 + 16).into_vec(), vec![0, 2, 4]);
+    /// assert_eq!(Set::from_word(123).word(), 123);
+    /// ```
+    #[inline]
+    pub fn from_word(word: W) -> Self {
+        Self(word)
     }
 
     // ------------------
