@@ -6,6 +6,8 @@ edition = "2024"
 [features]
 default = ["alloc"]
 alloc = []
+serde = ["dep:serde"]
 
 [dependencies]
 num-traits = { version = "0.2.19", default-features = false }
+serde = { version = "1.0.229", default-features = false, features = ["derive"], optional = true }

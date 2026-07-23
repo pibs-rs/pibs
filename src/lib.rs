@@ -29,6 +29,9 @@ extern crate alloc;
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use core::{
     any::type_name,
     fmt::{self, Debug},
@@ -68,6 +71,7 @@ pub trait Word = PrimInt
 /// use pitset::{BitSet, Set};
 /// ```
 #[derive(Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BitSet<W: Word>(W);
 
 impl<W: Word> BitSet<W> {
