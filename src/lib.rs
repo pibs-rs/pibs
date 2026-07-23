@@ -31,7 +31,6 @@ use alloc::vec::Vec;
 
 use core::{
     any::type_name,
-    fmt::Debug,
     ops::{Add, AddAssign, BitAndAssign, BitOrAssign, Range, RangeInclusive, Shl, Sub},
 };
 use num_traits::{PrimInt, Unsigned};
@@ -62,7 +61,7 @@ pub trait Word =
 /// ```
 /// use pitset::{BitSet, Set};
 /// ```
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct BitSet<W: Word>(W);
 
 impl<W: Word> BitSet<W> {
@@ -480,8 +479,7 @@ impl<W: Word> IntoIterator for BitSet<W> {
 
 impl<W: Word, T> FromIterator<T> for BitSet<W>
 where
-    T: TryInto<Element>,
-    <T as TryInto<usize>>::Error: Debug,
+    T: PrimInt + TryInto<Element>,
 {
     /// Create a [`BitSet`] from an integer iterator.
     ///
@@ -492,14 +490,19 @@ where
     /// let set = Set::from_iter(iter);
     /// assert_eq!(set.into_vec(), vec![0, 5]);
     /// ```
+    ///
+    /// # Panics
+    ///
+    /// If an element cannot be represented in the bitset.
     #[inline]
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         let mut word = W::zero();
 
         for e in iter {
-            let e = e
-                .try_into()
-                .expect("failed to load an element from an iterator");
+            let e = match e.try_into() {
+                Ok(x) => x,
+                Err(_) => panic!("failed to load a bitset element from an iterator"),
+            };
             Self::debug_bound_check(e);
             word += W::one() << e;
         }
@@ -510,8 +513,7 @@ where
 
 impl<W: Word, T> From<Vec<T>> for BitSet<W>
 where
-    T: TryInto<Element>,
-    <T as TryInto<usize>>::Error: Debug,
+    T: PrimInt + TryInto<Element>,
 {
     /// Create a [`BitSet`] from an integer vector.
     ///
@@ -521,6 +523,10 @@ where
     /// let set: Set = vec![2, 4, 6].into();
     /// assert_eq!(set.into_vec(), vec![2, 4, 6]);
     /// ```
+    ///
+    /// # Panics
+    ///
+    /// If an element cannot be represented in the bitset.
     #[inline]
     fn from(vec: Vec<T>) -> Self {
         vec.into_iter().collect()
@@ -601,9 +607,7 @@ impl<W: Word> Iterator for BitSetIter<W> {
 #[cfg(feature = "alloc")]
 impl<W: Word, T> From<BitSet<W>> for Vec<T>
 where
-    T: PrimInt, // Avoid bool.
-    T: TryFrom<Element>,
-    <T as TryFrom<usize>>::Error: Debug,
+    T: PrimInt + TryFrom<Element>,
 {
     /// Create a sorted [`Vec`] from a [`BitSet`].
     ///
@@ -612,7 +616,8 @@ where
     /// ```
     /// # use pitset::BitSet;
     /// type S = BitSet<u128>;
-    /// let v: Vec<i8> = S::from(vec![S::MIN, S::MAX]).into();
+    /// let set = S::from(vec![S::MIN, S::MAX]);
+    /// let v: Vec<i8> = set.into();
     /// assert_eq!(v, vec![0, 127]);
     /// ```
     /// To avoid a type hint, use [`BitSet::to_vec`] or [`BitSet::into_vec`], which always produce a
@@ -626,16 +631,18 @@ where
     ///
     /// # Panics
     ///
-    /// If an element cannot be represented by the integer type stored in the vector.
+    /// If an element of the bitset cannot be represented by `T`.
     ///
-    /// Note that even the combination of [`BitSet<u128>`] and [`Vec<i8>`] is safe as the largest
-    /// element in the former (127) can still be represented by the latter. Therefore, it should not
-    /// be possible for this implementation to panic in practice, unless further primitive integer
-    /// types are introduced.
-    fn from(value: BitSet<W>) -> Self {
-        value
-            .into_iter()
-            .map(|e| T::try_from(e).expect("failed to convert an element to the target type"))
+    /// Note that even the extreme combination of [`BitSet<u128>`] and [`Vec<i8>`] is safe as the
+    /// largest possible element in the former (127) can still be represented by the latter.
+    /// Therefore, this implementation could only panic if additional primitive integer types are
+    /// introduced in the future.
+    fn from(set: BitSet<W>) -> Self {
+        set.into_iter()
+            .map(|e| match T::try_from(e) {
+                Ok(x) => x,
+                Err(_) => panic!("bitset element cannot be represented by target integer type"),
+            })
             .collect()
     }
 }
