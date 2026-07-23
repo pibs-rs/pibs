@@ -244,18 +244,6 @@ impl<W: Word> Sub<Element> for BitSet<W> {
 // From implementations
 // --------------------
 
-// impl<W: Word> FromIterator<Element> for BitSet<W> {
-//     #[inline]
-//     fn from_iter<T: IntoIterator<Item = Element>>(iter: T) -> Self {
-//         let mut word = W::zero();
-//         for e in iter {
-//             Self::debug_bound_check(e);
-//             word += W::one() << e;
-//         }
-//         Self(word)
-//     }
-// }
-
 impl<W: Word, T> FromIterator<T> for BitSet<W>
 where
     T: TryInto<Element>,
@@ -361,9 +349,9 @@ impl<W: Word> IntoIterator for BitSet<W> {
     }
 }
 
-// ---------
-// Iterators
-// ---------
+// --------------------
+// Associated iterators
+// --------------------
 
 pub struct BitSetIter<W: Word>(W);
 
