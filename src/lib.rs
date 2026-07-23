@@ -406,12 +406,12 @@ impl<W: Word> BitSet<W> {
         BitSetIter::<W>(self.0)
     }
 
-    /// The elements as a sorted vector.
+    /// The elements as a sorted vector of type [`Vec<Element>`].
     ///
     /// # Example
     /// ```
     /// # use pitset::Set;
-    /// assert_eq!(Set::from(1..=3).to_vec(), vec![1, 2, 3]);
+    /// assert_eq!(Set::interval(1, 3).to_vec(), vec![1, 2, 3]);
     /// ```
     #[cfg(feature = "alloc")]
     #[inline]
@@ -419,12 +419,15 @@ impl<W: Word> BitSet<W> {
         self.iter().collect()
     }
 
-    /// The elements as a sorted vector.
+    /// The elements as a sorted vector of type [`Vec<Element>`].
+    ///
+    /// See [`From<BitSet<W>> for Vec<T>`](#impl-From<BitSet<W>>-for-Vec<T>) for  conversion to
+    /// vectors storing other primitive integer types.
     ///
     /// # Example
     /// ```
     /// # use pitset::Set;
-    /// assert_eq!(Set::from(1..=3).into_vec(), vec![1, 2, 3]);
+    /// assert_eq!(Set::interval(1, 3).into_vec(), vec![1, 2, 3]);
     /// ```
     #[cfg(feature = "alloc")]
     #[inline]
@@ -525,7 +528,7 @@ where
 }
 
 impl<W: Word> From<Range<Element>> for BitSet<W> {
-    /// Create a [`BitSet`] from an exclusive range.
+    /// Create a [`BitSet`] from an end-exclusive range.
     ///
     /// # Example
     /// ```
@@ -595,18 +598,44 @@ impl<W: Word> Iterator for BitSetIter<W> {
 // Implementations for foreign types
 // ---------------------------------
 
-// TODO: Implement this for different integer types.
 #[cfg(feature = "alloc")]
-impl<W: Word> From<BitSet<W>> for Vec<Element> {
-    /// Create a [`Vec`] from a [`BitSet`].
+impl<W: Word, T> From<BitSet<W>> for Vec<T>
+where
+    T: PrimInt, // Avoid bool.
+    T: TryFrom<Element>,
+    <T as TryFrom<usize>>::Error: Debug,
+{
+    /// Create a sorted [`Vec`] from a [`BitSet`].
     ///
-    /// # Example
+    /// # Examples
+    /// Any element in a [`BitSet<u128>`] can fit in a [`Vec<i8>`].
+    /// ```
+    /// # use pitset::BitSet;
+    /// type S = BitSet<u128>;
+    /// let v: Vec<i8> = S::from(vec![S::MIN, S::MAX]).into();
+    /// assert_eq!(v, vec![0, 127]);
+    /// ```
+    /// To avoid a type hint, use [`BitSet::to_vec`] or [`BitSet::into_vec`], which always produce a
+    /// [`Vec<Element>`].
     /// ```
     /// # use pitset::Set;
-    /// let v: Vec<_> = Set::from(1..=3).into();
-    /// assert_eq!(v, vec![1, 2, 3]);
+    /// let set = Set::interval(1, 3);
+    /// let vec = set.to_vec(); // does not consume the set
+    /// let vec = set.into_vec(); // consumes the set
     /// ```
+    ///
+    /// # Panics
+    ///
+    /// If an element cannot be represented by the integer type stored in the vector.
+    ///
+    /// Note that even the combination of [`BitSet<u128>`] and [`Vec<i8>`] is safe as the largest
+    /// element in the former (127) can still be represented by the latter. Therefore, it should not
+    /// be possible for this implementation to panic in practice, unless further primitive integer
+    /// types are introduced.
     fn from(value: BitSet<W>) -> Self {
-        value.into_vec()
+        value
+            .into_iter()
+            .map(|e| T::try_from(e).expect("failed to convert an element to the target type"))
+            .collect()
     }
 }
