@@ -31,7 +31,7 @@ use alloc::vec::Vec;
 
 use core::{
     any::type_name,
-    fmt,
+    fmt::{self, Debug},
     ops::{Add, AddAssign, BitAndAssign, BitOrAssign, Range, RangeInclusive, Shl, Sub},
 };
 use num_traits::{PrimInt, Unsigned};
@@ -52,8 +52,13 @@ pub type Set128 = BitSet<u128>;
 pub type Element = usize;
 
 /// Describes a primitive integer type that [`BitSet`] can use for storage.
-pub trait Word =
-    PrimInt + Unsigned + AddAssign + BitAndAssign + BitOrAssign + Shl<Element, Output = Self>;
+pub trait Word = PrimInt
+    + Unsigned
+    + Debug
+    + AddAssign
+    + BitAndAssign
+    + BitOrAssign
+    + Shl<Element, Output = Self>;
 
 /// A high-performance generic bitset that uses a single primitive integer for storage.
 ///
@@ -461,14 +466,14 @@ impl<W: Word> BitSet<W> {
 // Trait implementations
 // ---------------------
 
-impl<W: Word> fmt::Debug for BitSet<W> {
-    /// Debug-format a bitset.
+impl<W: Word> fmt::Display for BitSet<W> {
+    /// Pretty-format a bitset.
     ///
     /// # Example
     /// ```
     /// # use pitset::Set;
     /// let set = Set::from(vec![0, 10, 1, 20]);
-    /// assert_eq!(format!("{:?}", set), "{0, 1, 10, 20}");
+    /// assert_eq!(format!("{}", set), "{0, 1, 10, 20}");
     /// ```
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{{")?;
@@ -482,6 +487,22 @@ impl<W: Word> fmt::Debug for BitSet<W> {
         }
         write!(f, "}}")?;
         Ok(())
+    }
+}
+
+impl<W: Word> fmt::Debug for BitSet<W> {
+    /// Debug-format a bitset.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// let set = Set::from(vec![0, 10, 1, 20]);
+    /// assert_eq!(format!("{:?}", set), "BitSet<usize>(1049603)");
+    /// ```
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple(type_name::<Self>().rsplit("::").next().unwrap())
+            .field(&self.0)
+            .finish()
     }
 }
 
