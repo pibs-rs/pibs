@@ -201,6 +201,11 @@ impl<W: Word> BitSet<W> {
     }
 
     #[inline]
+    pub fn intersects(&self, other: &Self) -> bool {
+        self.0 & other.0 != W::zero()
+    }
+
+    #[inline]
     pub fn is_disjoint(&self, other: &Self) -> bool {
         self.0 & other.0 == W::zero()
     }
