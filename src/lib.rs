@@ -1,11 +1,22 @@
-//! A b**itset** using a single **p**rimitive integer to store small non-negative numbers.
+//! A **p**rimitive integer b**itset** for high-performance combinatorics involving small numbers.
 //!
-//! The focus of this crate are zero overhead on top of bitwise operations (no heap allocation or
-//! block selection) and a rich API for mathematical operations involving small integer sets.
+//! # Purpose
 //!
-//! If your numbers can exceed the number of bits in a machine word (i.e., larger than 127),
-//! use ... instead. If you want zero overhead but only need bit-manipulation but not mathematical
-//! set abstraction, consider ... instead.
+//! The focus of this crate are
+//! 1. **minimal overhead** over bitwise operations (no allocation or block management) and
+//! 2. a rich interface for **mathematical operations** that involve sets of non-negative integers.
+//!
+//! We recommend this crate over alternatives when bitset operations are a performance bottleneck
+//! and all numbers to be stored lie between 0 and 127 (inclusive).
+//!
+//! # Alternatives
+//!
+//! The [`BitSet`] offered by this crate uses a single primitive integer type for storage, and is
+//! thus limited to hold numbers up to 127 (using [`u128`]). If your numbers can be larger but you
+//! know an upper bound, consider using [fixedbitset](https://docs.rs/fixedbitset) instead.
+//! If you don't know your largest number ahead of time, [bit-set](https://docs.rs/bit_set) may
+//! be what you are looking for. If you want minimal overhead but only need bit manipulation as
+//! opposed to mathematical set abstraction, consider [bittle](https://docs.rs/bittle).
 
 #![feature(trait_alias)]
 #![no_std]
@@ -23,25 +34,36 @@ use core::{
 };
 use num_traits::{PrimInt, Unsigned};
 
-/// The default [`BitSet`], which uses a [`usize`] for internal storage.
+/// A [`BitSet`] using a [`usize`] for highest performance.
 ///
 /// On 64 bit systems, this set can store integers between 0 and 63 (inclusive).
 /// For numbers up to 127, use [`BitSet<u128>`] at a potential performance cost.
 pub type Set = BitSet<usize>;
 
-/// Default type for the input and output of numbers stored in a [`BitSet`].
+/// A [`BitSet`] using a [`u128`] for highest capacity.
+///
+/// On 64 bit systems, this set can store integers between 0 and 63 (inclusive).
+/// For numbers up to 127, use [`BitSet<u128>`] at a potential performance cost.
+pub type Set128 = BitSet<u128>;
+
+/// An alias for [`usize`], the default input and output type for numbers stored in a [`BitSet`].
 pub type Element = usize;
 
-/// A primitive integer type that [`BitSet`] can use for storage.
+/// Describes a primitive integer type that [`BitSet`] can use for storage.
 pub trait Word =
     PrimInt + Unsigned + AddAssign + BitAndAssign + BitOrAssign + Shl<Element, Output = Self>;
 
+/// A high-performance generic bitset that uses a single primitive integer for storage.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct BitSet<W: Word>(W);
 
 impl<W: Word> BitSet<W> {
     pub const BITS: usize = size_of::<W>() * 8;
     pub const MAX: usize = Self::BITS - 1;
+
+    // -------
+    // Helpers
+    // -------
 
     #[inline(always)]
     fn debug_bound_check(e: Element) {
@@ -54,6 +76,10 @@ impl<W: Word> BitSet<W> {
         )
     }
 
+    // -------
+    // Queries
+    // -------
+
     #[inline]
     pub fn len(self) -> usize {
         self.0.count_ones() as usize
@@ -62,23 +88,6 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.0 == W::zero()
-    }
-
-    #[inline]
-    pub fn insert(&mut self, e: Element) {
-        Self::debug_bound_check(e);
-        self.0 |= W::one() << e;
-    }
-
-    #[inline]
-    pub fn remove(&mut self, e: Element) {
-        Self::debug_bound_check(e);
-        self.0 &= !(W::one() << e);
-    }
-
-    #[inline]
-    pub fn clear(&mut self) {
-        self.0 = W::zero();
     }
 
     #[inline]
@@ -100,6 +109,27 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn is_disjoint(&self, other: &Self) -> bool {
         self.0 & other.0 == W::zero()
+    }
+
+    // --------------
+    // Set operations
+    // --------------
+
+    #[inline]
+    pub fn insert(&mut self, e: Element) {
+        Self::debug_bound_check(e);
+        self.0 |= W::one() << e;
+    }
+
+    #[inline]
+    pub fn remove(&mut self, e: Element) {
+        Self::debug_bound_check(e);
+        self.0 &= !(W::one() << e);
+    }
+
+    #[inline]
+    pub fn clear(&mut self) {
+        self.0 = W::zero();
     }
 
     #[inline]
@@ -160,11 +190,16 @@ impl<W: Word> BitSet<W> {
         self.position_unchecked(e) + 1
     }
 
+    // ------------
+    // Constructors
+    // ------------
+
     /// Create an empty set.
     ///
     /// # Example
     /// ```
-    /// assert!(pitset::Set::new().is_empty());
+    /// use pitset::Set;
+    /// assert!(Set::new().is_empty());
     /// ```
     #[inline]
     pub fn new() -> Self {
@@ -175,7 +210,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// assert_eq!(pitset::Set::singleton(5).into_vec(), vec![5]);
+    /// use pitset::Set;
+    /// assert_eq!(Set::singleton(5).into_vec(), vec![5]);
     /// ```
     ///
     /// # Panics
@@ -186,6 +222,10 @@ impl<W: Word> BitSet<W> {
         Self(W::one() << e)
     }
 
+    // ------------------
+    // Conversion methods
+    // ------------------
+
     #[inline]
     pub fn iter(self) -> BitSetIter<W> {
         BitSetIter::<W>(self.0)
@@ -195,7 +235,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// assert_eq!(pitset::Set::from(1..=3).to_vec(), vec![1, 2, 3]);
+    /// use pitset::Set;
+    /// assert_eq!(Set::from(1..=3).to_vec(), vec![1, 2, 3]);
     /// ```
     #[cfg(feature = "alloc")]
     #[inline]
@@ -207,7 +248,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// assert_eq!(pitset::Set::from(1..=3).into_vec(), vec![1, 2, 3]);
+    /// use pitset::Set;
+    /// assert_eq!(Set::from(1..=3).into_vec(), vec![1, 2, 3]);
     /// ```
     #[cfg(feature = "alloc")]
     #[inline]
@@ -215,6 +257,10 @@ impl<W: Word> BitSet<W> {
         self.into_iter().collect()
     }
 }
+
+// ---------------------
+// Trait implementations
+// ---------------------
 
 impl<W: Word> Default for BitSet<W> {
     fn default() -> Self {
@@ -240,6 +286,16 @@ impl<W: Word> Sub<Element> for BitSet<W> {
     }
 }
 
+impl<W: Word> IntoIterator for BitSet<W> {
+    type Item = usize;
+    type IntoIter = BitSetIter<W>;
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
 // --------------------
 // From implementations
 // --------------------
@@ -253,8 +309,9 @@ where
     ///
     /// # Example
     /// ```
+    /// use pitset::Set;
     /// let iter = core::iter::once(0).chain(core::iter::once(5));
-    /// let set = pitset::Set::from_iter(iter);
+    /// let set = Set::from_iter(iter);
     /// assert_eq!(set.into_vec(), vec![0, 5]);
     /// ```
     #[inline]
@@ -282,7 +339,8 @@ where
     ///
     /// # Example
     /// ```
-    /// let set: pitset::Set = vec![2, 4, 6].into();
+    /// use pitset::Set;
+    /// let set: Set = vec![2, 4, 6].into();
     /// assert_eq!(set.into_vec(), vec![2, 4, 6]);
     /// ```
     #[inline]
@@ -296,8 +354,9 @@ impl<W: Word> From<Range<Element>> for BitSet<W> {
     ///
     /// # Example
     /// ```
+    /// use pitset::Set;
     /// for range in [(2..5), (2..3), (2..2), (2..1)] {
-    ///     let set: pitset::Set = range.clone().into();
+    ///     let set: Set = range.clone().into();
     ///     let vec: Vec<_> = range.collect();
     ///     assert_eq!(set.into_vec(), vec);
     /// }
@@ -317,8 +376,9 @@ impl<W: Word> From<RangeInclusive<Element>> for BitSet<W> {
     ///
     /// # Example
     /// ```
+    /// use pitset::Set;
     /// for range in [(2..=4), (2..=2), (2..=1)] {
-    ///     let set: pitset::Set = range.clone().into();
+    ///     let set: Set = range.clone().into();
     ///     let vec: Vec<_> = range.collect();
     ///     assert_eq!(set.into_vec(), vec);
     /// }
@@ -336,23 +396,10 @@ impl<W: Word> From<RangeInclusive<Element>> for BitSet<W> {
 }
 
 // --------------------
-// Into implementations
-// --------------------
-
-impl<W: Word> IntoIterator for BitSet<W> {
-    type Item = usize;
-    type IntoIter = BitSetIter<W>;
-
-    #[inline]
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-
-// --------------------
 // Associated iterators
 // --------------------
 
+/// Iterator over the [elements](Element) of a [`BitSet`].
 pub struct BitSetIter<W: Word>(W);
 
 impl<W: Word> Iterator for BitSetIter<W> {
@@ -369,17 +416,19 @@ impl<W: Word> Iterator for BitSetIter<W> {
     }
 }
 
-// --------------------------------------
-// From implementations for foreign types
-// --------------------------------------
+// ---------------------------------
+// Implementations for foreign types
+// ---------------------------------
 
+// TODO: Implement this for different integer types.
 #[cfg(feature = "alloc")]
 impl<W: Word> From<BitSet<W>> for Vec<Element> {
     /// Create a [`Vec`] from a [`BitSet`].
     ///
     /// # Example
     /// ```
-    /// let v: Vec<_> = pitset::Set::from(1..=3).into();
+    /// use pitset::Set;
+    /// let v: Vec<_> = Set::from(1..=3).into();
     /// assert_eq!(v, vec![1, 2, 3]);
     /// ```
     fn from(value: BitSet<W>) -> Self {
