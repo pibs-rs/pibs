@@ -31,6 +31,7 @@ use alloc::vec::Vec;
 
 use core::{
     any::type_name,
+    fmt,
     ops::{Add, AddAssign, BitAndAssign, BitOrAssign, Range, RangeInclusive, Shl, Sub},
 };
 use num_traits::{PrimInt, Unsigned};
@@ -459,6 +460,30 @@ impl<W: Word> BitSet<W> {
 // ---------------------
 // Trait implementations
 // ---------------------
+
+impl<W: Word> fmt::Debug for BitSet<W> {
+    /// Debug-format a bitset.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// let set = Set::from(vec![0, 10, 1, 20]);
+    /// assert_eq!(format!("{:?}", set), "{0, 1, 10, 20}");
+    /// ```
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{{")?;
+        let mut first = true;
+        for e in self.iter() {
+            if !first {
+                write!(f, ", ")?;
+            }
+            write!(f, "{}", e)?;
+            first = false;
+        }
+        write!(f, "}}")?;
+        Ok(())
+    }
+}
 
 impl<W: Word> Default for BitSet<W> {
     fn default() -> Self {
