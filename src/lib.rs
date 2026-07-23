@@ -179,7 +179,6 @@ impl<W: Word> BitSet<W> {
     /// ```
     ///
     /// # Panics
-    ///
     /// If the element exceeds [`Self::MAX`].
     /// ```should_panic
     /// # use pitset::BitSet;
@@ -352,6 +351,10 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Panics
     /// If `e` exceeds [`BitSet::MAX`].
+    /// ```should_panic
+    /// # use pitset::Set;
+    /// Set::singleton(10_000);
+    /// ```
     #[inline]
     pub fn singleton(e: Element) -> Self {
         Self::debug_bound_check(e);
@@ -486,14 +489,24 @@ where
     /// # Example
     /// ```
     /// # use pitset::Set;
-    /// let iter = core::iter::once(0).chain(core::iter::once(5));
+    /// use core::iter::once;
+    /// let iter = once(0).chain(once(5));
     /// let set = Set::from_iter(iter);
     /// assert_eq!(set.into_vec(), vec![0, 5]);
     /// ```
     ///
     /// # Panics
-    ///
     /// If an element cannot be represented in the bitset.
+    /// ```should_panic
+    /// # use pitset::Set;
+    /// use core::iter::once;
+    /// Set::from_iter(once(-1));
+    /// ```
+    /// ```should_panic
+    /// # use pitset::Set;
+    /// use core::iter::once;
+    /// Set::from_iter(once(10_000));
+    /// ```
     #[inline]
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         let mut word = W::zero();
@@ -527,6 +540,14 @@ where
     /// # Panics
     ///
     /// If an element cannot be represented in the bitset.
+    /// ```should_panic
+    /// # use pitset::Set;
+    /// Set::from(vec![-1]);
+    /// ```
+    /// ```should_panic
+    /// # use pitset::Set;
+    /// Set::from(vec![10_000]);
+    /// ```
     #[inline]
     fn from(vec: Vec<T>) -> Self {
         vec.into_iter().collect()
