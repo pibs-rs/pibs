@@ -246,7 +246,7 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn contains(&self, e: Element) -> bool {
         Self::debug_bound_check(e);
-        (self.0 >> e) & W::one() == W::one()
+        self.0 & (W::one() << e) != W::zero()
     }
 
     #[inline]
