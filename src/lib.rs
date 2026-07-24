@@ -1,24 +1,26 @@
-//! A **p**rimitive integer b**itset** for high-performance combinatorics involving small numbers.
+//! A primitive integer bitset for high-performance combinatorics involving small numbers.
 //!
 //! # Scope
 //!
-//! The focus of this crate are
-//! 1. **minimal overhead** over bitwise operations (no allocation or block management) and
-//! 2. a rich interface for **mathematical operations** that involve sets of (small) non-negative
+//! This crate offers
+//! 1. **zero-cost abstraction** over bitwise operations (no allocation or block management) and
+//! 2. a rich interface for **mathematical operations** that involve sets of small non-negative
 //!    integers.
 //!
-//! It is best suited when bitset operations are performance critical and all elements naturally lie
-//! between 0 and 127 (inclusive).
+//! It is best suited when bitset operations are performance critical and the numbers to be stored
+//! naturally lie in the range `0..=127`; see [Alternatives](#alternatives) if this is not the case.
 //!
 //! # Alternatives
 //!
-//! The [`BitSet`] offered by this crate uses a single primitive integer type for storage, and is
-//! thus limited to hold numbers up to 127 (using [`u128`]). If your numbers can be larger but you
-//! know an upper bound, consider using [fixedbitset](https://docs.rs/fixedbitset) instead.
-//! If you don't know your largest number ahead of time, [bit-set](https://docs.rs/bit_set) may
-//! be what you are looking for. If you want minimal overhead but only need bit manipulation as
-//! opposed to mathematical set abstraction, consider [bittle](https://docs.rs/bittle).
-// TODO: Add Examples section.
+//! The [`BitSet`] offered by this crate uses a single primitive integer type for storage, and
+//! therefore can only store numbers up to 127.
+//! - If your numbers can be larger but you know an upper bound, consider using
+//!   [fixedbitset](https://docs.rs/fixedbitset) instead.
+//! - If you don't know your largest number ahead of time, [bit-set](https://docs.rs/bit_set) may
+//!   be what you are looking for.
+//! - If you want minimal overhead but only need bit manipulation as opposed to mathematical set
+//!   abstraction, consider [bittle](https://docs.rs/bittle).
+// TODO: Add an Examples section.
 
 #![feature(trait_alias)]
 #![no_std]
@@ -52,19 +54,19 @@ use core::{
 };
 use num_traits::{CheckedShr, PrimInt, Unsigned, WrappingNeg};
 
-/// A [`BitSet`] using a [`usize`] for highest performance.
+/// Alias for [`BitSet<usize>`], the bitset offering the best performance.
 ///
 /// On 64 bit systems, this set can store integers between 0 and 63 (inclusive).
-/// For numbers up to 127, use [`BitSet<u128>`] at a potential performance cost.
+/// For numbers up to 127, use [`Set128`] at a potential performance cost.
 pub type Set = BitSet<usize>;
 
-/// A [`BitSet`] using a [`u128`] for highest capacity.
+/// Alias for [`BitSet<u128>`], the bitset with the highest capacity.
 ///
-/// On 64 bit systems, this set can store integers between 0 and 63 (inclusive).
-/// For numbers up to 127, use [`BitSet<u128>`] at a potential performance cost.
+/// This set can store integers between 0 and 127 (inclusive).
+/// For numbers smaller than the number of bits in a usize, use [`Set`] for best performance.
 pub type Set128 = BitSet<u128>;
 
-/// An alias for [`usize`], the default input and output type for numbers stored in a [`BitSet`].
+/// Alias for [`usize`], the default input and output type for numbers stored in a [`BitSet`].
 pub type Element = usize;
 
 /// Describes a primitive integer type that [`BitSet`] can use for storage.
@@ -78,7 +80,7 @@ pub trait Word = PrimInt
     + CheckedShr
     + WrappingNeg;
 
-/// A high-performance generic bitset that uses a single primitive integer for storage.
+/// A high-performance generic bitset that wraps a single primitive integer for storage.
 ///
 /// # Documentation conventions
 /// The examples below assume the prelude import
@@ -963,13 +965,14 @@ where
 // Macros
 // ------
 
-/// # Example
+/// Create a [`Set`] containing the arguments.
+///
+///  # Example
 /// ```
 /// # use pitset::prelude::*;
 /// assert_eq!(set![], Set::new());
 /// assert_eq!(set![5], Set::singleton(5));
 /// assert_eq!(set![0, 2, 4], Set::from(vec![0, 2, 4]));
-/// assert_eq!(set128![0, 64, 127], Set128::from(vec![0, 64, 127]));
 /// ```
 #[macro_export]
 macro_rules! set {
@@ -978,6 +981,13 @@ macro_rules! set {
     };
 }
 
+/// Create a [`Set128`] containing the arguments.
+///
+/// # Example
+/// ```
+/// # use pitset::prelude::*;
+/// assert_eq!(set128![0, 64, 127], Set128::from(vec![0, 64, 127]));
+/// ```
 #[macro_export]
 macro_rules! set128 {
     ($($element:expr),* $(,)?) => {
