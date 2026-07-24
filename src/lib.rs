@@ -179,7 +179,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(Set::interval(4, 6).len(), 3);
     /// ```
     #[inline]
-    pub fn len(self) -> usize {
+    pub fn len(&self) -> usize {
         self.0.count_ones() as usize
     }
 
@@ -192,7 +192,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(Set::interval(4, 6).min(), Some(4));
     /// ```
     #[inline]
-    pub fn min(self) -> Option<Element> {
+    pub fn min(&self) -> Option<Element> {
         if self.is_empty() {
             None
         } else {
@@ -209,7 +209,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(Set::interval(4, 6).max(), Some(6));
     /// ```
     #[inline]
-    pub fn max(self) -> Option<Element> {
+    pub fn max(&self) -> Option<Element> {
         if self.is_empty() {
             None
         } else {
@@ -559,7 +559,7 @@ impl<W: Word> BitSet<W> {
     }
 
     #[inline]
-    pub fn iter(self) -> BitSetIter<W> {
+    pub fn iter(&self) -> BitSetIter<W> {
         BitSetIter::<W>(self.0)
     }
 
