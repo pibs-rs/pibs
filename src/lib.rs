@@ -948,3 +948,29 @@ where
             .collect()
     }
 }
+
+// ------
+// Macros
+// ------
+
+/// # Example
+/// ```
+/// use pitset::{set, set128, Set, Set128};
+/// assert_eq!(set![], Set::new());
+/// assert_eq!(set![5], Set::singleton(5));
+/// assert_eq!(set![0, 2, 4], Set::from(vec![0, 2, 4]));
+/// assert_eq!(set128![0, 64, 127], Set128::from(vec![0, 64, 127]));
+/// ```
+#[macro_export]
+macro_rules! set {
+    ($($element:expr),* $(,)?) => {
+        Set::from_word(0usize $(| (1usize << $element))*)
+    };
+}
+
+#[macro_export]
+macro_rules! set128 {
+    ($($element:expr),* $(,)?) => {
+        Set128::from_word(0u128 $(| (1u128 << $element))*)
+    };
+}
