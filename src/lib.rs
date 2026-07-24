@@ -250,22 +250,22 @@ impl<W: Word> BitSet<W> {
     }
 
     #[inline]
-    pub fn is_subset(&self, other: &Self) -> bool {
+    pub fn is_subset(&self, other: Self) -> bool {
         self.0 & !other.0 == W::zero()
     }
 
     #[inline]
-    pub fn is_superset(&self, other: &Self) -> bool {
+    pub fn is_superset(&self, other: Self) -> bool {
         !self.0 & other.0 == W::zero()
     }
 
     #[inline]
-    pub fn intersects(&self, other: &Self) -> bool {
+    pub fn intersects(&self, other: Self) -> bool {
         self.0 & other.0 != W::zero()
     }
 
     #[inline]
-    pub fn is_disjoint(&self, other: &Self) -> bool {
+    pub fn is_disjoint(&self, other: Self) -> bool {
         self.0 & other.0 == W::zero()
     }
 
@@ -314,22 +314,22 @@ impl<W: Word> BitSet<W> {
     }
 
     #[inline]
-    pub fn union(&self, other: &Self) -> Self {
+    pub fn union(&self, other: Self) -> Self {
         Self(self.0 | other.0)
     }
 
     #[inline]
-    pub fn intersection(&self, other: &Self) -> Self {
+    pub fn intersection(&self, other: Self) -> Self {
         Self(self.0 & other.0)
     }
 
     #[inline]
-    pub fn difference(&self, other: &Self) -> Self {
+    pub fn difference(&self, other: Self) -> Self {
         Self(self.0 & !other.0)
     }
 
     #[inline]
-    pub fn symmetric_difference(&self, other: &Self) -> Self {
+    pub fn symmetric_difference(&self, other: Self) -> Self {
         Self(self.0 ^ other.0)
     }
 
