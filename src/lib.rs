@@ -80,6 +80,7 @@ pub trait Word = PrimInt
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BitSet<W: Word>(W);
 
+// IDEA: Implement a set![...] macro.
 impl<W: Word> BitSet<W> {
     /// The number of bits in the [primitive integer type](Word) `W`.
     ///
@@ -389,6 +390,46 @@ impl<W: Word> BitSet<W> {
         self.position_unchecked(e) + 1
     }
 
+    /// Generate all subsets, with the maximum number growing slowly.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// let set: Set = vec![0, 5, 23].into();
+    /// let subsets_as_vecs: Vec<Vec<_>> = set.subsets().map(Set::into_vec).collect();
+    /// assert_eq!(subsets_as_vecs, vec![
+    ///     vec![],
+    ///     vec![0],
+    ///     vec![5],
+    ///     vec![0, 5],
+    ///     vec![23],
+    ///     vec![0, 23],
+    ///     vec![5, 23],
+    ///     vec![0, 5, 23]],
+    /// );
+    /// ```
+    #[inline]
+    pub fn subsets(&self) -> impl Iterator<Item = Self> {
+        let mut word = W::zero();
+        let mut stop = false;
+
+        iter::from_fn(move || {
+            if stop {
+                None
+            } else {
+                let next = word;
+                if let Some(x) = (word | !self.0).checked_add(&W::one()) {
+                    word = x & self.0;
+                } else {
+                    stop = true;
+                }
+                Some(Self(next))
+            }
+        })
+    }
+
+    // TODO: Generate all subsets with the cardinality growing slowly.
+
     // ------------
     // Constructors
     // ------------
@@ -469,7 +510,7 @@ impl<W: Word> BitSet<W> {
     // Enumerators
     // -----------
 
-    /// Generate all representable sets with the maximum number growing slowly.
+    /// Generate all representable sets, with the maximum number growing slowly.
     ///
     /// # Example
     /// ```
@@ -486,32 +527,31 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn iter_all() -> impl Iterator<Item = Self> {
-        let mut set = Self::new();
+        let mut word = W::zero();
         let mut stop = false;
 
         iter::from_fn(move || {
             if stop {
                 None
             } else {
-                let next = set;
-                if let Some(word) = set.0.checked_add(&W::one()) {
-                    set.0 = word;
+                let next = word;
+                if let Some(next_word) = word.checked_add(&W::one()) {
+                    word = next_word;
                 } else {
                     stop = true;
                 }
-                Some(next)
+                Some(Self(next))
             }
         })
     }
 
-    /// Generate all subsets of `0..n` with the cardinality growing slowly.
+    /// Generate all subsets of `0..n`, with the cardinality growing slowly.
     ///
     /// # Example
     /// ```
     /// # use pitset::Set;
-    /// let subsets: Vec<_> = Set::iter_all_below(3).collect();
-    /// let as_vecs: Vec<Vec<_>> = subsets.into_iter().map(|set| set.into_vec()).collect();
-    /// assert_eq!(as_vecs, vec![
+    /// let subsets_as_vecs: Vec<_> = Set::iter_all_below(3).map(Set::into_vec).collect();
+    /// assert_eq!(subsets_as_vecs, vec![
     ///     vec![],
     ///     vec![0],
     ///     vec![1],
