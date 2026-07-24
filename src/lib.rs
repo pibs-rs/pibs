@@ -1,6 +1,6 @@
 //! A **p**rimitive integer b**itset** for high-performance combinatorics involving small numbers.
 //!
-//! # Purpose
+//! # Scope
 //!
 //! The focus of this crate are
 //! 1. **minimal overhead** over bitwise operations (no allocation or block management) and
@@ -25,6 +25,15 @@
 
 #[cfg(test)]
 mod tests;
+
+/// Exports the macros [`set`] and [`set128`], and the structs [`BitSet`], [`Set`], and [`Set128`].
+pub mod prelude {
+    pub use crate::BitSet;
+    pub use crate::Set;
+    pub use crate::Set128;
+    pub use crate::set;
+    pub use crate::set128;
+}
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -72,21 +81,22 @@ pub trait Word = PrimInt
 /// A high-performance generic bitset that uses a single primitive integer for storage.
 ///
 /// # Documentation conventions
-/// The examples below use the following imports.
+/// The examples below assume the prelude import
 /// ```
-/// use pitset::{BitSet, Set};
+/// use pitset::prelude::*;
 /// ```
+/// which gives access to the generic [`BitSet`], its variants [`Set`] (using [`usize`]) and
+/// [`Set128`] (using [`u128`]), and the associated macros [`set`] and [`set128`].
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BitSet<W: Word>(W);
 
-// IDEA: Implement a set![...] macro.
 impl<W: Word> BitSet<W> {
     /// The number of bits in the [primitive integer type](Word) `W`.
     ///
     /// # Example
     /// ```
-    /// # use pitset::BitSet;
+    /// # use pitset::prelude::*;
     /// assert_eq!(BitSet::<u32>::BITS, 32);
     /// ```
     pub const BITS: usize = size_of::<W>() * 8;
@@ -95,7 +105,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// assert_eq!(Set::MIN, 0);
     /// ```
     pub const MIN: Element = 0;
@@ -104,7 +114,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::BitSet;
+    /// # use pitset::prelude::*;
     /// assert_eq!(BitSet::<u64>::MAX, 63);
     /// assert_eq!(BitSet::<u128>::MAX, 127);
     /// ```
@@ -176,7 +186,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// assert_eq!(Set::interval(4, 6).len(), 3);
     /// ```
     #[inline]
@@ -188,7 +198,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// assert_eq!(Set::new().min(), None);
     /// assert_eq!(Set::interval(4, 6).min(), Some(4));
     /// ```
@@ -205,7 +215,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// assert_eq!(Set::new().max(), None);
     /// assert_eq!(Set::interval(4, 6).max(), Some(6));
     /// ```
@@ -222,7 +232,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// assert!(Set::new().is_empty());
     /// ```
     #[inline]
@@ -234,14 +244,14 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// assert!(Set::singleton(5).contains(5));
     /// ```
     ///
     /// # Panics
     /// If the element exceeds [`Self::MAX`].
     /// ```should_panic
-    /// # use pitset::BitSet;
+    /// # use pitset::prelude::*;
     /// BitSet::<u8>::singleton(5).contains(8);
     /// ```
     #[inline]
@@ -274,7 +284,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// let mut set = Set::interval(4, 6);
     /// assert!(set.is_interval());
     /// set.remove(5);
@@ -338,7 +348,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// let set: Set = (4..=6).into();
     /// assert_eq!(set.position(3), None);
     /// assert_eq!(set.position(4), Some(0));
@@ -368,7 +378,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// let set: Set = (4..=6).into();
     /// assert_eq!(set.rank(3), None);
     /// assert_eq!(set.rank(4), Some(1));
@@ -394,7 +404,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// let set: Set = vec![0, 5, 23].into();
     /// let subsets_as_vecs: Vec<Vec<_>> = set.subsets().map(Set::into_vec).collect();
     /// assert_eq!(subsets_as_vecs, vec![
@@ -438,7 +448,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// assert!(Set::new().is_empty());
     /// ```
     #[inline]
@@ -450,14 +460,14 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// assert_eq!(Set::singleton(5).into_vec(), vec![5]);
     /// ```
     ///
     /// # Panics
     /// If `e` exceeds [`BitSet::MAX`].
     /// ```should_panic
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// Set::singleton(10_000);
     /// ```
     #[inline]
@@ -470,7 +480,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// assert_eq!(Set::interval(1, 3).into_vec(), vec![1, 2, 3]);
     /// assert_eq!(Set::interval(2, 2), Set::singleton(2));
     /// assert!(Set::interval(3, 1).is_empty());
@@ -497,7 +507,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// assert_eq!(Set::from_word(1 + 4 + 16).into_vec(), vec![0, 2, 4]);
     /// assert_eq!(Set::from_word(123).word(), 123);
     /// ```
@@ -514,7 +524,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::BitSet;
+    /// # use pitset::prelude::*;
     /// type S = BitSet<u8>;
     /// let all_sets: Vec<_> = S::iter_all().collect();
     /// assert_eq!(all_sets.len(), 256);
@@ -549,7 +559,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// let subsets_as_vecs: Vec<_> = Set::iter_all_below(3).map(Set::into_vec).collect();
     /// assert_eq!(subsets_as_vecs, vec![
     ///     vec![],
@@ -575,7 +585,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::BitSet;
+    /// # use pitset::prelude::*;
     /// let set = BitSet::<u8>::from(vec![0, 2, 4]);
     /// assert_eq!(set.word(), 1u8 + 4u8 + 16u8);
     /// ```
@@ -588,7 +598,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// let mut set = Set::new();
     /// *set.word_mut() |= 1 + 4 + 16; // Set bits with index 0, 2, and 4.
     /// assert_eq!(set.into_vec(), vec![0, 2, 4]);
@@ -607,7 +617,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// assert_eq!(Set::interval(1, 3).to_vec(), vec![1, 2, 3]);
     /// ```
     #[cfg(feature = "alloc")]
@@ -623,7 +633,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// assert_eq!(Set::interval(1, 3).into_vec(), vec![1, 2, 3]);
     /// ```
     #[cfg(feature = "alloc")]
@@ -662,7 +672,7 @@ where
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// use core::iter::once;
     /// let iter = once(0).chain(once(5));
     /// let set = Set::from_iter(iter);
@@ -672,12 +682,12 @@ where
     /// # Panics
     /// If an element cannot be represented in the bitset.
     /// ```should_panic
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// use core::iter::once;
     /// Set::from_iter(once(-1));
     /// ```
     /// ```should_panic
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// use core::iter::once;
     /// Set::from_iter(once(10_000));
     /// ```
@@ -703,7 +713,7 @@ impl<W: Word> fmt::Display for BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// let set = Set::from(vec![0, 10, 1, 20]);
     /// assert_eq!(format!("{}", set), "{0, 1, 10, 20}");
     /// ```
@@ -727,7 +737,7 @@ impl<W: Word> fmt::Debug for BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// let set = Set::from(vec![0, 10, 1, 20]);
     /// assert_eq!(format!("{:?}", set), "BitSet<usize>(1049603)");
     /// ```
@@ -792,7 +802,7 @@ where
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// let set: Set = vec![2, 4, 6].into();
     /// assert_eq!(set.into_vec(), vec![2, 4, 6]);
     /// ```
@@ -801,11 +811,11 @@ where
     ///
     /// If an element cannot be represented in the bitset.
     /// ```should_panic
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// Set::from(vec![-1]);
     /// ```
     /// ```should_panic
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// Set::from(vec![10_000]);
     /// ```
     #[inline]
@@ -822,7 +832,7 @@ where
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// let vec = vec![2, 4, 6];
     /// let set = Set::from(&vec);
     /// assert_eq!(set.into_vec(), vec);
@@ -832,11 +842,11 @@ where
     ///
     /// If an element cannot be represented in the bitset.
     /// ```should_panic
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// Set::from(&vec![-1]);
     /// ```
     /// ```should_panic
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// Set::from(&vec![10_000]);
     #[inline]
     fn from(vec: &Vec<T>) -> Self {
@@ -849,7 +859,7 @@ impl<W: Word> From<Range<Element>> for BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// for range in [(2..5), (2..3), (2..2), (2..1)] {
     ///     let set: Set = range.clone().into();
     ///     let vec: Vec<_> = range.collect();
@@ -867,7 +877,7 @@ impl<W: Word> From<RangeInclusive<Element>> for BitSet<W> {
     ///
     /// # Example
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// for range in [(2..=4), (2..=2), (2..=1)] {
     ///     let set: Set = range.clone().into();
     ///     let vec: Vec<_> = range.collect();
@@ -915,7 +925,7 @@ where
     /// # Examples
     /// Any element in a [`BitSet<u128>`] can fit in a [`Vec<i8>`].
     /// ```
-    /// # use pitset::BitSet;
+    /// # use pitset::prelude::*;
     /// type S = BitSet<u128>;
     /// let set = S::from(vec![S::MIN, S::MAX]);
     /// let v: Vec<i8> = set.into();
@@ -924,7 +934,7 @@ where
     /// To avoid a type hint, use [`BitSet::to_vec`] or [`BitSet::into_vec`], which always produce a
     /// [`Vec<Element>`].
     /// ```
-    /// # use pitset::Set;
+    /// # use pitset::prelude::*;
     /// let set = Set::interval(1, 3);
     /// let vec = set.to_vec(); // does not consume the set
     /// let vec = set.into_vec(); // consumes the set
@@ -955,7 +965,7 @@ where
 
 /// # Example
 /// ```
-/// use pitset::{set, set128, Set, Set128};
+/// # use pitset::prelude::*;
 /// assert_eq!(set![], Set::new());
 /// assert_eq!(set![5], Set::singleton(5));
 /// assert_eq!(set![0, 2, 4], Set::from(vec![0, 2, 4]));
