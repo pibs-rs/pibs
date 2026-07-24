@@ -593,72 +593,14 @@ impl<W: Word> BitSet<W> {
     }
 }
 
-// ---------------------
-// Trait implementations
-// ---------------------
-
-impl<W: Word> fmt::Display for BitSet<W> {
-    /// Pretty-format a bitset.
-    ///
-    /// # Example
-    /// ```
-    /// # use pitset::Set;
-    /// let set = Set::from(vec![0, 10, 1, 20]);
-    /// assert_eq!(format!("{}", set), "{0, 1, 10, 20}");
-    /// ```
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{{")?;
-        let mut first = true;
-        for e in self.iter() {
-            if !first {
-                write!(f, ", ")?;
-            }
-            write!(f, "{}", e)?;
-            first = false;
-        }
-        write!(f, "}}")?;
-        Ok(())
-    }
-}
-
-impl<W: Word> fmt::Debug for BitSet<W> {
-    /// Debug-format a bitset.
-    ///
-    /// # Example
-    /// ```
-    /// # use pitset::Set;
-    /// let set = Set::from(vec![0, 10, 1, 20]);
-    /// assert_eq!(format!("{:?}", set), "BitSet<usize>(1049603)");
-    /// ```
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple(type_name::<Self>().rsplit("::").next().unwrap())
-            .field(&self.0)
-            .finish()
-    }
-}
+// ----------------------------
+// Common trait implementations
+// ----------------------------
 
 impl<W: Word> Default for BitSet<W> {
     #[inline]
     fn default() -> Self {
         Self(W::zero())
-    }
-}
-
-impl<W: Word> Add<Element> for BitSet<W> {
-    type Output = Self;
-
-    #[inline]
-    fn add(self, rhs: Element) -> Self {
-        Self(self.0 | (W::one() << rhs))
-    }
-}
-
-impl<W: Word> Sub<Element> for BitSet<W> {
-    type Output = Self;
-
-    #[inline]
-    fn sub(self, rhs: Element) -> Self {
-        Self(self.0 & !(W::one() << rhs))
     }
 }
 
@@ -716,9 +658,91 @@ where
     }
 }
 
-// --------------------
-// From implementations
-// --------------------
+impl<W: Word> fmt::Display for BitSet<W> {
+    /// Pretty-format a bitset.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// let set = Set::from(vec![0, 10, 1, 20]);
+    /// assert_eq!(format!("{}", set), "{0, 1, 10, 20}");
+    /// ```
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{{")?;
+        let mut first = true;
+        for e in self.iter() {
+            if !first {
+                write!(f, ", ")?;
+            }
+            write!(f, "{}", e)?;
+            first = false;
+        }
+        write!(f, "}}")?;
+        Ok(())
+    }
+}
+
+impl<W: Word> fmt::Debug for BitSet<W> {
+    /// Debug-format a bitset.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// let set = Set::from(vec![0, 10, 1, 20]);
+    /// assert_eq!(format!("{:?}", set), "BitSet<usize>(1049603)");
+    /// ```
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple(type_name::<Self>().rsplit("::").next().unwrap())
+            .field(&self.0)
+            .finish()
+    }
+}
+
+// ------------------------------
+// Operator trait implementations
+// ------------------------------
+
+impl<W: Word> Add<Element> for BitSet<W> {
+    type Output = Self;
+
+    /// The set with an element added (or left in).
+    ///
+    /// # Example
+    /// ```
+    /// use pitset::Set;
+    /// let set = Set::interval(4, 6);
+    /// assert_eq!(set + 6, set);
+    /// assert_eq!(set + 7, Set::interval(4, 7));
+    /// assert_eq!(set + 8, set.union(Set::singleton(8)));
+    /// ```
+    #[inline]
+    fn add(self, rhs: Element) -> Self {
+        Self(self.0 | (W::one() << rhs))
+    }
+}
+
+impl<W: Word> Sub<Element> for BitSet<W> {
+    type Output = Self;
+
+    /// The set with an element removed (if it existed).
+    ///
+    /// # Example
+    /// ```
+    /// use pitset::Set;
+    /// let set = Set::interval(4, 6);
+    /// assert_eq!(set - 5, set.difference(Set::singleton(5)));
+    /// assert_eq!(set - 6, Set::interval(4, 5));
+    /// assert_eq!(set - 7, set);
+    /// ```
+    #[inline]
+    fn sub(self, rhs: Element) -> Self {
+        Self(self.0 & !(W::one() << rhs))
+    }
+}
+
+// --------------------------
+// From trait implementations
+// --------------------------
 
 impl<W: Word, T> From<Vec<T>> for BitSet<W>
 where
