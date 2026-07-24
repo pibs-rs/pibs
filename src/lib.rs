@@ -23,6 +23,9 @@
 #![feature(trait_alias)]
 #![no_std]
 
+#[cfg(test)]
+mod tests;
+
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
@@ -35,9 +38,10 @@ use serde::{Deserialize, Serialize};
 use core::{
     any::type_name,
     fmt::{self, Debug},
+    iter,
     ops::{Add, AddAssign, BitAndAssign, BitOrAssign, Range, RangeInclusive, Shl, Sub},
 };
-use num_traits::{PrimInt, Unsigned};
+use num_traits::{CheckedShr, PrimInt, Unsigned, WrappingNeg};
 
 /// A [`BitSet`] using a [`usize`] for highest performance.
 ///
@@ -61,7 +65,9 @@ pub trait Word = PrimInt
     + AddAssign
     + BitAndAssign
     + BitOrAssign
-    + Shl<Element, Output = Self>;
+    + Shl<Element, Output = Self>
+    + CheckedShr
+    + WrappingNeg;
 
 /// A high-performance generic bitset that uses a single primitive integer for storage.
 ///
@@ -382,11 +388,25 @@ impl<W: Word> BitSet<W> {
     /// ```
     /// # use pitset::Set;
     /// assert_eq!(Set::interval(1, 3).into_vec(), vec![1, 2, 3]);
+    /// assert_eq!(Set::interval(2, 2), Set::singleton(2));
     /// assert!(Set::interval(3, 1).is_empty());
     /// ```
+    ///
+    /// # Panics
+    /// If `last` exceeds [`Self::MAX`] in debug builds.
+    ///
+    /// # Undefined behavior
+    /// If `last` exceeds [`Self::MAX`] in release builds.
     #[inline]
     pub fn interval(first: Element, last: Element) -> Self {
-        (first..=last).into()
+        Self::debug_bound_check(last);
+        if first > last {
+            Self(W::zero())
+        } else if last == Self::MAX {
+            Self(!W::zero() << first)
+        } else {
+            Self(((W::one() << (last - first + 1)) - W::one()) << first)
+        }
     }
 
     /// Create a bitset from the underlying primitive type `W`.
@@ -400,6 +420,108 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn from_word(word: W) -> Self {
         Self(word)
+    }
+
+    // -----------
+    // Enumerators
+    // -----------
+
+    /// Generate all representable sets with the maximum number growing slowly.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::BitSet;
+    /// type S = BitSet<u8>;
+    /// let all_sets: Vec<_> = S::iter_all().collect();
+    /// assert_eq!(all_sets.len(), 256);
+    /// assert_eq!(all_sets[0], S::new());
+    /// assert_eq!(all_sets[1], S::singleton(0));
+    /// assert_eq!(all_sets[2], S::singleton(1));
+    /// assert_eq!(all_sets[3], S::from(0..2));
+    /// assert_eq!(all_sets[4], S::singleton(2));
+    /// assert_eq!(all_sets[all_sets.len() - 1], S::from(0..8));
+    /// ```
+    pub fn iter_all() -> impl Iterator<Item = Self> {
+        let mut set = Self::new();
+        let mut stop = false;
+
+        iter::from_fn(move || {
+            if stop {
+                None
+            } else {
+                let next = set;
+                if let Some(word) = set.0.checked_add(&W::one()) {
+                    set.0 = word;
+                } else {
+                    stop = true;
+                }
+                Some(next)
+            }
+        })
+    }
+
+    pub(crate) fn bit_combinations(n: usize, k: usize) -> impl Iterator<Item = W> {
+        debug_assert!(k <= n);
+        debug_assert!(n <= Self::BITS);
+
+        // TODO: Avoid cases below via unbounded shift once there is trait support for it.
+        // IDEA: Use checked shift with fallback behavior?
+        let mut bits: W = if k == Self::BITS {
+            !W::zero()
+        } else {
+            (W::one() << k) - W::one()
+        };
+
+        let last: W = if k == 0 {
+            W::zero()
+        } else {
+            (!W::zero() << Self::BITS - k) >> Self::BITS - n
+        };
+
+        let mut stop: bool = false;
+
+        iter::from_fn(move || {
+            if stop {
+                None
+            } else if bits == last {
+                stop = true;
+                Some(bits)
+            } else {
+                // Gosper's hack.
+                let b = bits;
+                let c = b & b.wrapping_neg();
+                let r = b + c;
+                debug_assert_eq!(c.count_ones(), 1);
+                // The following equals the standard `(((r ^ b) >> 2) / c) | r` and might be faster.
+                bits = (r ^ b)
+                    .checked_shr(2 + c.trailing_zeros())
+                    .unwrap_or(W::zero())
+                    | r;
+                Some(b)
+            }
+        })
+    }
+
+    /// Generate all subsets of `0..n` with the cardinality growing slowly.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::Set;
+    /// let subsets: Vec<_> = Set::iter_all_below(3).collect();
+    /// let as_vecs: Vec<Vec<_>> = subsets.into_iter().map(|set| set.into_vec()).collect();
+    /// assert_eq!(as_vecs, vec![
+    ///     vec![],
+    ///     vec![0],
+    ///     vec![1],
+    ///     vec![2],
+    ///     vec![0, 1],
+    ///     vec![0, 2],
+    ///     vec![1, 2],
+    ///     vec![0, 1, 2]],
+    /// );
+    /// ```
+    pub fn iter_all_below(n: usize) -> impl Iterator<Item = Self> {
+        (0..=n).flat_map(move |k| Self::bit_combinations(n, k).map(|word| Self(word)))
     }
 
     // ------------------
@@ -666,11 +788,7 @@ impl<W: Word> From<Range<Element>> for BitSet<W> {
     /// ```
     #[inline]
     fn from(range: Range<Element>) -> Self {
-        if range.is_empty() {
-            return Self(W::zero());
-        }
-        Self::debug_bound_check(range.end - 1);
-        Self(((W::one() << (range.end - range.start)) - W::one()) << range.start)
+        Self::interval(range.start, range.end - 1)
     }
 }
 
@@ -688,13 +806,7 @@ impl<W: Word> From<RangeInclusive<Element>> for BitSet<W> {
     /// ```
     #[inline]
     fn from(range: RangeInclusive<Element>) -> Self {
-        if range.is_empty() {
-            return Self(W::zero());
-        }
-        let start = *range.start();
-        let end = range.last().unwrap() + 1;
-        Self::debug_bound_check(end - 1);
-        Self(((W::one() << (end - start)) - W::one()) << start)
+        Self::interval(*range.start(), *range.end())
     }
 }
 
