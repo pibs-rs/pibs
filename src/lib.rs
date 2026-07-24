@@ -50,6 +50,7 @@ use core::{
     any::type_name,
     fmt::{self, Debug},
     iter,
+    mem::MaybeUninit,
     ops::{Add, AddAssign, BitAndAssign, BitOrAssign, Range, RangeInclusive, Shl, Sub},
 };
 use num_traits::{CheckedShr, PrimInt, Unsigned, WrappingNeg};
@@ -440,7 +441,73 @@ impl<W: Word> BitSet<W> {
         })
     }
 
-    // TODO: Generate all subsets with the cardinality growing slowly.
+    /// Generate all subsets, with the cardinality growing slowly.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let set: Set = vec![0, 5, 23].into();
+    /// let subsets_as_vecs: Vec<Vec<_>> = set.subsets_by_size().map(Set::into_vec).collect();
+    /// assert_eq!(subsets_as_vecs, vec![
+    ///     vec![],
+    ///     vec![0],
+    ///     vec![5],
+    ///     vec![23],
+    ///     vec![0, 5],
+    ///     vec![0, 23],
+    ///     vec![5, 23],
+    ///     vec![0, 5, 23]],
+    /// );
+    /// ```
+    #[inline]
+    pub fn subsets_by_size(&self) -> impl Iterator<Item = Self> {
+        // In suffixes[i], 0 <= i <= self.len(), store self.0 with all but the last i ones zeroed.
+        let n = self.len();
+        let mut suffixes = [const { MaybeUninit::uninit() }; u128::BITS as usize + 1];
+        debug_assert!(n < suffixes.len());
+        let mut suffix = W::zero();
+        let mut remainder = self.0;
+        suffixes[0].write(suffix);
+        for i in 1..=n {
+            let next_bit = W::one() << remainder.trailing_zeros() as usize;
+            suffix |= next_bit;
+            remainder &= !next_bit;
+            suffixes[i].write(suffix);
+        }
+        // let suffixes = unsafe { slice::from_raw_parts(suffixes.as_ptr() as *const W, n + 1) };
+
+        let mut word = W::zero();
+        let mut stop = false;
+        let mut k = 0;
+
+        iter::from_fn(move || {
+            debug_assert!(word & !self.0 == W::zero());
+            debug_assert_eq!(word.count_ones() as usize, k);
+
+            if stop {
+                None
+            } else if k == n {
+                stop = true;
+                Some(*self)
+            } else {
+                let next = word;
+                let bit = word & word.wrapping_neg();
+                if bit != W::zero()
+                    && let Some(x) = (word | !self.0).checked_add(&bit)
+                {
+                    let prefix = x & self.0;
+                    let lost = (word.count_ones() - prefix.count_ones()) as usize;
+                    let suffix = unsafe { suffixes[lost].assume_init() };
+                    debug_assert!(prefix & suffix == W::zero());
+                    word = prefix | suffix;
+                } else {
+                    k += 1;
+                    word = unsafe { suffixes[k].assume_init() };
+                }
+                Some(Self(next))
+            }
+        })
+    }
 
     // ------------
     // Constructors
