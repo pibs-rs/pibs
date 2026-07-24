@@ -124,6 +124,49 @@ impl<W: Word> BitSet<W> {
         )
     }
 
+    #[inline]
+    pub(crate) fn bit_combinations(n: usize, k: usize) -> impl Iterator<Item = W> {
+        debug_assert!(k <= n);
+        debug_assert!(n <= Self::BITS);
+
+        // TODO: Avoid cases below via unbounded shift once there is trait support for it.
+        // IDEA: Use checked shift with fallback behavior?
+        let mut bits: W = if k == Self::BITS {
+            !W::zero()
+        } else {
+            (W::one() << k) - W::one()
+        };
+
+        let last: W = if k == 0 {
+            W::zero()
+        } else {
+            (!W::zero() << Self::BITS - k) >> Self::BITS - n
+        };
+
+        let mut stop: bool = false;
+
+        iter::from_fn(move || {
+            if stop {
+                None
+            } else if bits == last {
+                stop = true;
+                Some(bits)
+            } else {
+                // Gosper's hack.
+                let b = bits;
+                let c = b & b.wrapping_neg();
+                let r = b + c;
+                debug_assert_eq!(c.count_ones(), 1);
+                // The following equals the standard `(((r ^ b) >> 2) / c) | r` and might be faster.
+                bits = (r ^ b)
+                    .checked_shr(2 + c.trailing_zeros())
+                    .unwrap_or(W::zero())
+                    | r;
+                Some(b)
+            }
+        })
+    }
+
     // -------
     // Queries
     // -------
@@ -441,6 +484,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(all_sets[4], S::singleton(2));
     /// assert_eq!(all_sets[all_sets.len() - 1], S::from(0..8));
     /// ```
+    #[inline]
     pub fn iter_all() -> impl Iterator<Item = Self> {
         let mut set = Self::new();
         let mut stop = false;
@@ -456,48 +500,6 @@ impl<W: Word> BitSet<W> {
                     stop = true;
                 }
                 Some(next)
-            }
-        })
-    }
-
-    pub(crate) fn bit_combinations(n: usize, k: usize) -> impl Iterator<Item = W> {
-        debug_assert!(k <= n);
-        debug_assert!(n <= Self::BITS);
-
-        // TODO: Avoid cases below via unbounded shift once there is trait support for it.
-        // IDEA: Use checked shift with fallback behavior?
-        let mut bits: W = if k == Self::BITS {
-            !W::zero()
-        } else {
-            (W::one() << k) - W::one()
-        };
-
-        let last: W = if k == 0 {
-            W::zero()
-        } else {
-            (!W::zero() << Self::BITS - k) >> Self::BITS - n
-        };
-
-        let mut stop: bool = false;
-
-        iter::from_fn(move || {
-            if stop {
-                None
-            } else if bits == last {
-                stop = true;
-                Some(bits)
-            } else {
-                // Gosper's hack.
-                let b = bits;
-                let c = b & b.wrapping_neg();
-                let r = b + c;
-                debug_assert_eq!(c.count_ones(), 1);
-                // The following equals the standard `(((r ^ b) >> 2) / c) | r` and might be faster.
-                bits = (r ^ b)
-                    .checked_shr(2 + c.trailing_zeros())
-                    .unwrap_or(W::zero())
-                    | r;
-                Some(b)
             }
         })
     }
@@ -520,8 +522,9 @@ impl<W: Word> BitSet<W> {
     ///     vec![0, 1, 2]],
     /// );
     /// ```
+    #[inline]
     pub fn iter_all_below(n: usize) -> impl Iterator<Item = Self> {
-        (0..=n).flat_map(move |k| Self::bit_combinations(n, k).map(|word| Self(word)))
+        (0..=n).flat_map(move |k| Self::bit_combinations(n, k).map(Self))
     }
 
     // ------------------
@@ -536,6 +539,7 @@ impl<W: Word> BitSet<W> {
     /// let set = BitSet::<u8>::from(vec![0, 2, 4]);
     /// assert_eq!(set.word(), 1u8 + 4u8 + 16u8);
     /// ```
+    #[inline]
     pub fn word(&self) -> W {
         self.0
     }
@@ -549,6 +553,7 @@ impl<W: Word> BitSet<W> {
     /// *set.word_mut() |= 1 + 4 + 16; // Set bits with index 0, 2, and 4.
     /// assert_eq!(set.into_vec(), vec![0, 2, 4]);
     /// ```
+    #[inline]
     pub fn word_mut(&mut self) -> &mut W {
         &mut self.0
     }
@@ -633,6 +638,7 @@ impl<W: Word> fmt::Debug for BitSet<W> {
 }
 
 impl<W: Word> Default for BitSet<W> {
+    #[inline]
     fn default() -> Self {
         Self(W::zero())
     }
@@ -868,6 +874,7 @@ where
     /// largest possible element in the former (127) can still be represented by the latter.
     /// Therefore, this implementation could only panic if additional primitive integer types are
     /// introduced in the future.
+    #[inline]
     fn from(set: BitSet<W>) -> Self {
         set.into_iter()
             .map(|e| match T::try_from(e) {
