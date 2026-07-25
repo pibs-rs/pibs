@@ -28,11 +28,12 @@
 #[cfg(test)]
 mod tests;
 
-/// Exports the macros [`set`] and [`set128`], and the structs [`BitSet`], [`Set`], and [`Set128`].
+/// Re-exports [`BitSet`], [`Set`], [`Set128`], and their associated creation macros.
 pub mod prelude {
     pub use crate::BitSet;
     pub use crate::Set;
     pub use crate::Set128;
+    pub use crate::bitset;
     pub use crate::set;
     pub use crate::set128;
 }
@@ -84,12 +85,12 @@ pub trait Word = PrimInt
 /// A high-performance generic bitset that wraps a single primitive integer for storage.
 ///
 /// # Documentation conventions
-/// The examples below assume the prelude import
+/// The examples below assume the prelude import:
 /// ```
 /// use pitset::prelude::*;
 /// ```
 /// which gives access to the generic [`BitSet`], its variants [`Set`] (using [`usize`]) and
-/// [`Set128`] (using [`u128`]), and the associated macros [`set`] and [`set128`].
+/// [`Set128`] (using [`u128`]), and the associated creation macros.
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BitSet<W: Word>(W);
@@ -405,6 +406,8 @@ impl<W: Word> BitSet<W> {
 
     /// Generate all subsets, with the maximum number growing slowly.
     ///
+    /// See [`Self::subsets_by_size`] for a different iteration order.
+    ///
     /// # Example
     /// ```
     /// # use pitset::prelude::*;
@@ -460,6 +463,8 @@ impl<W: Word> BitSet<W> {
     }
 
     /// Generate all subsets, with the cardinality growing slowly.
+    ///
+    /// If the iteration order is not important, use the faster [`Self::subsets`].
     ///
     /// # Example
     /// ```
@@ -910,7 +915,11 @@ impl<W: Word> From<Range<Element>> for BitSet<W> {
     /// ```
     #[inline]
     fn from(range: Range<Element>) -> Self {
-        Self::interval(range.start, range.end - 1)
+        if range.end == 0 {
+            Self::new()
+        } else {
+            Self::interval(range.start, range.end - 1)
+        }
     }
 }
 
@@ -937,6 +946,7 @@ impl<W: Word> From<RangeInclusive<Element>> for BitSet<W> {
 // --------------------
 
 /// Iterator returned by [`BitSet::iter`] and [`BitSet::into_iter`].
+#[doc(hidden)]
 pub struct BitSetIter<W: Word>(W);
 
 impl<W: Word> Iterator for BitSetIter<W> {
@@ -954,6 +964,7 @@ impl<W: Word> Iterator for BitSetIter<W> {
 }
 
 /// Iterator returned by [`BitSet::subsets_of_size`].
+#[doc(hidden)]
 pub struct SubsetsOfSizeIter<W> {
     /// `suffixes[i]` for `i` in `0..=size` stores `subset` with all but the last `i`` ones zeroed.
     suffixes: [MaybeUninit<W>; u128::BITS as usize + 1],
@@ -1081,6 +1092,41 @@ where
 // Macros
 // ------
 
+/// Create a [`BitSet`] using the given primitive type to store the arguments.
+///
+/// # Example
+/// ```
+/// # use pitset::prelude::*;
+/// assert_eq!(bitset![u8; 0..5], BitSet::<u8>::from(0..5));
+/// assert_eq!(bitset![usize; 1..=23], BitSet::<usize>::from(1..=23));
+/// assert_eq!(bitset![u128; 0, 64, 127], BitSet::<u128>::from(vec![0, 64, 127]));
+/// ```
+///
+/// # Compile-time checks
+/// ```compile_fail
+/// # use pitset::prelude::*;
+/// let set = bitset![u8; 6, 7, 8]; // The compiler detects out-of-bounds elements.
+/// ```
+#[macro_export]
+macro_rules! bitset {
+    ($word:ty; $start:literal .. $end:literal) => {{
+        const _: () = assert!($end <= BitSet::<$word>::BITS);
+        if $end <= 0 {
+            BitSet::<$word>::new()
+        } else {
+            BitSet::<$word>::interval($start, $end - 1)
+        }
+    }};
+    ($word:ty; $start:literal ..= $last:literal) => {{
+        const _: () = assert!($last <= BitSet::<$word>::MAX);
+        BitSet::<$word>::interval($start, $last)
+    }};
+    ($word:ty; $($element:expr),* $(,)?) => {{
+        $(const _: () = assert!($element < BitSet::<$word>::BITS);)*
+        BitSet::<$word>::from_word(0 as $word $(| ((1 as $word) << $element))*)
+    }};
+}
+
 /// Create a [`Set`] containing the arguments.
 ///
 ///  # Example
@@ -1089,11 +1135,19 @@ where
 /// assert_eq!(set![], Set::new());
 /// assert_eq!(set![5], Set::singleton(5));
 /// assert_eq!(set![0, 2, 4], Set::from(vec![0, 2, 4]));
+/// assert_eq!(set![0..4], Set::from(0..4));
+/// assert_eq!(set![0..=4], Set::from(0..=4));
+/// ```
+///
+/// # Compile-time checks
+/// ```compile_fail
+/// # use pitset::prelude::*;
+/// let set = set![10_000]; // The compiler detects out-of-bounds elements.
 /// ```
 #[macro_export]
 macro_rules! set {
-    ($($element:expr),* $(,)?) => {
-        Set::from_word(0usize $(| (1usize << $element))*)
+    ($($tt:tt)*) => {
+        $crate::bitset!(usize; $($tt)*)
     };
 }
 
@@ -1102,11 +1156,19 @@ macro_rules! set {
 /// # Example
 /// ```
 /// # use pitset::prelude::*;
+/// assert_eq!(set128![100..105], Set128::from(100..105));
+/// assert_eq!(set128![100..=105], Set128::from(100..=105));
 /// assert_eq!(set128![0, 64, 127], Set128::from(vec![0, 64, 127]));
+/// ```
+///
+/// # Compile-time checks
+/// ```compile_fail
+/// # use pitset::prelude::*;
+/// let set = set![0..=128]; // The compiler detects out-of-bounds elements.
 /// ```
 #[macro_export]
 macro_rules! set128 {
-    ($($element:expr),* $(,)?) => {
-        Set128::from_word(0u128 $(| (1u128 << $element))*)
+    ($($tt:tt)*) => {
+        $crate::bitset!(u128; $($tt)*)
     };
 }
