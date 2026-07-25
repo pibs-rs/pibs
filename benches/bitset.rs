@@ -6,39 +6,34 @@ fn _bench_enumerate<W: Word>(
     group: &mut criterion::BenchmarkGroup<'_, criterion::measurement::WallTime>,
 ) {
     group.throughput(Throughput::Elements(2.pow(BitSet::<W>::BITS as u32)));
-    group.bench_function(BenchmarkId::from_parameter("iter_all"), |benchmark| {
-        benchmark.iter(|| {
+    group.bench_function(BenchmarkId::from_parameter("iter_all"), |b| {
+        b.iter(|| {
             for set in BitSet::<W>::iter_all() {
                 black_box(set);
             }
         });
     });
-    group.bench_function(BenchmarkId::from_parameter("iter_all_below"), |benchmark| {
-        benchmark.iter(|| {
-            for set in BitSet::<W>::iter_all_below(BitSet::<W>::BITS) {
+    group.bench_function(BenchmarkId::from_parameter("iter_all_by_size"), |b| {
+        b.iter(|| {
+            for set in BitSet::<W>::iter_all_by_size() {
                 black_box(set);
             }
         });
     });
-    group.bench_function(BenchmarkId::from_parameter("subsets"), |benchmark| {
-        let all = BitSet::<W>::from_word(W::one().wrapping_neg());
-        benchmark.iter(|| {
-            for set in all.subsets() {
+    group.bench_function(BenchmarkId::from_parameter("subsets"), |b| {
+        b.iter(|| {
+            for set in BitSet::<W>::full().subsets() {
                 black_box(set);
             }
         });
     });
-    group.bench_function(
-        BenchmarkId::from_parameter("subsets_by_size"),
-        |benchmark| {
-            let all = BitSet::<W>::from_word(W::one().wrapping_neg());
-            benchmark.iter(|| {
-                for set in all.subsets_by_size() {
-                    black_box(set);
-                }
-            });
-        },
-    );
+    group.bench_function(BenchmarkId::from_parameter("subsets_by_size"), |b| {
+        b.iter(|| {
+            for set in BitSet::<W>::full().subsets_by_size() {
+                black_box(set);
+            }
+        });
+    });
 }
 
 fn bench_enumerate(criterion: &mut Criterion) {
@@ -59,8 +54,8 @@ fn _bench_iter_all_below<W: Word>(
         group.bench_with_input(
             BenchmarkId::from_parameter(type_name::<W>()),
             &n,
-            |benchmark, &n| {
-                benchmark.iter(|| {
+            |b, &n| {
+                b.iter(|| {
                     for set in BitSet::<W>::iter_all_below(n) {
                         black_box(set);
                     }

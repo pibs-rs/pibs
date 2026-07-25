@@ -515,6 +515,19 @@ impl<W: Word> BitSet<W> {
         Self::default()
     }
 
+    /// Create a set containing all representable elements.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// assert_eq!(BitSet::<u8>::full(), bitset![u8; 0..8]);
+    /// assert_eq!(Set128::full().len(), 128);
+    /// ```
+    #[inline]
+    pub fn full() -> Self {
+        Self(W::one().wrapping_neg())
+    }
+
     /// Create a singleton set.
     ///
     /// # Example
@@ -617,10 +630,34 @@ impl<W: Word> BitSet<W> {
         })
     }
 
-    /// Generate all 2^n subsets of `0..n`, with the cardinality growing slowly.
+    /// Generate all representable subsets, with the cardinality growing slowly.
     ///
-    /// If `n == Self::BITS` and you do not care about the iteration order, use the faster
-    /// [`Self::iter_all`] for full enumeration.
+    /// This is a shorthand for `Self::iter_all_below(Self::BITS)`.
+    ///
+    /// If you do not care about the iteration order, use the faster [`Self::iter_all`].
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// assert!(
+    ///     Set::iter_all_by_size().take(8).eq([
+    ///         set![],
+    ///         set![0],
+    ///         set![1],
+    ///         set![2],
+    ///         set![3],
+    ///         set![4],
+    ///         set![5],
+    ///         set![6]
+    ///     ])
+    /// );
+    /// ```
+    #[inline]
+    pub fn iter_all_by_size() -> impl Iterator<Item = Self> {
+        Self::iter_all_below(Self::BITS)
+    }
+
+    /// Generate all 2^n subsets of `0..n`, with the cardinality growing slowly.
     ///
     /// # Example
     /// ```
