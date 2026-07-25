@@ -13,4 +13,9 @@ num-traits = { version = "0.2.19", default-features = false }
 serde = { version = "1.0.229", default-features = false, features = ["derive"], optional = true }
 
 [dev-dependencies]
+criterion = "0.8.2"
 itertools = "0.15.0"
+
+[[bench]]
+name = "bitset"
+harness = false
