@@ -441,6 +441,24 @@ impl<W: Word> BitSet<W> {
         })
     }
 
+    /// Generate all subsets of a given cardinality.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let set: Set = vec![0, 5, 23].into();
+    /// let subsets_as_vecs: Vec<Vec<_>> = set.subsets_of_size(2).map(Set::into_vec).collect();
+    /// assert_eq!(subsets_as_vecs, vec![
+    ///     vec![0, 5],
+    ///     vec![0, 23],
+    ///     vec![5, 23]],
+    /// );
+    /// ```
+    #[inline]
+    pub fn subsets_of_size(&self, size: usize) -> SubsetsOfSizeIter<W> {
+        SubsetsOfSizeIter::<W>::new(self.0, size)
+    }
+
     /// Generate all subsets, with the cardinality growing slowly.
     ///
     /// # Example
@@ -461,52 +479,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn subsets_by_size(&self) -> impl Iterator<Item = Self> {
-        // In suffixes[i], 0 <= i <= self.len(), store self.0 with all but the last i ones zeroed.
-        let n = self.len();
-        let mut suffixes = [const { MaybeUninit::uninit() }; u128::BITS as usize + 1];
-        debug_assert!(n < suffixes.len());
-        let mut suffix = W::zero();
-        let mut remainder = self.0;
-        suffixes[0].write(suffix);
-        for i in 1..=n {
-            let next_bit = W::one() << remainder.trailing_zeros() as usize;
-            suffix |= next_bit;
-            remainder &= !next_bit;
-            suffixes[i].write(suffix);
-        }
-        // let suffixes = unsafe { slice::from_raw_parts(suffixes.as_ptr() as *const W, n + 1) };
-
-        let mut word = W::zero();
-        let mut stop = false;
-        let mut k = 0;
-
-        iter::from_fn(move || {
-            debug_assert!(word & !self.0 == W::zero());
-            debug_assert_eq!(word.count_ones() as usize, k);
-
-            if stop {
-                None
-            } else if k == n {
-                stop = true;
-                Some(*self)
-            } else {
-                let next = word;
-                let bit = word & word.wrapping_neg();
-                if bit != W::zero()
-                    && let Some(x) = (word | !self.0).checked_add(&bit)
-                {
-                    let prefix = x & self.0;
-                    let lost = (word.count_ones() - prefix.count_ones()) as usize;
-                    let suffix = unsafe { suffixes[lost].assume_init() };
-                    debug_assert!(prefix & suffix == W::zero());
-                    word = prefix | suffix;
-                } else {
-                    k += 1;
-                    word = unsafe { suffixes[k].assume_init() };
-                }
-                Some(Self(next))
-            }
-        })
+        (0..=self.len()).flat_map(|k| self.subsets_of_size(k))
     }
 
     // ------------
@@ -963,7 +936,7 @@ impl<W: Word> From<RangeInclusive<Element>> for BitSet<W> {
 // Associated iterators
 // --------------------
 
-/// Iterator over the [elements](Element) of a [`BitSet`].
+/// Iterator returned by [`BitSet::iter`] and [`BitSet::into_iter`].
 pub struct BitSetIter<W: Word>(W);
 
 impl<W: Word> Iterator for BitSetIter<W> {
@@ -977,6 +950,82 @@ impl<W: Word> Iterator for BitSetIter<W> {
         let item = self.0.trailing_zeros() as Self::Item;
         self.0 &= self.0 - W::one();
         Some(item)
+    }
+}
+
+/// Iterator returned by [`BitSet::subsets_of_size`].
+pub struct SubsetsOfSizeIter<W> {
+    /// `suffixes[i]` for `i` in `0..=size` stores `subset` with all but the last `i`` ones zeroed.
+    suffixes: [MaybeUninit<W>; u128::BITS as usize + 1],
+    /// Cardinality of the subsets to generate.
+    size: usize,
+    /// The base set.
+    set: W,
+    /// The current subset.
+    subset: W,
+    /// Whether to yield [`None`] next.
+    stop: bool,
+}
+
+impl<W: Word> SubsetsOfSizeIter<W> {
+    #[inline]
+    fn new(set: W, size: usize) -> Self {
+        let mut suffixes = [const { MaybeUninit::uninit() }; _];
+        if size > set.count_ones() as usize {
+            return Self {
+                suffixes,          // Unused.
+                size: 0,           // Unused.
+                set: W::zero(),    // Unused.
+                subset: W::zero(), // Unused.
+                stop: true,
+            };
+        }
+        debug_assert!(size < suffixes.len());
+        let mut suffix = W::zero();
+        let mut remainder = set;
+        suffixes[0].write(suffix);
+        for i in 1..=size {
+            let next_bit = W::one() << remainder.trailing_zeros() as usize;
+            suffix |= next_bit;
+            remainder &= !next_bit;
+            suffixes[i].write(suffix);
+        }
+        debug_assert_eq!(suffix.count_ones() as usize, size);
+        Self {
+            suffixes,
+            size,
+            set,
+            subset: suffix,
+            stop: false,
+        }
+    }
+}
+
+impl<W: Word> Iterator for SubsetsOfSizeIter<W> {
+    type Item = BitSet<W>;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.stop {
+            None
+        } else {
+            debug_assert!(self.subset & !self.set == W::zero());
+            debug_assert!(self.subset.count_ones() as usize == self.size);
+            let next = self.subset;
+            let bit = self.subset & self.subset.wrapping_neg();
+            if bit != W::zero()
+                && let Some(x) = (self.subset | !self.set).checked_add(&bit)
+            {
+                let prefix = x & self.set;
+                let lost = (self.subset.count_ones() - prefix.count_ones()) as usize;
+                let suffix = unsafe { self.suffixes[lost].assume_init() };
+                debug_assert!(prefix & suffix == W::zero());
+                self.subset = prefix | suffix;
+            } else {
+                self.stop = true;
+            }
+            Some(BitSet::<W>(next))
+        }
     }
 }
 
