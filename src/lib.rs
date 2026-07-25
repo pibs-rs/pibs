@@ -822,6 +822,7 @@ impl<W: Word> Sub<Element> for BitSet<W> {
 // From trait implementations
 // --------------------------
 
+#[cfg(feature = "alloc")]
 impl<W: Word, T> From<Vec<T>> for BitSet<W>
 where
     T: PrimInt + TryInto<Element>,
@@ -852,6 +853,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<W: Word, T> From<&Vec<T>> for BitSet<W>
 where
     T: PrimInt + TryInto<Element>,
