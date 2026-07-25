@@ -194,7 +194,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(Set::interval(4, 6).len(), 3);
     /// ```
     #[inline]
-    pub fn len(&self) -> usize {
+    pub fn len(self) -> usize {
         self.0.count_ones() as usize
     }
 
@@ -207,7 +207,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(Set::interval(4, 6).min(), Some(4));
     /// ```
     #[inline]
-    pub fn min(&self) -> Option<Element> {
+    pub fn min(self) -> Option<Element> {
         if self.is_empty() {
             None
         } else {
@@ -224,7 +224,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(Set::interval(4, 6).max(), Some(6));
     /// ```
     #[inline]
-    pub fn max(&self) -> Option<Element> {
+    pub fn max(self) -> Option<Element> {
         if self.is_empty() {
             None
         } else {
@@ -240,7 +240,7 @@ impl<W: Word> BitSet<W> {
     /// assert!(Set::new().is_empty());
     /// ```
     #[inline]
-    pub fn is_empty(&self) -> bool {
+    pub fn is_empty(self) -> bool {
         self.0 == W::zero()
     }
 
@@ -259,28 +259,28 @@ impl<W: Word> BitSet<W> {
     /// BitSet::<u8>::singleton(5).contains(8);
     /// ```
     #[inline]
-    pub fn contains(&self, e: Element) -> bool {
+    pub fn contains(self, e: Element) -> bool {
         Self::debug_bound_check(e);
         self.0 & (W::one() << e) != W::zero()
     }
 
     #[inline]
-    pub fn is_subset(&self, other: Self) -> bool {
+    pub fn is_subset(self, other: Self) -> bool {
         self.0 & !other.0 == W::zero()
     }
 
     #[inline]
-    pub fn is_superset(&self, other: Self) -> bool {
+    pub fn is_superset(self, other: Self) -> bool {
         !self.0 & other.0 == W::zero()
     }
 
     #[inline]
-    pub fn intersects(&self, other: Self) -> bool {
+    pub fn intersects(self, other: Self) -> bool {
         self.0 & other.0 != W::zero()
     }
 
     #[inline]
-    pub fn is_disjoint(&self, other: Self) -> bool {
+    pub fn is_disjoint(self, other: Self) -> bool {
         self.0 & other.0 == W::zero()
     }
 
@@ -299,7 +299,7 @@ impl<W: Word> BitSet<W> {
     /// assert!(Set::new().is_interval());
     /// ```
     #[inline]
-    pub fn is_interval(&self) -> bool {
+    pub fn is_interval(self) -> bool {
         if self.is_empty() {
             true
         } else {
@@ -329,22 +329,22 @@ impl<W: Word> BitSet<W> {
     }
 
     #[inline]
-    pub fn union(&self, other: Self) -> Self {
+    pub fn union(self, other: Self) -> Self {
         Self(self.0 | other.0)
     }
 
     #[inline]
-    pub fn intersection(&self, other: Self) -> Self {
+    pub fn intersection(self, other: Self) -> Self {
         Self(self.0 & other.0)
     }
 
     #[inline]
-    pub fn difference(&self, other: Self) -> Self {
+    pub fn difference(self, other: Self) -> Self {
         Self(self.0 & !other.0)
     }
 
     #[inline]
-    pub fn symmetric_difference(&self, other: Self) -> Self {
+    pub fn symmetric_difference(self, other: Self) -> Self {
         Self(self.0 ^ other.0)
     }
 
@@ -359,7 +359,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set.position(6), Some(2));
     /// ```
     #[inline]
-    pub fn position(&self, e: Element) -> Option<usize> {
+    pub fn position(self, e: Element) -> Option<usize> {
         if self.contains(e) {
             Some(self.position_unchecked(e))
         } else {
@@ -373,7 +373,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// If the element is not in the set.
     #[inline]
-    pub fn position_unchecked(&self, e: Element) -> usize {
+    pub fn position_unchecked(self, e: Element) -> usize {
         debug_assert!(self.contains(e));
         (self.0 & ((W::one() << e) - W::one())).count_ones() as usize
     }
@@ -389,7 +389,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set.rank(6), Some(3));
     /// ```
     #[inline]
-    pub fn rank(&self, e: Element) -> Option<usize> {
+    pub fn rank(self, e: Element) -> Option<usize> {
         self.position(e).and_then(|p| Some(p + 1))
     }
 
@@ -399,7 +399,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// If the element is not in the set.
     #[inline]
-    pub fn rank_unchecked(&self, e: Element) -> usize {
+    pub fn rank_unchecked(self, e: Element) -> usize {
         debug_assert!(self.contains(e));
         self.position_unchecked(e) + 1
     }
@@ -425,7 +425,7 @@ impl<W: Word> BitSet<W> {
     /// );
     /// ```
     #[inline]
-    pub fn subsets(&self) -> impl Iterator<Item = Self> {
+    pub fn subsets(self) -> impl Iterator<Item = Self> {
         let mut word = W::zero();
         let mut stop = false;
 
@@ -458,7 +458,7 @@ impl<W: Word> BitSet<W> {
     /// );
     /// ```
     #[inline]
-    pub fn subsets_of_size(&self, size: usize) -> SubsetsOfSizeIter<W> {
+    pub fn subsets_of_size(self, size: usize) -> SubsetsOfSizeIter<W> {
         SubsetsOfSizeIter::<W>::new(self.0, size)
     }
 
@@ -483,8 +483,8 @@ impl<W: Word> BitSet<W> {
     /// );
     /// ```
     #[inline]
-    pub fn subsets_by_size(&self) -> impl Iterator<Item = Self> {
-        (0..=self.len()).flat_map(|k| self.subsets_of_size(k))
+    pub fn subsets_by_size(self) -> impl Iterator<Item = Self> {
+        (0..=self.len()).flat_map(move |k| self.subsets_of_size(k))
     }
 
     // ------------
@@ -636,7 +636,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set![0, 2, 4].word(), 1 + 4 + 16);
     /// ```
     #[inline]
-    pub fn word(&self) -> W {
+    pub fn word(self) -> W {
         self.0
     }
 
@@ -655,7 +655,7 @@ impl<W: Word> BitSet<W> {
     }
 
     #[inline]
-    pub fn iter(&self) -> BitSetIter<W> {
+    pub fn iter(self) -> BitSetIter<W> {
         BitSetIter::<W>(self.0)
     }
 
@@ -668,7 +668,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[cfg(feature = "alloc")]
     #[inline]
-    pub fn to_vec(&self) -> Vec<Element> {
+    pub fn to_vec(self) -> Vec<Element> {
         self.iter().collect()
     }
 }
