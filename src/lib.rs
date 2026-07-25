@@ -837,18 +837,104 @@ impl<W: Word> Sub<Element> for BitSet<W> {
 // From trait implementations
 // --------------------------
 
+impl<W: Word, T, const N: usize> From<[T; N]> for BitSet<W>
+where
+    T: PrimInt + TryInto<Element>,
+{
+    /// Create a [`BitSet`] from an array.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// assert_eq!(Set::from([2, 4, 6]), set![2, 4, 6]);
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// If an element cannot be represented in the bitset.
+    /// ```should_panic
+    /// # use pitset::prelude::*;
+    /// Set::from([-1]);
+    /// ```
+    /// ```should_panic
+    /// # use pitset::prelude::*;
+    /// Set::from([10_000]);
+    /// ```
+    #[inline]
+    fn from(arr: [T; N]) -> Self {
+        arr.into_iter().collect()
+    }
+}
+
+impl<W: Word, T, const N: usize> From<&[T; N]> for BitSet<W>
+where
+    T: PrimInt + TryInto<Element>,
+{
+    /// Create a [`BitSet`] from an array by reference.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// assert_eq!(Set::from(&[2, 4, 6]), set![2, 4, 6]);
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// If an element cannot be represented in the bitset.
+    /// ```should_panic
+    /// # use pitset::prelude::*;
+    /// Set::from(&[-1]);
+    /// ```
+    /// ```should_panic
+    /// # use pitset::prelude::*;
+    /// Set::from(&[10_000]);
+    /// ```
+    #[inline]
+    fn from(arr: &[T; N]) -> Self {
+        arr.iter().copied().collect()
+    }
+}
+
+impl<W: Word, T> From<&[T]> for BitSet<W>
+where
+    T: PrimInt + TryInto<Element>,
+{
+    /// Create a [`BitSet`] from a slice.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// assert_eq!(Set::from([2, 4, 6].as_slice()), set![2, 4, 6]);
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// If an element cannot be represented in the bitset.
+    /// ```should_panic
+    /// # use pitset::prelude::*;
+    /// Set::from([-1].as_slice());
+    /// ```
+    /// ```should_panic
+    /// # use pitset::prelude::*;
+    /// Set::from([10_000].as_slice());
+    /// ```
+    #[inline]
+    fn from(slice: &[T]) -> Self {
+        slice.iter().copied().collect()
+    }
+}
+
 #[cfg(feature = "alloc")]
 impl<W: Word, T> From<Vec<T>> for BitSet<W>
 where
     T: PrimInt + TryInto<Element>,
 {
-    /// Create a [`BitSet`] from an integer vector.
+    /// Create a [`BitSet`] from a vector.
     ///
     /// # Example
     /// ```
     /// # use pitset::prelude::*;
-    /// let set: Set = vec![2, 4, 6].into();
-    /// assert_eq!(set, set![2, 4, 6]);
+    /// assert_eq!(Set::from(vec![2, 4, 6]), set![2, 4, 6]);
     /// ```
     ///
     /// # Panics
@@ -873,14 +959,12 @@ impl<W: Word, T> From<&Vec<T>> for BitSet<W>
 where
     T: PrimInt + TryInto<Element>,
 {
-    /// Create a [`BitSet`] from an integer vector by reference.
+    /// Create a [`BitSet`] from a vector by reference.
     ///
     /// # Example
     /// ```
     /// # use pitset::prelude::*;
-    /// let vec = vec![2, 4, 6];
-    /// let set = Set::from(&vec);
-    /// assert_eq!(set.to_vec(), vec);
+    /// assert_eq!(Set::from(&vec![2, 4, 6]), set![2, 4, 6]);
     /// ```
     ///
     /// # Panics
@@ -1092,7 +1176,7 @@ where
 /// # use pitset::prelude::*;
 /// assert_eq!(bitset![u8; 0..5], BitSet::<u8>::from(0..5));
 /// assert_eq!(bitset![usize; 1..=23], BitSet::<usize>::from(1..=23));
-/// assert_eq!(bitset![u128; 0, 64, 127], BitSet::<u128>::from(vec![0, 64, 127]));
+/// assert_eq!(bitset![u128; 0, 64, 127], BitSet::<u128>::from([0, 64, 127]));
 /// ```
 ///
 /// # Compile-time checks
@@ -1127,7 +1211,7 @@ macro_rules! bitset {
 /// # use pitset::prelude::*;
 /// assert_eq!(set![], Set::new());
 /// assert_eq!(set![5], Set::singleton(5));
-/// assert_eq!(set![0, 2, 4], Set::from(vec![0, 2, 4]));
+/// assert_eq!(set![0, 2, 4], Set::from([0, 2, 4]));
 /// assert_eq!(set![0..4], Set::from(0..4));
 /// assert_eq!(set![0..=4], Set::from(0..=4));
 /// ```
@@ -1151,7 +1235,7 @@ macro_rules! set {
 /// # use pitset::prelude::*;
 /// assert_eq!(set128![100..105], Set128::from(100..105));
 /// assert_eq!(set128![100..=105], Set128::from(100..=105));
-/// assert_eq!(set128![0, 64, 127], Set128::from(vec![0, 64, 127]));
+/// assert_eq!(set128![0, 64, 127], Set128::from([0, 64, 127]));
 /// ```
 ///
 /// # Compile-time checks
