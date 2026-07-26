@@ -63,49 +63,6 @@ impl<W: Word> BitSet<W> {
         )
     }
 
-    #[inline]
-    pub(crate) fn bit_combinations(n: usize, k: usize) -> impl Iterator<Item = W> {
-        debug_assert!(k <= n);
-        debug_assert!(n <= Self::BITS);
-
-        // TODO: Avoid cases below via unbounded shift once there is trait support for it.
-        // IDEA: Use checked shift with fallback behavior?
-        let mut bits: W = if k == Self::BITS {
-            !W::zero()
-        } else {
-            (W::one() << k) - W::one()
-        };
-
-        let last: W = if k == 0 {
-            W::zero()
-        } else {
-            (!W::zero() << Self::BITS - k) >> Self::BITS - n
-        };
-
-        let mut stop: bool = false;
-
-        iter::from_fn(move || {
-            if stop {
-                None
-            } else if bits == last {
-                stop = true;
-                Some(bits)
-            } else {
-                // Gosper's hack.
-                let b = bits;
-                let c = b & b.wrapping_neg();
-                let r = b + c;
-                debug_assert_eq!(c.count_ones(), 1);
-                // The following equals the standard `(((r ^ b) >> 2) / c) | r` and might be faster.
-                bits = (r ^ b)
-                    .checked_shr(2 + c.trailing_zeros())
-                    .unwrap_or(W::zero())
-                    | r;
-                Some(b)
-            }
-        })
-    }
-
     // -------
     // Queries
     // -------
@@ -755,7 +712,45 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn iter_combinations(n: usize, k: usize) -> impl Iterator<Item = Self> {
-        Self::bit_combinations(n, k).map(Self)
+        debug_assert!(k <= n);
+        debug_assert!(n <= Self::BITS);
+
+        // TODO: Avoid cases below via unbounded shift once there is trait support for it.
+        // IDEA: Use checked shift with fallback behavior?
+        let mut bits: W = if k == Self::BITS {
+            !W::zero()
+        } else {
+            (W::one() << k) - W::one()
+        };
+
+        let last: W = if k == 0 {
+            W::zero()
+        } else {
+            (!W::zero() << Self::BITS - k) >> Self::BITS - n
+        };
+
+        let mut stop: bool = false;
+
+        iter::from_fn(move || {
+            if stop {
+                None
+            } else if bits == last {
+                stop = true;
+                Some(Self(bits))
+            } else {
+                // Gosper's hack.
+                let b = bits;
+                let c = b & b.wrapping_neg();
+                let r = b + c;
+                debug_assert_eq!(c.count_ones(), 1);
+                // The following equals the standard `(((r ^ b) >> 2) / c) | r` and might be faster.
+                bits = (r ^ b)
+                    .checked_shr(2 + c.trailing_zeros())
+                    .unwrap_or(W::zero())
+                    | r;
+                Some(Self(b))
+            }
+        })
     }
 
     // ------------------

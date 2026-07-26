@@ -2,25 +2,24 @@ extern crate std;
 
 use crate::*;
 use itertools::Itertools;
-use std::{collections::HashSet, vec, vec::Vec};
+use std::collections::HashSet;
 
 #[test]
-fn test_bit_combinations() {
+fn test_iter_combinations() {
     type W = u8;
     type S = BitSet<W>;
     let b = S::BITS;
 
-    // Only extreme cases.
-    assert_eq!(S::bit_combinations(b, 0).collect::<Vec<_>>(), vec![0]);
-    assert_eq!(
-        S::bit_combinations(b, b).collect::<Vec<_>>(),
-        vec![(1 as W).wrapping_neg()]
-    );
+    // Extreme cases.
+    assert!(S::iter_combinations(b, 0).eq([S::new()]));
+    assert!(S::iter_combinations(b, b).eq([S::full()]));
 
     // Full range.
     for k in 0..=b {
         assert_eq!(
-            S::bit_combinations(b, k).collect::<HashSet<_>>(),
+            S::iter_combinations(b, k)
+                .map(S::word)
+                .collect::<HashSet<_>>(),
             (0..b)
                 .combinations(k)
                 .map(|subset| subset.into_iter().fold(0 as W, |x, i| x | (1 << i)))
@@ -32,7 +31,9 @@ fn test_bit_combinations() {
     let limit = b / 2;
     for k in 0..=limit {
         assert_eq!(
-            S::bit_combinations(limit, k).collect::<HashSet<_>>(),
+            S::iter_combinations(limit, k)
+                .map(S::word)
+                .collect::<HashSet<_>>(),
             (0..limit)
                 .combinations(k)
                 .map(|subset| subset.into_iter().fold(0 as W, |x, i| x | (1 << i)))
