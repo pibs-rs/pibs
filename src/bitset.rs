@@ -345,7 +345,6 @@ impl<W: Word> BitSet<W> {
     /// let b = set![3..=5];
     /// assert_eq!(a.difference(b), set![1..=2]);
     /// ```
-    // TODO: Implement BitSet::sub(Bitset)?
     #[inline]
     pub fn difference(self, other: Self) -> Self {
         Self(self.0 & !other.0)
@@ -388,9 +387,13 @@ impl<W: Word> BitSet<W> {
 
     /// Ordinal position of an element assumed to be in the set, counted from zero.
     ///
+    /// # Panics
+    ///
+    /// If `e` is not in the set in debug builds.
+    ///
     /// # Undefined behavior
     ///
-    /// If `e` is not in the set.
+    /// If `e` is not in the set in release builds.
     #[inline]
     pub fn position_unchecked(self, e: Element) -> usize {
         debug_assert!(self.contains(e));
@@ -414,9 +417,13 @@ impl<W: Word> BitSet<W> {
 
     /// Ordinal position of an element assumed to be in the set, counted from one.
     ///
+    /// # Panics
+    ///
+    /// If `e` is not in the set in debug builds.
+    ///
     /// # Undefined behavior
     ///
-    /// If `e` is not in the set.
+    /// If `e` is not in the set in release builds.
     #[inline]
     pub fn rank_unchecked(self, e: Element) -> usize {
         debug_assert!(self.contains(e));
