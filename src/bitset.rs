@@ -189,11 +189,33 @@ impl<W: Word> BitSet<W> {
         self.0 & (W::one() << e) != W::zero()
     }
 
+    /// Whether `self` is a (non-strict) subset of `other`.
+    ///
+    /// This is equal to `self <= other`, and `self < other` can be used for strict subset checks.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// assert!(set![1, 2].is_subset(set![1, 2]));
+    /// assert!(set![1, 2].is_subset(set![1, 2, 3]));
+    /// assert!(!set![1, 2,3 ].is_subset(set![1, 2]));
+    /// ```
     #[inline]
     pub fn is_subset(self, other: Self) -> bool {
         self.0 & !other.0 == W::zero()
     }
 
+    /// Whether `self` is a (non-strict) superset of `other`.
+    ///
+    /// This is equal to `self >= other`, and `self > other` can be used for strict superset checks.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// assert!(set![1, 2].is_superset(set![1, 2]));
+    /// assert!(!set![1, 2].is_superset(set![1, 2, 3]));
+    /// assert!(set![1, 2,3 ].is_superset(set![1, 2]));
+    /// ```
     #[inline]
     pub fn is_superset(self, other: Self) -> bool {
         !self.0 & other.0 == W::zero()

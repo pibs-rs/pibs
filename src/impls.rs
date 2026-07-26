@@ -1,10 +1,34 @@
 use crate::*;
-use core::{any::type_name, fmt};
+use core::{any::type_name, cmp::Ordering, fmt};
 
 impl<W: Word> Default for BitSet<W> {
     #[inline]
     fn default() -> Self {
         Self(W::zero())
+    }
+}
+
+impl<W: Word> PartialOrd for BitSet<W> {
+    /// Test for a subset relation.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// assert!(set![1, 2] <= set![1, 2]);
+    /// assert!(!(set![1, 2] < set![1, 2]));
+    /// assert!(set![1, 2] <= set![1, 2, 3]);
+    /// assert!(set![1, 2] < set![1, 2, 3]);
+    /// ```
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        if self == other {
+            Some(Ordering::Equal)
+        } else if self.is_subset(*other) {
+            Some(Ordering::Less)
+        } else if self.is_superset(*other) {
+            Some(Ordering::Greater)
+        } else {
+            None
+        }
     }
 }
 
