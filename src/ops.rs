@@ -16,17 +16,33 @@ impl<W: Word> Add<Element> for BitSet<W> {
     /// assert_eq!(set + 7, set![4..=7]);
     /// assert_eq!(set + 8, set.union(set![8]));
     /// ```
+    ///
+    /// # Panics
+    /// If `rhs` exceeds [`Self::MAX`].
     #[inline]
     fn add(self, rhs: Element) -> Self {
+        Self::debug_bound_check(rhs);
         Self(self.0 | (W::one() << rhs))
     }
 }
 
 impl<W: Word> AddAssign<Element> for BitSet<W> {
     /// Add an element to the set (or leave it in).
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let mut set = set![4..=6];
+    /// set += 7;
+    /// assert_eq!(set, set![4..=7]);
+    /// set += 7; // Does nothing.
+    /// ```
+    ///
+    /// # Panics
+    /// If `rhs` exceeds [`Self::MAX`].
     #[inline]
     fn add_assign(&mut self, rhs: Element) {
-        self.0 |= W::one() << rhs;
+        self.insert(rhs);
     }
 }
 
@@ -43,17 +59,57 @@ impl<W: Word> Sub<Element> for BitSet<W> {
     /// assert_eq!(set - 6, set![4..=5]);
     /// assert_eq!(set - 7, set);
     /// ```
+    ///
+    /// # Panics
+    /// If `rhs` exceeds [`Self::MAX`].
     #[inline]
     fn sub(self, rhs: Element) -> Self {
+        Self::debug_bound_check(rhs);
         Self(self.0 & !(W::one() << rhs))
+    }
+}
+
+impl<W: Word> Sub<BitSet<W>> for BitSet<W> {
+    type Output = Self;
+
+    /// The set with every element also present in another set removed.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let a = set![1..=3];
+    /// let b = set![3..=5];
+    /// assert_eq!(a - b, set![1..=2]);
+    /// ```
+    ///
+    /// # Pitfalls
+    ///
+    /// While `a - b` denotes the difference of sets `a` and `b`, the counterpart of set union is
+    /// written as `a | b` and not `a + b`.
+    #[inline]
+    fn sub(self, rhs: Self) -> Self {
+        self.difference(rhs)
     }
 }
 
 impl<W: Word> SubAssign<Element> for BitSet<W> {
     /// Remove an element from the set (if it exists).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let mut set = set![4..=7];
+    /// set -= 7;
+    /// assert_eq!(set, set![4..=6]);
+    /// set -= 7; // Does nothing.
+    /// ```
+    ///
+    /// # Panics
+    /// If `rhs` exceeds [`Self::MAX`].
     #[inline]
     fn sub_assign(&mut self, rhs: Element) {
-        self.0 &= !(W::one() << rhs);
+        self.remove(rhs);
     }
 }
 
@@ -71,7 +127,7 @@ impl<W: Word> BitOr for BitSet<W> {
     /// ```
     #[inline]
     fn bitor(self, rhs: Self) -> Self {
-        Self(self.0 | rhs.0)
+        self.union(rhs)
     }
 }
 
@@ -105,7 +161,7 @@ impl<W: Word> BitAnd for BitSet<W> {
     /// ```
     #[inline]
     fn bitand(self, rhs: Self) -> Self {
-        Self(self.0 & rhs.0)
+        self.intersection(rhs)
     }
 }
 
@@ -139,7 +195,7 @@ impl<W: Word> BitXor for BitSet<W> {
     /// ```
     #[inline]
     fn bitxor(self, rhs: Self) -> Self {
-        Self(self.0 ^ rhs.0)
+        self.symmetric_difference(rhs)
     }
 }
 

@@ -1,4 +1,4 @@
-//! A primitive integer bitset for high-performance combinatorics involving small numbers.
+//! A [primitive integer bitset](BitSet) for high-performance combinatorics involving small numbers.
 //!
 //! # Scope
 //!

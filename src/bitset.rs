@@ -173,12 +173,12 @@ impl<W: Word> BitSet<W> {
     /// # Example
     /// ```
     /// # use pitset::prelude::*;
-    /// assert!(set![4, 5, 6].contains(5));
-    /// assert!(!set![4, 5, 6].contains(8));
+    /// assert_eq!(set![4, 5, 6].contains(5), true);
+    /// assert_eq!(set![4, 5, 6].contains(8), false);
     /// ```
     ///
     /// # Panics
-    /// If the element exceeds [`Self::MAX`].
+    /// If `e` exceeds [`Self::MAX`].
     /// ```should_panic
     /// # use pitset::prelude::*;
     /// bitset![u8; 4, 5, 6].contains(8);
@@ -196,9 +196,9 @@ impl<W: Word> BitSet<W> {
     /// # Example
     /// ```
     /// # use pitset::prelude::*;
-    /// assert!(set![1, 2].is_subset(set![1, 2]));
-    /// assert!(set![1, 2].is_subset(set![1, 2, 3]));
-    /// assert!(!set![1, 2,3 ].is_subset(set![1, 2]));
+    /// assert_eq!(set![1, 2].is_subset(set![1, 2]), true);
+    /// assert_eq!(set![1, 2].is_subset(set![1, 2, 3]), true);
+    /// assert_eq!(set![1, 2,3 ].is_subset(set![1, 2]), false);
     /// ```
     #[inline]
     pub fn is_subset(self, other: Self) -> bool {
@@ -212,20 +212,36 @@ impl<W: Word> BitSet<W> {
     /// # Example
     /// ```
     /// # use pitset::prelude::*;
-    /// assert!(set![1, 2].is_superset(set![1, 2]));
-    /// assert!(!set![1, 2].is_superset(set![1, 2, 3]));
-    /// assert!(set![1, 2,3 ].is_superset(set![1, 2]));
+    /// assert_eq!(set![1, 2].is_superset(set![1, 2]), true);
+    /// assert_eq!(set![1, 2].is_superset(set![1, 2, 3]), false);
+    /// assert_eq!(set![1, 2,3 ].is_superset(set![1, 2]), true);
     /// ```
     #[inline]
     pub fn is_superset(self, other: Self) -> bool {
         !self.0 & other.0 == W::zero()
     }
 
+    /// Whether `self` and `other` have elements in common.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// assert_eq!(set![1, 2].intersects(set![2, 3]), true);
+    /// assert_eq!(set![1, 2].intersects(set![3, 4]), false);
+    /// ```
     #[inline]
     pub fn intersects(self, other: Self) -> bool {
         self.0 & other.0 != W::zero()
     }
 
+    /// Whether `self` and `other` have no elements in common.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// assert_eq!(set![1, 2].is_disjoint(set![2, 3]), false);
+    /// assert_eq!(set![1, 2].is_disjoint(set![3, 4]), true);
+    /// ```
     #[inline]
     pub fn is_disjoint(self, other: Self) -> bool {
         self.0 & other.0 == W::zero()
@@ -237,9 +253,9 @@ impl<W: Word> BitSet<W> {
     /// ```
     /// # use pitset::prelude::*;
     /// let mut set = set![4..=6];
-    /// assert!(set.is_interval());
+    /// assert_eq!(set.is_interval(), true);
     /// set.remove(5);
-    /// assert!(!set.is_interval());
+    /// assert_eq!(set.is_interval(), false);
     ///
     /// // Empty sets and singletons are intervals.
     /// assert!(set![].is_interval());
@@ -258,38 +274,137 @@ impl<W: Word> BitSet<W> {
     // Set operations
     // --------------
 
+    /// Insert an element into the set (or leave it in).
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let mut set = set![1, 3];
+    /// set.insert(2);
+    /// assert_eq!(set, set![1..=3]);
+    /// set.insert(2); // Does nothing.
+    /// ```
+    ///
+    /// # Panics
+    /// If `e` exceeds [`Self::MAX`].
     #[inline]
     pub fn insert(&mut self, e: Element) {
         Self::debug_bound_check(e);
         self.0 |= W::one() << e;
     }
 
+    /// Removes an element from the set (if it exists).
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let mut set = set![1..=3];
+    /// set.remove(2);
+    /// assert_eq!(set, set![1, 3]);
+    /// set.remove(2); // Does nothing.
+    /// ```
+    ///
+    /// # Panics
+    /// If `e` exceeds [`Self::MAX`].
     #[inline]
     pub fn remove(&mut self, e: Element) {
         Self::debug_bound_check(e);
         self.0 &= !(W::one() << e);
     }
 
+    /// Toggles the presence of an element in the set.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let mut set = set![1..=3];
+    /// set.toggle(2);
+    /// assert_eq!(set, set![1, 3]);
+    /// set.toggle(2);
+    /// let mut set = set![1..=3];
+    /// ```
+    ///
+    /// # Panics
+    /// If `e` exceeds [`Self::MAX`].
+    #[inline]
+    pub fn toggle(&mut self, e: Element) {
+        Self::debug_bound_check(e);
+        self.0 ^= W::one() << e;
+    }
+
+    /// Removes all elements from the set.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let mut set = set![0..23];
+    /// assert_eq!(set.len(), 23);
+    /// set.clear();
+    /// assert_eq!(set.len(), 0);
+    /// ```
     #[inline]
     pub fn clear(&mut self) {
         self.0 = W::zero();
     }
 
+    /// The union of two sets.
+    ///
+    /// Alternative notation for the same operation is `self | other`.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let a = set![1..=3];
+    /// let b = set![3..=5];
+    /// assert_eq!(a.union(b), set![1..=5]);
+    /// ```
     #[inline]
     pub fn union(self, other: Self) -> Self {
         Self(self.0 | other.0)
     }
 
+    /// The intersection of two sets.
+    ///
+    /// Alternative notation for the same operation is `self & other`.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let a = set![1..=3];
+    /// let b = set![3..=5];
+    /// assert_eq!(a.intersection(b), set![3]);
+    /// ```
     #[inline]
     pub fn intersection(self, other: Self) -> Self {
         Self(self.0 & other.0)
     }
 
+    /// The set with every element also present in another set removed.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let a = set![1..=3];
+    /// let b = set![3..=5];
+    /// assert_eq!(a.difference(b), set![1..=2]);
+    /// ```
+    // TODO: Implement BitSet::sub(Bitset)?
     #[inline]
     pub fn difference(self, other: Self) -> Self {
         Self(self.0 & !other.0)
     }
 
+    /// The symmetric difference of two sets.
+    ///
+    /// Alternative notation for the same operation is `self ^ other`.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let a = set![1..=3];
+    /// let b = set![3..=5];
+    /// assert_eq!(a.symmetric_difference(b), set![1..=2, 4..=5]);
+    /// ```
     #[inline]
     pub fn symmetric_difference(self, other: Self) -> Self {
         Self(self.0 ^ other.0)
@@ -318,7 +433,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Undefined behavior
     ///
-    /// If the element is not in the set.
+    /// If `e` is not in the set.
     #[inline]
     pub fn position_unchecked(self, e: Element) -> usize {
         debug_assert!(self.contains(e));
@@ -344,7 +459,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Undefined behavior
     ///
-    /// If the element is not in the set.
+    /// If `e` is not in the set.
     #[inline]
     pub fn rank_unchecked(self, e: Element) -> usize {
         debug_assert!(self.contains(e));
@@ -476,7 +591,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     ///
     /// # Panics
-    /// If `e` exceeds [`BitSet::MAX`].
+    /// If `e` exceeds [`Self::MAX`].
     /// ```should_panic
     /// # use pitset::prelude::*;
     /// Set::singleton(10_000);
