@@ -12,7 +12,6 @@
 //!
 //! # Usage
 //!
-//!
 //! `# TODO`
 //!
 //! # Examples
@@ -74,7 +73,7 @@ use num_traits::{CheckedShr, PrimInt, Unsigned, WrappingNeg};
 /// Alias for [`BitSet<usize>`]; the set offering the best performance.
 ///
 /// On 64 bit systems, this set can store integers between 0 and 63 (inclusive).
-/// For numbers up to 127, use [`Set128`] at a potential performance cost.
+/// For numbers up to 127, use [`Set128`] at a possible performance cost.
 pub type Set = BitSet<usize>;
 
 /// Alias for [`BitSet<u128>`]; the set with the highest capacity.
@@ -104,8 +103,6 @@ pub trait Word = PrimInt
 /// ```
 /// use pitset::prelude::*;
 /// ```
-/// which gives access to the generic [`BitSet`], its variants [`Set`] (using [`usize`]) and
-/// [`Set128`] (using [`u128`]), and the associated creation macros.
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BitSet<W: Word>(W);
