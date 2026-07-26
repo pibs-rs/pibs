@@ -3,20 +3,38 @@
 //! # Scope
 //!
 //! This crate offers
-//! 1. **zero-cost abstraction** over bitwise operations (no allocation or block management) and
+//! 1. **zero-cost abstraction** over bitwise operations without allocation or block management and
 //! 2. a rich interface for **combinatorics** involving sets of small non-negative integers.
 //!
 //! It is best suited when the bitset should abstract a mathematical set, set operations are
-//! performance critical, and the numbers stored naturally lie in the representable range `0..=127`.
+//! performance critical, and the elements naturally lie in the representable range `0..=127`.
 //! See [Alternatives](#alternatives) if your use case differs.
-//!
-//! # Usage
-//!
-//! `# TODO`
 //!
 //! # Examples
 //!
 //! `# TODO`
+//!
+//! # Usage
+//!
+//! Add the crate to your `Cargo.toml`:
+//! ```toml
+//! [dependencies]
+//! pitset = "0.1"                                            # with default features
+//! # pitset = { version = "0.1", default-features = false }  # without default features
+//! # pitset = { version = "0.1", features = ["serde"] }      # with 'serde' feature
+//! ```
+//!
+//! ## Features
+//!
+//! | feature | default | implements                                         |
+//! | ------- | ------- | -------------------------------------------------- |
+//! | `alloc` | yes     | conversion from and to [`Vec`](https://doc.rust-lang.org/alloc/vec/struct.Vec.html) |
+//! | `serde` | no      | (de)serialization via [`serde`](https://serde.rs/) |
+//!
+//! ## Dependencies
+//!
+//! The crate is [no_std](https://docs.rust-embedded.org/book/intro/no-std.html)-compatible and its
+//! only dependency is [`num_traits`].
 //!
 //! # Discussion
 //! ## Impact of word size on performance
