@@ -2,7 +2,7 @@ extern crate std;
 
 use crate::*;
 use itertools::Itertools;
-use std::{collections::HashSet, vec};
+use std::{collections::HashSet, vec, vec::Vec};
 
 #[test]
 fn test_bit_combinations() {

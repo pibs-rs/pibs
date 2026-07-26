@@ -56,21 +56,11 @@ mod tests;
 // Imports
 // -------
 
-#[cfg(feature = "alloc")]
-extern crate alloc;
-
-#[cfg(feature = "alloc")]
-use alloc::vec::Vec;
 use core::{
-    any::type_name,
-    fmt::{self, Debug},
-    iter,
-    mem::MaybeUninit,
-    ops::{Add, AddAssign, BitAndAssign, BitOrAssign, Range, RangeInclusive, Shl, Sub},
+    fmt::Debug,
+    ops::{AddAssign, BitAndAssign, BitOrAssign, Shl},
 };
 use num_traits::{CheckedShr, PrimInt, Unsigned, WrappingNeg};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 // -------
 // Exports

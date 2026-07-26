@@ -1,4 +1,12 @@
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 use crate::*;
+#[cfg(feature = "alloc")]
+use alloc::vec::Vec;
+use core::{any::type_name, iter};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// A high-performance generic bitset that wraps a single primitive integer for storage.
 ///

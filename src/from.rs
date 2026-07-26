@@ -1,4 +1,10 @@
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 use crate::*;
+#[cfg(feature = "alloc")]
+use alloc::vec::Vec;
+use core::ops::{Range, RangeInclusive};
 
 impl<W: Word, T, const N: usize> From<[T; N]> for BitSet<W>
 where

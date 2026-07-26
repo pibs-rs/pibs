@@ -1,4 +1,5 @@
 use crate::*;
+use core::{any::type_name, fmt};
 
 impl<W: Word> Default for BitSet<W> {
     #[inline]

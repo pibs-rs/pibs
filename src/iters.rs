@@ -1,4 +1,5 @@
 use crate::*;
+use core::mem::MaybeUninit;
 
 /// Iterator returned by [`BitSet::iter`] and [`BitSet::into_iter`].
 pub struct BitSetIter<W: Word>(pub(crate) W);

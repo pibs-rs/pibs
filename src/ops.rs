@@ -1,4 +1,5 @@
 use crate::*;
+use core::ops::{Add, Sub};
 
 impl<W: Word> Add<Element> for BitSet<W> {
     type Output = Self;
