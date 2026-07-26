@@ -52,3 +52,35 @@ fn test_iter_all_below() {
         );
     }
 }
+
+#[test]
+fn test_subsets() {
+    for mut set in Set::iter_all_below(8) {
+        set.insert(Set::MAX); // Test for overflows.
+        assert_eq!(
+            set.subsets()
+                .map(|subset| {
+                    assert!(subset.is_subset(set) && set.is_superset(subset));
+                    subset.to_vec()
+                })
+                .collect::<HashSet<_>>(),
+            set.iter().powerset().collect::<HashSet<_>>()
+        );
+    }
+}
+
+#[test]
+fn test_subsets_by_size() {
+    for mut set in Set::iter_all_below(8) {
+        set.insert(Set::MAX); // Test for overflows.
+        assert_eq!(
+            set.subsets_by_size()
+                .map(|subset| {
+                    assert!(subset.is_subset(set) && set.is_superset(subset));
+                    subset.to_vec()
+                })
+                .collect::<HashSet<_>>(),
+            set.iter().powerset().collect::<HashSet<_>>()
+        );
+    }
+}
