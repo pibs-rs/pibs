@@ -17,5 +17,5 @@ criterion = "0.8.2"
 itertools = "0.15.0"
 
 [[bench]]
-name = "bitset"
+name = "criterion"
 harness = false
