@@ -278,7 +278,7 @@ impl<W: Word> BitSet<W> {
     /// set.toggle(2);
     /// assert_eq!(set, set![1, 3]);
     /// set.toggle(2);
-    /// let mut set = set![1..=3];
+    /// assert_eq!(set, set![1..=3]);
     /// ```
     ///
     /// # Panics
@@ -508,6 +508,98 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn subsets_by_size(self) -> impl Iterator<Item = Self> {
         (0..=self.len()).flat_map(move |k| self.subsets_of_size(k))
+    }
+
+    // ---------------------
+    // Arithmetic operations
+    // ---------------------
+
+    /// Try to add a number to each element in the set.
+    ///
+    /// If resulting elements are not representable (above [`Self::MAX`]), returns [`None`].
+    ///
+    /// See [`Self::truncating_add_to_all`] for a variant that drops irrepresentable elements.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let set = bitset![u8; 1..=3, 5];
+    /// assert_eq!(set.add_to_all(2), Some(bitset![u8; 3..=5, 7]));
+    /// assert_eq!(set.add_to_all(3), None);
+    /// assert_eq!(set.add_to_all(10_000), None);
+    /// ```
+    #[inline]
+    pub fn add_to_all(self, e: Element) -> Option<Self> {
+        self.0.checked_shl(e as u32).and_then(|word| {
+            if word.count_ones() as usize == self.len() {
+                Some(Self(word))
+            } else {
+                None
+            }
+        })
+    }
+
+    /// Try to subtract a number from each element in the set.
+    ///
+    /// If resulting elements are not representable (below zero), returns [`None`].
+    ///
+    /// See [`Self::truncating_sub_from_all`] for a variant that drops irrepresentable elements.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let set = set![1..=3, 5];
+    /// assert_eq!(set.sub_from_all(1), Some(set![0..=2, 4]));
+    /// assert_eq!(set.sub_from_all(3), None);
+    /// assert_eq!(set.sub_from_all(10_000), None);
+    /// ```
+    #[inline]
+    pub fn sub_from_all(self, e: Element) -> Option<Self> {
+        self.0.checked_shr(e as u32).and_then(|word| {
+            if word.count_ones() as usize == self.len() {
+                Some(Self(word))
+            } else {
+                None
+            }
+        })
+    }
+
+    /// Add a number to each element in the set.
+    ///
+    /// If resulting elements are not representable (above [`Self::MAX`]), they are discarded.
+    ///
+    /// See [`Self::add_to_all`] for a checked variant.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let set = bitset![u8; 1..=3, 5];
+    /// assert_eq!(set.truncating_add_to_all(2), bitset![u8; 3..=5, 7]);
+    /// assert_eq!(set.truncating_add_to_all(3), bitset![u8; 4..=6]);
+    /// assert_eq!(set.truncating_add_to_all(10_000), bitset![u8;]);
+    /// ```
+    #[inline]
+    pub fn truncating_add_to_all(self, e: Element) -> Self {
+        Self(self.0.checked_shl(e as u32).unwrap_or(W::zero()))
+    }
+
+    /// Subtract a number from each element in the set.
+    ///
+    /// If resulting elements are not representable (below zero), they are discarded.
+    ///
+    /// See [`Self::sub_from_all`] for a checked variant.
+    ///
+    /// # Example
+    /// ```
+    /// # use pitset::prelude::*;
+    /// let set = set![1..=3, 5];
+    /// assert_eq!(set.truncating_sub_from_all(1), set![0..=2, 4]);
+    /// assert_eq!(set.truncating_sub_from_all(3), set![0, 2]);
+    /// assert_eq!(set.truncating_sub_from_all(10_000), set![]);
+    /// ```
+    #[inline]
+    pub fn truncating_sub_from_all(self, e: Element) -> Self {
+        Self(self.0.checked_shr(e as u32).unwrap_or(W::zero()))
     }
 
     // ------------

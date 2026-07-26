@@ -78,7 +78,7 @@ use core::{
     fmt::Debug,
     ops::{AddAssign, BitAndAssign, BitOrAssign, BitXorAssign, Shl},
 };
-use num_traits::{CheckedShr, PrimInt, Unsigned, WrappingNeg};
+use num_traits::{CheckedShl, CheckedShr, PrimInt, Unsigned, WrappingNeg};
 
 // -------
 // Exports
@@ -121,5 +121,6 @@ pub trait Word = PrimInt
     + BitOrAssign
     + BitXorAssign
     + Shl<Element, Output = Self>
+    + CheckedShl
     + CheckedShr
     + WrappingNeg;
