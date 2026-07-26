@@ -215,21 +215,17 @@ where
     /// # use pitset::prelude::*;
     /// let vec = set![1, 2, 3].to_vec();
     /// ```
-    ///
-    /// # Panics
-    ///
-    /// If an element of the bitset cannot be represented by `T`.
-    ///
-    /// Note that even the extreme combination of [`BitSet<u128>`] and [`Vec<i8>`] is safe as the
-    /// largest possible element in the former (127) can still be represented by the latter.
-    /// Therefore, this implementation could only panic if additional primitive integer types are
-    /// introduced in the future.
     #[inline]
     fn from(set: BitSet<W>) -> Self {
         set.into_iter()
             .map(|e| match T::try_from(e) {
                 Ok(x) => x,
-                Err(_) => panic!("bitset element cannot be represented by target integer type"),
+                Err(_) => {
+                    // Even a Vec<i8> can store the largest element in a BitSet<u128>.
+                    unreachable!(
+                        "any bitset element should be representable by any primitive integer type"
+                    )
+                }
             })
             .collect()
     }
