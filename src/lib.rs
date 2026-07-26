@@ -76,7 +76,7 @@ mod tests;
 
 use core::{
     fmt::Debug,
-    ops::{AddAssign, BitAndAssign, BitOrAssign, Shl},
+    ops::{AddAssign, BitAndAssign, BitOrAssign, BitXorAssign, Shl},
 };
 use num_traits::{CheckedShr, PrimInt, Unsigned, WrappingNeg};
 
@@ -119,6 +119,7 @@ pub trait Word = PrimInt
     + AddAssign
     + BitAndAssign
     + BitOrAssign
+    + BitXorAssign
     + Shl<Element, Output = Self>
     + CheckedShr
     + WrappingNeg;
