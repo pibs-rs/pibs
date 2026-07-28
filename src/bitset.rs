@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 /// A high-performance generic bitset that wraps a single primitive integer for storage.
 ///
 /// # Example conventions
+///
 /// The examples below assume the prelude import:
 /// ```
 /// use pitset::prelude::*;
@@ -22,7 +23,8 @@ pub struct BitSet<W: Word>(pub(crate) W);
 impl<W: Word> BitSet<W> {
     /// The number of bits in the [primitive integer type](Word) `W`.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(BitSet::<u32>::BITS, 32);
@@ -31,7 +33,8 @@ impl<W: Word> BitSet<W> {
 
     /// The smallest integer that can be stored in the set.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(Set::MIN, 0);
@@ -40,7 +43,8 @@ impl<W: Word> BitSet<W> {
 
     /// The largest integer that can be stored in the set.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(BitSet::<u64>::MAX, 63);
@@ -69,7 +73,8 @@ impl<W: Word> BitSet<W> {
 
     /// Number of elements in the set.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(set![4..=6].len(), 3);
@@ -81,7 +86,8 @@ impl<W: Word> BitSet<W> {
 
     /// The smallest element in the set, if any.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(set![].min(), None);
@@ -98,7 +104,8 @@ impl<W: Word> BitSet<W> {
 
     /// The largest element in the set, if any.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(set![].max(), None);
@@ -115,7 +122,8 @@ impl<W: Word> BitSet<W> {
 
     /// The largest element in the set, if any.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert!(Set::new().is_empty());
@@ -125,20 +133,19 @@ impl<W: Word> BitSet<W> {
         self.0 == W::zero()
     }
 
-    /// Whether an element is contained in the set.
+    /// Whether the set contains an element.
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(set![4, 5, 6].contains(5), true);
     /// assert_eq!(set![4, 5, 6].contains(8), false);
-    /// ```
-    ///
-    /// # Panics
-    /// If `e` exceeds [`Self::MAX`].
-    /// ```should_panic
-    /// # use pitset::prelude::*;
-    /// bitset![u8; 4, 5, 6].contains(8);
     /// ```
     #[inline]
     pub fn contains(self, e: Element) -> bool {
@@ -150,7 +157,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// This is equal to `self <= other`, and `self < other` can be used for strict subset checks.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(set![1, 2].is_subset(set![1, 2]), true);
@@ -166,7 +174,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// This is equal to `self >= other`, and `self > other` can be used for strict superset checks.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(set![1, 2].is_superset(set![1, 2]), true);
@@ -180,7 +189,8 @@ impl<W: Word> BitSet<W> {
 
     /// Whether `self` and `other` have elements in common.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(set![1, 2].intersects(set![2, 3]), true);
@@ -193,7 +203,8 @@ impl<W: Word> BitSet<W> {
 
     /// Whether `self` and `other` have no elements in common.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(set![1, 2].is_disjoint(set![2, 3]), false);
@@ -206,7 +217,8 @@ impl<W: Word> BitSet<W> {
 
     /// Whether the elements form a contiguous interval.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let mut set = set![4..=6];
@@ -233,7 +245,13 @@ impl<W: Word> BitSet<W> {
 
     /// Insert an element into the set (or leave it in).
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let mut set = set![1, 3];
@@ -241,9 +259,6 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set, set![1..=3]);
     /// set.insert(2); // Does nothing.
     /// ```
-    ///
-    /// # Panics
-    /// If `e` exceeds [`Self::MAX`].
     #[inline]
     pub fn insert(&mut self, e: Element) {
         Self::debug_bound_check(e);
@@ -252,7 +267,13 @@ impl<W: Word> BitSet<W> {
 
     /// Removes an element from the set (if it exists).
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let mut set = set![1..=3];
@@ -260,9 +281,6 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set, set![1, 3]);
     /// set.remove(2); // Does nothing.
     /// ```
-    ///
-    /// # Panics
-    /// If `e` exceeds [`Self::MAX`].
     #[inline]
     pub fn remove(&mut self, e: Element) {
         Self::debug_bound_check(e);
@@ -271,7 +289,13 @@ impl<W: Word> BitSet<W> {
 
     /// Toggles the presence of an element in the set.
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let mut set = set![1..=3];
@@ -280,9 +304,6 @@ impl<W: Word> BitSet<W> {
     /// set.toggle(2);
     /// assert_eq!(set, set![1..=3]);
     /// ```
-    ///
-    /// # Panics
-    /// If `e` exceeds [`Self::MAX`].
     #[inline]
     pub fn toggle(&mut self, e: Element) {
         Self::debug_bound_check(e);
@@ -291,7 +312,8 @@ impl<W: Word> BitSet<W> {
 
     /// Removes all elements from the set.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let mut set = set![0..23];
@@ -308,7 +330,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// Alternative notation for the same operation is `self | other`.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let a = set![1..=3];
@@ -324,7 +347,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// Alternative notation for the same operation is `self & other`.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let a = set![1..=3];
@@ -338,7 +362,8 @@ impl<W: Word> BitSet<W> {
 
     /// The set with every element also present in another set removed.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let a = set![1..=3];
@@ -354,7 +379,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// Alternative notation for the same operation is `self ^ other`.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let a = set![1..=3];
@@ -368,7 +394,8 @@ impl<W: Word> BitSet<W> {
 
     /// Ordinal position of an element in the set, counted from zero.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let set: Set = (4..=6).into();
@@ -387,13 +414,10 @@ impl<W: Word> BitSet<W> {
 
     /// Ordinal position of an element assumed to be in the set, counted from zero.
     ///
-    /// # Panics
+    /// # Preconditions
     ///
-    /// If `e` is not in the set in debug builds.
-    ///
-    /// # Undefined behavior
-    ///
-    /// If `e` is not in the set in release builds.
+    /// The caller must ensure that `e` is contained in the set. Violating this precondition panics
+    /// in debug builds and results in unspecified behavior in release builds.
     #[inline]
     pub fn position_unchecked(self, e: Element) -> usize {
         debug_assert!(self.contains(e));
@@ -402,7 +426,8 @@ impl<W: Word> BitSet<W> {
 
     /// Ordinal position of an element in the set, counted from one.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let set = set![4..=6];
@@ -417,13 +442,10 @@ impl<W: Word> BitSet<W> {
 
     /// Ordinal position of an element assumed to be in the set, counted from one.
     ///
-    /// # Panics
+    /// # Preconditions
     ///
-    /// If `e` is not in the set in debug builds.
-    ///
-    /// # Undefined behavior
-    ///
-    /// If `e` is not in the set in release builds.
+    /// The caller must ensure that `e` is contained in the set. Violating this precondition panics
+    /// in debug builds and results in unspecified behavior in release builds.
     #[inline]
     pub fn rank_unchecked(self, e: Element) -> usize {
         debug_assert!(self.contains(e));
@@ -435,7 +457,8 @@ impl<W: Word> BitSet<W> {
     /// See [`Self::subsets_by_size`] for a different iteration order.
     /// To generate all subsets of `0..=Self::BITS`, use the faster [`Self::iter_all`].
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let set = set![0, 5, 23];
@@ -474,7 +497,8 @@ impl<W: Word> BitSet<W> {
 
     /// Generate all subsets of a given cardinality.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let set = set![0, 5, 23];
@@ -495,7 +519,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// If the iteration order is not important, use the faster [`Self::subsets`].
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let set = set![0, 5, 23];
@@ -527,7 +552,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// See [`Self::truncating_add_to_all`] for a variant that drops irrepresentable elements.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let set = bitset![u8; 1..=3, 5];
@@ -552,7 +578,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// See [`Self::truncating_sub_from_all`] for a variant that drops irrepresentable elements.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let set = set![1..=3, 5];
@@ -577,7 +604,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// See [`Self::add_to_all`] for a checked variant.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let set = bitset![u8; 1..=3, 5];
@@ -596,7 +624,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// See [`Self::sub_from_all`] for a checked variant.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let set = set![1..=3, 5];
@@ -615,7 +644,8 @@ impl<W: Word> BitSet<W> {
 
     /// Create an empty set.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert!(Set::new().is_empty());
@@ -627,7 +657,8 @@ impl<W: Word> BitSet<W> {
 
     /// Create a set containing all representable elements.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(BitSet::<u8>::full(), bitset![u8; 0..8]);
@@ -640,17 +671,16 @@ impl<W: Word> BitSet<W> {
 
     /// Create a singleton set.
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(Set::singleton(5), set![5]);
-    /// ```
-    ///
-    /// # Panics
-    /// If `e` exceeds [`Self::MAX`].
-    /// ```should_panic
-    /// # use pitset::prelude::*;
-    /// Set::singleton(10_000);
     /// ```
     #[inline]
     pub fn singleton(e: Element) -> Self {
@@ -660,19 +690,19 @@ impl<W: Word> BitSet<W> {
 
     /// Create a contiguous interval.
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(Set::interval(1, 3), set![1..=3]);
     /// assert_eq!(Set::interval(2, 2), set![2]);
     /// assert!(Set::interval(3, 1).is_empty());
     /// ```
-    ///
-    /// # Panics
-    /// If `last` exceeds [`Self::MAX`] in debug builds.
-    ///
-    /// # Undefined behavior
-    /// If `last` exceeds [`Self::MAX`] in release builds.
     #[inline]
     pub fn interval(first: Element, last: Element) -> Self {
         Self::debug_bound_check(last);
@@ -687,7 +717,8 @@ impl<W: Word> BitSet<W> {
 
     /// Create a bitset from the underlying primitive type `W`.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(Set::from_word(1 + 4 + 16), set![0, 2, 4]);
@@ -704,7 +735,8 @@ impl<W: Word> BitSet<W> {
 
     /// Generate all representable sets, with the maximum number growing slowly.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert!(
@@ -746,7 +778,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// If you do not care about the iteration order, use the faster [`Self::iter_all`].
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert!(
@@ -769,7 +802,13 @@ impl<W: Word> BitSet<W> {
 
     /// Generate all 2^n subsets of `0..n`, with the cardinality growing slowly.
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `n <= Self::BITS`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert!(
@@ -785,7 +824,6 @@ impl<W: Word> BitSet<W> {
     ///     ])
     /// );
     /// ```
-    // FIXME: Appears to not panic but hang when n > Self::BITS.
     #[inline]
     pub fn iter_all_below(n: usize) -> impl Iterator<Item = Self> {
         (0..=n).flat_map(move |k| Self::iter_combinations(n, k))
@@ -795,7 +833,13 @@ impl<W: Word> BitSet<W> {
     ///
     /// The maximum number is growing slowly.
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `k <= n <= Self::BITS`. Violating this precondition panics in
+    /// debug builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert!(
@@ -858,7 +902,8 @@ impl<W: Word> BitSet<W> {
 
     /// A copy of the internal storage word.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(set![0, 2, 4].word(), 1 + 4 + 16);
@@ -870,7 +915,8 @@ impl<W: Word> BitSet<W> {
 
     /// A writable reference to the internal storage word.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let mut set = set![];
@@ -889,7 +935,8 @@ impl<W: Word> BitSet<W> {
 
     /// The elements as a sorted vector of type [`Vec<Element>`].
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(set![1, 2, 3].to_vec(), vec![1, 2, 3]);

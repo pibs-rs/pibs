@@ -12,22 +12,16 @@ where
 {
     /// Create a [`BitSet`] from an array.
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX` for every array element `e`. Violating this
+    /// precondition panics in debug builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(Set::from([2, 4, 6]), set![2, 4, 6]);
-    /// ```
-    ///
-    /// # Panics
-    ///
-    /// If an element cannot be represented in the bitset.
-    /// ```should_panic
-    /// # use pitset::prelude::*;
-    /// Set::from([-1]);
-    /// ```
-    /// ```should_panic
-    /// # use pitset::prelude::*;
-    /// Set::from([10_000]);
     /// ```
     #[inline]
     fn from(arr: [T; N]) -> Self {
@@ -41,22 +35,16 @@ where
 {
     /// Create a [`BitSet`] from an array by reference.
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX` for every array element `e`. Violating this
+    /// precondition panics in debug builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(Set::from(&[2, 4, 6]), set![2, 4, 6]);
-    /// ```
-    ///
-    /// # Panics
-    ///
-    /// If an element cannot be represented in the bitset.
-    /// ```should_panic
-    /// # use pitset::prelude::*;
-    /// Set::from(&[-1]);
-    /// ```
-    /// ```should_panic
-    /// # use pitset::prelude::*;
-    /// Set::from(&[10_000]);
     /// ```
     #[inline]
     fn from(arr: &[T; N]) -> Self {
@@ -70,22 +58,16 @@ where
 {
     /// Create a [`BitSet`] from a slice.
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX` for every slice element `e`. Violating this
+    /// precondition panics in debug builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(Set::from([2, 4, 6].as_slice()), set![2, 4, 6]);
-    /// ```
-    ///
-    /// # Panics
-    ///
-    /// If an element cannot be represented in the bitset.
-    /// ```should_panic
-    /// # use pitset::prelude::*;
-    /// Set::from([-1].as_slice());
-    /// ```
-    /// ```should_panic
-    /// # use pitset::prelude::*;
-    /// Set::from([10_000].as_slice());
     /// ```
     #[inline]
     fn from(slice: &[T]) -> Self {
@@ -100,22 +82,16 @@ where
 {
     /// Create a [`BitSet`] from a vector.
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX` for every vector element `e`. Violating this
+    /// precondition panics in debug builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(Set::from(vec![2, 4, 6]), set![2, 4, 6]);
-    /// ```
-    ///
-    /// # Panics
-    ///
-    /// If an element cannot be represented in the bitset.
-    /// ```should_panic
-    /// # use pitset::prelude::*;
-    /// Set::from(vec![-1]);
-    /// ```
-    /// ```should_panic
-    /// # use pitset::prelude::*;
-    /// Set::from(vec![10_000]);
     /// ```
     #[inline]
     fn from(vec: Vec<T>) -> Self {
@@ -130,22 +106,17 @@ where
 {
     /// Create a [`BitSet`] from a vector by reference.
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX` for every vector element `e`. Violating this
+    /// precondition panics in debug builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert_eq!(Set::from(&vec![2, 4, 6]), set![2, 4, 6]);
     /// ```
-    ///
-    /// # Panics
-    ///
-    /// If an element cannot be represented in the bitset.
-    /// ```should_panic
-    /// # use pitset::prelude::*;
-    /// Set::from(&vec![-1]);
-    /// ```
-    /// ```should_panic
-    /// # use pitset::prelude::*;
-    /// Set::from(&vec![10_000]);
     #[inline]
     fn from(vec: &Vec<T>) -> Self {
         vec.iter().copied().collect()
@@ -155,7 +126,13 @@ where
 impl<W: Word> From<Range<Element>> for BitSet<W> {
     /// Create a [`BitSet`] from an end-exclusive range.
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `range.end <= Self::BITS`. Violating this precondition panics in
+    /// debug builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// for range in [(2..5), (2..3), (2..2), (2..1)] {
@@ -176,7 +153,13 @@ impl<W: Word> From<Range<Element>> for BitSet<W> {
 impl<W: Word> From<RangeInclusive<Element>> for BitSet<W> {
     /// Create a [`BitSet`] from an inclusive range.
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `range.end() <= Self::MAX`. Violating this precondition panics
+    /// in debug builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// for range in [(2..=4), (2..=2), (2..=1)] {
@@ -201,7 +184,8 @@ where
 {
     /// Create a sorted [`Vec`] from a [`BitSet`].
     ///
-    /// # Examples
+    /// # Exampless
+    ///
     /// Any element in a [`BitSet<u128>`] can fit in a [`Vec<i8>`].
     /// ```
     /// # use pitset::prelude::*;
@@ -210,6 +194,7 @@ where
     /// assert_eq!(set.len(), u128::BITS as usize);
     /// assert_eq!(set.to_vec(), vec.into_iter().map(|x| x as usize).collect::<Vec<_>>());
     /// ```
+    ///
     /// To avoid a type hint, use [`BitSet::to_vec`], which always produces a [`Vec<Element>`].
     /// ```
     /// # use pitset::prelude::*;

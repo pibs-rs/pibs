@@ -3,7 +3,8 @@ use crate::*;
 
 /// Create a [`BitSet`] using the given primitive type to store the arguments.
 ///
-/// # Example
+/// # Examples
+///
 /// ```
 /// # use pitset::prelude::*;
 /// assert_eq!(bitset![u8; 0..5], BitSet::<u8>::from(0..5));
@@ -12,6 +13,7 @@ use crate::*;
 /// ```
 ///
 /// # Compile-time checks
+///
 /// ```compile_fail
 /// # use pitset::prelude::*;
 /// let set = bitset![u8; 6, 7, 8]; // The compiler detects out-of-bounds elements.
@@ -71,7 +73,8 @@ macro_rules! bitset {
 
 /// Create a [`Set`] containing the arguments.
 ///
-///  # Example
+///  # Examples
+///
 /// ```
 /// # use pitset::prelude::*;
 /// assert_eq!(set![], Set::new());
@@ -83,6 +86,7 @@ macro_rules! bitset {
 /// ```
 ///
 /// # Compile-time checks
+///
 /// ```compile_fail
 /// # use pitset::prelude::*;
 /// let set = set![10_000]; // The compiler detects out-of-bounds elements.
@@ -96,7 +100,8 @@ macro_rules! set {
 
 /// Create a [`Set128`] containing the arguments.
 ///
-/// # Example
+/// # Examples
+///
 /// ```
 /// # use pitset::prelude::*;
 /// assert_eq!(set128![100..105], Set128::from(100..105));
@@ -105,6 +110,7 @@ macro_rules! set {
 /// ```
 ///
 /// # Compile-time checks
+///
 /// ```compile_fail
 /// # use pitset::prelude::*;
 /// let set = set128![0..=128]; // The compiler detects out-of-bounds elements.

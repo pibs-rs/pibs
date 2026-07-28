@@ -11,7 +11,8 @@ impl<W: Word> Default for BitSet<W> {
 impl<W: Word> PartialOrd for BitSet<W> {
     /// Test for a subset relation.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// assert!(set![1, 2] <= set![1, 2]);
@@ -48,24 +49,18 @@ where
 {
     /// Create a [`BitSet`] from an integer iterator.
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX` for every element `e` produced by the iterator.
+    /// Violating this precondition panics in debug builds and results in unspecified behavior in
+    /// release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// use core::iter::once;
     /// assert_eq!(Set::from_iter(once(0).chain(once(5))), set![0, 5]);
-    /// ```
-    ///
-    /// # Panics
-    /// If an element cannot be represented in the bitset.
-    /// ```should_panic
-    /// # use pitset::prelude::*;
-    /// use core::iter::once;
-    /// Set::from_iter(once(-1));
-    /// ```
-    /// ```should_panic
-    /// # use pitset::prelude::*;
-    /// use core::iter::once;
-    /// Set::from_iter(once(10_000));
     /// ```
     #[inline]
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
@@ -87,7 +82,8 @@ where
 impl<W: Word> fmt::Display for BitSet<W> {
     /// Pretty-format a bitset.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let set = set![0, 10, 1, 20];
@@ -108,10 +104,12 @@ impl<W: Word> fmt::Display for BitSet<W> {
     }
 }
 
+// IDEA: Format the word in hex or binary.
 impl<W: Word> fmt::Debug for BitSet<W> {
     /// Debug-format a bitset.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let set = set![0, 10, 1, 20];

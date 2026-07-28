@@ -6,15 +6,16 @@
 //! 1. **zero-cost abstraction** over bitwise operations without allocation or block management and
 //! 2. a rich interface for **combinatorics** involving sets of small non-negative integers.
 //!
-//! It is best suited when the bitset should abstract a mathematical set, set operations are
-//! performance critical, and the elements naturally lie in the representable range `0..=127`.
+//! It is best suited when the bitset should abstract a mathematical set, the performance of set
+//! operations is a concern, and the elements naturally lie in the representable range `0..=127`.
 //! See [Alternatives](#alternatives) if your use case differs.
 //!
 //! # Examples
 //!
-//! `# TODO`
+//! ...
 //!
 //! # Usage
+//! ## Onboarding
 //!
 //! Add the crate to your `Cargo.toml`:
 //! ```toml
@@ -24,27 +25,35 @@
 //! # pitset = { version = "0.1", features = ["serde"] }      # with 'serde' feature
 //! ```
 //!
-//! ## Features
+//! ## Features and dependencies
 //!
 //! | feature | default | implements                                         |
 //! | ------- | ------- | -------------------------------------------------- |
 //! | `alloc` | yes     | conversion from and to [`Vec`](https://doc.rust-lang.org/alloc/vec/struct.Vec.html) |
 //! | `serde` | no      | (de)serialization via [`serde`](https://serde.rs/) |
 //!
-//! ## Dependencies
-//!
 //! The crate is [no_std](https://docs.rust-embedded.org/book/intro/no-std.html)-compatible and its
-//! only dependency is [`num_traits`].
+//! only non-optional dependency is [`num_traits`].
 //!
 //! # Discussion
+//! ## Checks and preconditions
+//!
+//! Almost all methods that take an [`Element`] as an argument require the caller to ensure that it
+//! does not exceed [`BitSet::MAX`]. This condition is checked in debug builds. In release builds,
+//! the outcome of providing out-of-bounds elements is unspecified.
+//!
+//! On the other hand, creation macros such as [`set!`] will check the numbers provided at compile
+//! time.
+//!
 //! ## Impact of word size on performance
 //!
-//! Benchmarking suggests that on a 64 bit system, [`BitSet`] operations are about equally fast for
-//! the primitives [`u32`] and [`u64`], while using [`u8`], [`u16`], or [`u128`] for storage makes
-//! them slower by a factor of about two. It is thus recommended to use [`Set128`] only when needed
-//! for capacity, and [`BitSet<u8>`] to [`<u32>`](BitSet<u32>) only when memory use is a concern or
-//! the platform has registers of the corresponding size. The default [`Set`] uses a [`usize`], but
-//! pinning to [`u32`] or [`u64`] can make sense to ensure a consistent capacity across platforms.
+//! Benchmarking suggests that on a 64 bit system, [`BitSet`] operations are often equally fast for
+//! the primitives [`u32`] and [`u64`], while using [`u8`], [`u16`], or [`u128`] for storage can
+//! make them slower by a factor of about two. It is thus recommended to use [`Set128`] only when
+//! needed for capacity, and [`BitSet<u8>`] to [`<u32>`](BitSet<u32>) only when memory use is a
+//! concern or the platform has registers of the corresponding size. The default [`Set`] uses a
+//! [`usize`], but pinning to [`u32`] or [`u64`] can make sense to ensure a consistent capacity
+//! across platforms.
 //!
 //! ## Alternatives
 //!

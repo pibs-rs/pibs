@@ -8,7 +8,13 @@ impl<W: Word> Add<Element> for BitSet<W> {
 
     /// The set with an element added (or left in).
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `rhs <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let set = set![4..=6];
@@ -16,11 +22,9 @@ impl<W: Word> Add<Element> for BitSet<W> {
     /// assert_eq!(set + 7, set![4..=7]);
     /// assert_eq!(set + 8, set.union(set![8]));
     /// ```
-    ///
-    /// # Panics
-    /// If `rhs` exceeds [`Self::MAX`].
     #[inline]
     fn add(self, rhs: Element) -> Self {
+        // TODO: Implement BitSet::with.
         Self::debug_bound_check(rhs);
         Self(self.0 | (W::one() << rhs))
     }
@@ -29,7 +33,13 @@ impl<W: Word> Add<Element> for BitSet<W> {
 impl<W: Word> AddAssign<Element> for BitSet<W> {
     /// Add an element to the set (or leave it in).
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `rhs <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let mut set = set![4..=6];
@@ -37,9 +47,6 @@ impl<W: Word> AddAssign<Element> for BitSet<W> {
     /// assert_eq!(set, set![4..=7]);
     /// set += 7; // Does nothing.
     /// ```
-    ///
-    /// # Panics
-    /// If `rhs` exceeds [`Self::MAX`].
     #[inline]
     fn add_assign(&mut self, rhs: Element) {
         self.insert(rhs);
@@ -51,7 +58,13 @@ impl<W: Word> Sub<Element> for BitSet<W> {
 
     /// The set with an element removed (if it exists).
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `rhs <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let set = set![4..=6];
@@ -59,11 +72,9 @@ impl<W: Word> Sub<Element> for BitSet<W> {
     /// assert_eq!(set - 6, set![4..=5]);
     /// assert_eq!(set - 7, set);
     /// ```
-    ///
-    /// # Panics
-    /// If `rhs` exceeds [`Self::MAX`].
     #[inline]
     fn sub(self, rhs: Element) -> Self {
+        // TODO: Implement BitSet::without.
         Self::debug_bound_check(rhs);
         Self(self.0 & !(W::one() << rhs))
     }
@@ -74,7 +85,8 @@ impl<W: Word> Sub<BitSet<W>> for BitSet<W> {
 
     /// The set with every element also present in another set removed.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let a = set![1..=3];
@@ -95,7 +107,12 @@ impl<W: Word> Sub<BitSet<W>> for BitSet<W> {
 impl<W: Word> SubAssign<Element> for BitSet<W> {
     /// Remove an element from the set (if it exists).
     ///
-    /// # Example
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `rhs <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
     ///
     /// ```
     /// # use pitset::prelude::*;
@@ -104,9 +121,6 @@ impl<W: Word> SubAssign<Element> for BitSet<W> {
     /// assert_eq!(set, set![4..=6]);
     /// set -= 7; // Does nothing.
     /// ```
-    ///
-    /// # Panics
-    /// If `rhs` exceeds [`Self::MAX`].
     #[inline]
     fn sub_assign(&mut self, rhs: Element) {
         self.remove(rhs);
@@ -118,7 +132,8 @@ impl<W: Word> BitOr for BitSet<W> {
 
     /// The union of two sets.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let a = set![1..=3];
@@ -134,7 +149,8 @@ impl<W: Word> BitOr for BitSet<W> {
 impl<W: Word> BitOrAssign for BitSet<W> {
     /// Insert every element from another set.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let mut set = set![1..=3];
@@ -152,7 +168,8 @@ impl<W: Word> BitAnd for BitSet<W> {
 
     /// The intersection of two sets.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let a = set![1..=3];
@@ -168,7 +185,8 @@ impl<W: Word> BitAnd for BitSet<W> {
 impl<W: Word> BitAndAssign for BitSet<W> {
     /// Remove all elements not present in another set.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let mut set = set![1..=5];
@@ -186,7 +204,8 @@ impl<W: Word> BitXor for BitSet<W> {
 
     /// The symmetric difference of two sets.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let a = set![1..=3];
@@ -202,7 +221,8 @@ impl<W: Word> BitXor for BitSet<W> {
 impl<W: Word> BitXorAssign for BitSet<W> {
     /// Toggle all elements present in another set.
     ///
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// # use pitset::prelude::*;
     /// let mut set = set![1..=3];
