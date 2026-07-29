@@ -3,18 +3,46 @@
 //! # Scope
 //!
 //! This crate offers
-//! 1. **zero-cost abstraction** over bitwise operations without allocation or block management and
-//! 2. a rich interface for **combinatorics** involving sets of small non-negative integers.
 //!
-//! It is best suited when the bitset should abstract a mathematical set, the performance of set
-//! operations is a concern, and the elements naturally lie in the representable range `0..=127`.
-//! See [Alternatives](#alternatives) if your use case differs.
+//! - zero-cost abstraction over bitwise operations without allocation or block management and
+//! - a rich interface for mathematics/combinatorics involving sets of small non-negative integers.
+//!
+//! *pibs* is best suited when the bitset should abstract a mathematical set, the performance of set
+//! operations is your primary concern, and the elements naturally lie in the representable range
+//! `0..=127`. See [Alternatives](#alternatives) if this is not the case.
+//!
+//! The ambition of *pibs* is that you can't write faster code for any of its operations. If you
+//! can, please report this as an issue!
 //!
 //! # Examples
 //!
 //! ...
 //!
 //! # Usage
+//! ## Cheat Sheet
+//! ### Creation
+//!
+//! | set           | short form     | long form
+//! | ------------- | -------------- | ---------
+//! | ∅            | `set![]`       | [`Set::new()`]
+//! | {0}           | `set![0]`      | [`Set::singleton(0)`](Set::singleton)
+//! | {1, ..., n}   | `set![1..=n]`  | [`Set::interval(1, n)`](Set::interval)
+//! | {0, ..., n-1} | `set![0..n]`   | `Set::from(0..n)`
+//!
+//! ### Queries
+//!
+//! | set           | short form     | long form
+//! | ------------- | -------------- | ---------
+//! | a = ∅        |                | [`a.is_empty()`](BitSet::is_empty)
+//!
+//! ### Operations
+//!
+//! | operation | short form | long form
+//! | --------- | ---------- | ---------
+//! | A ⋃ B     | `a \| b`   | [`a.union(b)`](BitSet::union)
+//! | A ⋂ B     | `a & b`    | [`a.intersection(b)`](BitSet::intersection)
+//! | A ⋂ B     | `a & b`    | [`a.intersection(b)`](BitSet::intersection)
+//!
 //! ## Onboarding
 //!
 //! Add the crate to your `Cargo.toml`:
@@ -57,11 +85,13 @@
 //!
 //! ## Alternatives
 //!
-//! The obvious limitation of this crate is that [`BitSet`] can only store numbers up to 127. If
+//! The obvious limitation of *pibs* is that its [`BitSet`] can only store numbers up to 127. If
 //! your numbers can be larger than this but you know an upper bound, consider using
-//! [fixedbitset](https://docs.rs/fixedbitset) or [bittle](https://docs.rs/bittle) instead. If you
-//! don't know your largest number ahead of time, then [bit-set](https://docs.rs/bit_set) may be
-//! what you are looking for.
+//! [fixedbitset](https://docs.rs/fixedbitset) (SIMD-optimized set abstraction) or
+//! [bittle](https://docs.rs/bittle) (low-level bit manipulation) instead. If you don't know your
+//! largest number ahead of time, then [bit-set](https://docs.rs/bit_set) (based on
+//! [bit-vec](https://docs.rs/bit_set)) or [roaring](https://docs.rs/bit_set) (compressed
+//! representation) may be what you are looking for.
 
 #![feature(trait_alias)]
 #![no_std]
