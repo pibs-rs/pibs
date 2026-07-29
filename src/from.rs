@@ -184,7 +184,7 @@ where
 {
     /// Create a sorted [`Vec`] from a [`BitSet`].
     ///
-    /// # Exampless
+    /// # Examples
     ///
     /// Any element in a [`BitSet<u128>`] can fit in a [`Vec<i8>`].
     /// ```

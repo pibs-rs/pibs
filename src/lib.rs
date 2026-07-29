@@ -20,32 +20,75 @@
 //!
 //! # Usage
 //! ## Cheat Sheet
+//!
+//! M denotes the largest representable element [`BitSet::MAX`].
+//!
 //! ### Creation
 //!
-//! | set           | short form     | long form
-//! | ------------- | -------------- | ---------
-//! | ∅            | `set![]`       | [`Set::new()`]
-//! | {0}           | `set![0]`      | [`Set::singleton(0)`](Set::singleton)
-//! | {1, ..., n}   | `set![1..=n]`  | [`Set::interval(1, n)`](Set::interval)
-//! | {0, ..., n-1} | `set![0..n]`   | `Set::from(0..n)`
+//! | set             | short form      | long form
+//! | --------------- | --------------- | ---------
+//! | ∅               | `set![]`        | [`Set::new()`]
+//! | {0}             | `set![0]`       | [`Set::singleton(0)`](BitSet::singleton)
+//! | {1, ..., n}     | `set![1..=n]`   | [`Set::interval(1, n)`](BitSet::interval)
+//! | {0, ..., n - 1} | `set![0..n]`    | `Set::from(0..n)`
+//! | {0, ..., M}     |                 | [`Set::full()`]
+//! | {2, 3, 5}       | `set![2, 3, 5]` | `Set::from([2, 3, 5])`
 //!
 //! ### Queries
 //!
-//! | set           | short form     | long form
-//! | ------------- | -------------- | ---------
-//! | a = ∅        |                | [`a.is_empty()`](BitSet::is_empty)
+//! | set           | short form | long form
+//! | ------------- | ---------- | ---------
+//! | \|A\|         |            | [`a.len()`](BitSet::len)
+//! | ∑[x ∈ A] x    |            | [`a.sum()`](BitSet::sum)
+//! | A = ∅         |            | [`a.is_empty()`](BitSet::is_empty)
+//! | A ⊆ B         | `a <= b`   | [`a.is_subset(b)`](BitSet::is_subset)
+//! | A ⊇ B         | `a >= b`   | [`a.is_superset(b)`](BitSet::is_superset)
+//! | A ⊂ B         | `a < b`    | [`a.is_strict_subset(b)`](BitSet::is_strict_subset)
+//! | A ⊃ B         | `a > b`    | [`a.is_strict_superset(b)`](BitSet::is_strict_superset)
+//! | A ∩ B ≠ ∅     |            | [`a.intersects(b)`](BitSet::intersects)
+//! | A ∩ B = ∅     |            | [`a.is_disjoint(b)`](BitSet::is_disjoint)
+//! | x ∈ A         |            | [`a.contains(x)`](BitSet::contains)
+//! | \|A\| = max A - min A + 1 | | [`a.is_interval()`](BitSet::is_interval)
 //!
-//! ### Operations
+//! ### Set operations
 //!
 //! | operation | short form | long form
 //! | --------- | ---------- | ---------
-//! | A ⋃ B     | `a \| b`   | [`a.union(b)`](BitSet::union)
-//! | A ⋂ B     | `a & b`    | [`a.intersection(b)`](BitSet::intersection)
-//! | A ⋂ B     | `a & b`    | [`a.intersection(b)`](BitSet::intersection)
+//! | A ∪ B     | `a \| b`   | [`a.union(b)`](BitSet::union)
+//! | A ∩ B     | `a & b`    | [`a.intersection(b)`](BitSet::intersection)
+//! | A ∖ B     | `a - b`    | [`a.difference(b)`](BitSet::difference)
+//! | A ∆ B     | `a ^ b`    | [`a.symmetric_difference(b)`](BitSet::symmetric_difference)
+//! | A ∪ {x}   | `a + x`    | [`a.with(x)`](BitSet::with)
+//! | A ∖ {x}   | `a - x`    | [`a.without(x)`](BitSet::without)
+//!
+//! ### Arithmetic operations
+//!
+//! Default long forms are checked and return `None` if an output element cannot be represented;
+//! truncating variants instead drop any values `< 0` or `> M`. The short forms are truncating.
+//!
+//! | operation | definition | short form   | checked variant | truncating variant
+//! | --------- | ---------- | ------------ | --------------- | ------------------
+//! | A + B     | {x + y \| x ∈ A ∧ y ∈ B} | `a + b`  | [`a.minkowski_sum(b)`](BitSet::minkowski_sum) | [`a.truncating_minkowski_sum(b)`](BitSet::minkowski_sum)
+//! | A + A     | {x + y \| x, y ∈ A}      | `a + a`  | [`a.sumset()`](BitSet::sumset)                | [`a.truncating_sumset()`](BitSet::sumset)
+//! | A + {x}   | {x + y \| y ∈ A}         | `a << x` | [`a.add_to_all(x)`](BitSet::add_to_all)       | [`a.truncating_add_to_all(x)`](BitSet::add_to_all)
+//! | A - {x}   | {x - y \| y ∈ A}         | `a >> x` | [`a.sub_from_all(x)`](BitSet::sub_from_all)   | [`a.truncating_sub_from_all(x)`](BitSet::sub_from_all)
+//! |           | {∑[x ∈ X] x \| X ⊆ A}    |          | [`a.subset_sum()`](BitSet::subset_sum)        | [`a.truncating_subset_sum()`](BitSet::subset_sum)
+//!
+//! ### Generation
+//!
+//! | example                                                    | iterator yields
+//! | ---------------------------------------------------------- | ---------------
+//! | [`Set::iter_all()`]                                        | ∅, {0}, {1}, {0, 1}, {2}, {0, 2}, {1, 2}, {0, 1, 2}, {3}, ...
+//! | [`Set::iter_all_by_size()`]                                | ∅, {0}, {1}, {2}, ..., {M}, {0, 1}, {0, 2}, {1, 2}, ..., {M, M - 1}, {0, 1, 2}, ...
+//! | [`Set::iter_all_below(3)`](Set::iter_all_below)            | ∅, {0}, {1}, {2}, {0, 1}, {0, 2}, {1, 2}, {0, 1, 2}
+//! | [`Set::iter_combinations(4, 2)`](Set::iter_combinations)   | {0, 1}, {0, 2}, {1, 2}, {0, 3}, {1, 3}, {2, 3}
+//! | [`set![2, 4, 6].subsets()`](Set::subsets)                  | ∅, {2}, {4}, {2, 4}, {6}, {2, 6}, {4, 6}, {2, 4, 6}
+//! | [`set![2, 4, 6].subsets_by_size()`](Set::subsets_by_size)  | ∅, {2}, {4}, {6}, {2, 4}, {2, 6}, {4, 6}, {2, 4, 6}
+//! | [`set![2, 4, 6].subsets_of_size(2)`](Set::subsets_of_size) | {2, 4}, {2, 6}, {4, 6}
 //!
 //! ## Onboarding
 //!
-//! Add the crate to your `Cargo.toml`:
+//! Add *pibs* to your `Cargo.toml`:
 //! ```toml
 //! [dependencies]
 //! pibs = "0.1"                                            # with default features
@@ -55,12 +98,12 @@
 //!
 //! ## Features and dependencies
 //!
-//! | feature | default | implements                                         |
-//! | ------- | ------- | -------------------------------------------------- |
-//! | `alloc` | yes     | conversion from and to [`Vec`](https://doc.rust-lang.org/alloc/vec/struct.Vec.html) |
-//! | `serde` | no      | (de)serialization via [`serde`](https://serde.rs/) |
+//! | feature | default | implements
+//! | ------- | ------- | ----------
+//! | `alloc` | yes     | conversion from and to [`Vec`](https://doc.rust-lang.org/alloc/vec/struct.Vec.html)
+//! | `serde` | no      | (de)serialization via [`serde`](https://serde.rs/)
 //!
-//! The crate is [no_std](https://docs.rust-embedded.org/book/intro/no-std.html)-compatible and its
+//! *pibs* is [no_std](https://docs.rust-embedded.org/book/intro/no-std.html)-compatible and its
 //! only non-optional dependency is [`num_traits`].
 //!
 //! # Discussion
