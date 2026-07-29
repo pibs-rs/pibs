@@ -120,7 +120,23 @@ impl<W: Word> BitSet<W> {
         }
     }
 
-    /// The largest element in the set, if any.
+    /// The sum of all elements in the set.
+    ///
+    /// Returns `0` for the the empty set.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// assert_eq!(set![].sum(), 0);
+    /// assert_eq!(set![1, 2, 4, 8].sum(), 15);
+    /// ```
+    #[inline]
+    pub fn sum(self) -> usize {
+        self.iter().sum()
+    }
+
+    /// Whether the set contains no elements.
     ///
     /// # Examples
     ///
@@ -133,7 +149,7 @@ impl<W: Word> BitSet<W> {
         self.0 == W::zero()
     }
 
-    /// Whether the set contains an element.
+    /// Whether the set contains a given element.
     ///
     /// # Preconditions
     ///
@@ -155,7 +171,7 @@ impl<W: Word> BitSet<W> {
 
     /// Whether `self` is a (non-strict) subset of `other`.
     ///
-    /// This is equal to `self <= other`, and `self < other` can be used for strict subset checks.
+    /// This can also be written as `self <= other`.
     ///
     /// # Examples
     ///
@@ -163,7 +179,7 @@ impl<W: Word> BitSet<W> {
     /// # use pibs::prelude::*;
     /// assert_eq!(set![1, 2].is_subset(set![1, 2]), true);
     /// assert_eq!(set![1, 2].is_subset(set![1, 2, 3]), true);
-    /// assert_eq!(set![1, 2,3 ].is_subset(set![1, 2]), false);
+    /// assert_eq!(set![1, 2, 3].is_subset(set![1, 2]), false);
     /// ```
     #[inline]
     pub fn is_subset(self, other: Self) -> bool {
@@ -172,7 +188,7 @@ impl<W: Word> BitSet<W> {
 
     /// Whether `self` is a (non-strict) superset of `other`.
     ///
-    /// This is equal to `self >= other`, and `self > other` can be used for strict superset checks.
+    /// This can also be written as `self >= other`.
     ///
     /// # Examples
     ///
@@ -180,11 +196,45 @@ impl<W: Word> BitSet<W> {
     /// # use pibs::prelude::*;
     /// assert_eq!(set![1, 2].is_superset(set![1, 2]), true);
     /// assert_eq!(set![1, 2].is_superset(set![1, 2, 3]), false);
-    /// assert_eq!(set![1, 2,3 ].is_superset(set![1, 2]), true);
+    /// assert_eq!(set![1, 2, 3].is_superset(set![1, 2]), true);
     /// ```
     #[inline]
     pub fn is_superset(self, other: Self) -> bool {
         !self.0 & other.0 == W::zero()
+    }
+
+    /// Whether `self` is a strict subset of `other`.
+    ///
+    /// his can also be written as `self < other`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// assert_eq!(set![1, 2].is_strict_subset(set![1, 2]), false);
+    /// assert_eq!(set![1, 2].is_strict_subset(set![1, 2, 3]), true);
+    /// assert_eq!(set![1, 2, 3].is_strict_subset(set![1, 2]), false);
+    /// ```
+    #[inline]
+    pub fn is_strict_subset(self, other: Self) -> bool {
+        self != other && self.is_subset(other)
+    }
+
+    /// Whether `self` is a strict superset of `other`.
+    ///
+    /// This can also be written as `self > other`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// assert_eq!(set![1, 2].is_strict_superset(set![1, 2]), false);
+    /// assert_eq!(set![1, 2].is_strict_superset(set![1, 2, 3]), false);
+    /// assert_eq!(set![1, 2, 3].is_strict_superset(set![1, 2]), true);
+    /// ```
+    #[inline]
+    pub fn is_strict_superset(self, other: Self) -> bool {
+        self != other && self.is_superset(other)
     }
 
     /// Whether `self` and `other` have elements in common.
@@ -324,6 +374,48 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn clear(&mut self) {
         self.0 = W::zero();
+    }
+
+    /// The set with an element added to it (or left in).
+    ///
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let set = set![1..=3];
+    /// assert_eq!(set.with(2), set![1..=3]); // Does nothing.
+    /// assert_eq!(set.with(4), set![1..=4]);
+    /// ```
+    #[inline]
+    pub fn with(self, e: Element) -> Self {
+        Self::debug_bound_check(e);
+        Self(self.0 | W::one() << e)
+    }
+
+    /// The set with an element removed from it (if present).
+    ///
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let set = set![1..=3];
+    /// assert_eq!(set.without(2), set![1, 3]);
+    /// assert_eq!(set.without(4), set![1..=3]); // Does nothing.
+    /// ```
+    #[inline]
+    pub fn without(self, e: Element) -> Self {
+        Self::debug_bound_check(e);
+        Self(self.0 & !(W::one() << e))
     }
 
     /// The union of two sets.

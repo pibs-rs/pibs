@@ -36,18 +36,19 @@
 //!
 //! ### Queries
 //!
-//! | set           | short form | long form
-//! | ------------- | ---------- | ---------
-//! | \|A\|         |            | [`a.len()`](BitSet::len)
-//! | ∑[x ∈ A] x    |            | [`a.sum()`](BitSet::sum)
-//! | A = ∅         |            | [`a.is_empty()`](BitSet::is_empty)
-//! | A ⊆ B         | `a <= b`   | [`a.is_subset(b)`](BitSet::is_subset)
-//! | A ⊇ B         | `a >= b`   | [`a.is_superset(b)`](BitSet::is_superset)
-//! | A ⊂ B         | `a < b`    | [`a.is_strict_subset(b)`](BitSet::is_strict_subset)
-//! | A ⊃ B         | `a > b`    | [`a.is_strict_superset(b)`](BitSet::is_strict_superset)
-//! | A ∩ B ≠ ∅     |            | [`a.intersects(b)`](BitSet::intersects)
-//! | A ∩ B = ∅     |            | [`a.is_disjoint(b)`](BitSet::is_disjoint)
-//! | x ∈ A         |            | [`a.contains(x)`](BitSet::contains)
+//! | set          | short form | long form
+//! | ------------ | ---------- | ---------
+//! | \|A\|        |            | [`a.len()`](BitSet::len)
+//! | min A, max A |            | [`a.min()`](BitSet::min), [`a.max()`](BitSet::max)
+//! | ∑(x : x ∈ A) |            | [`a.sum()`](BitSet::sum)
+//! | A = ∅        |            | [`a.is_empty()`](BitSet::is_empty)
+//! | A ⊆ B        | `a <= b`   | [`a.is_subset(b)`](BitSet::is_subset)
+//! | A ⊇ B        | `a >= b`   | [`a.is_superset(b)`](BitSet::is_superset)
+//! | A ⊂ B        | `a < b`    | [`a.is_strict_subset(b)`](BitSet::is_strict_subset)
+//! | A ⊃ B        | `a > b`    | [`a.is_strict_superset(b)`](BitSet::is_strict_superset)
+//! | A ∩ B ≠ ∅    |            | [`a.intersects(b)`](BitSet::intersects)
+//! | A ∩ B = ∅    |            | [`a.is_disjoint(b)`](BitSet::is_disjoint)
+//! | x ∈ A        |            | [`a.contains(x)`](BitSet::contains)
 //! | \|A\| = max A - min A + 1 | | [`a.is_interval()`](BitSet::is_interval)
 //!
 //! ### Set operations
@@ -72,9 +73,11 @@
 //! | A + A     | {x + y \| x, y ∈ A}      | `a + a`  | [`a.sumset()`](BitSet::sumset)                | [`a.truncating_sumset()`](BitSet::sumset)
 //! | A + {x}   | {x + y \| y ∈ A}         | `a << x` | [`a.add_to_all(x)`](BitSet::add_to_all)       | [`a.truncating_add_to_all(x)`](BitSet::add_to_all)
 //! | A - {x}   | {x - y \| y ∈ A}         | `a >> x` | [`a.sub_from_all(x)`](BitSet::sub_from_all)   | [`a.truncating_sub_from_all(x)`](BitSet::sub_from_all)
-//! |           | {∑[x ∈ X] x \| X ⊆ A}    |          | [`a.subset_sum()`](BitSet::subset_sum)        | [`a.truncating_subset_sum()`](BitSet::subset_sum)
+//! |           | {∑(x : x ∈ X) \| X ⊆ A}  |          | [`a.subset_sum()`](BitSet::subset_sum)        | [`a.truncating_subset_sum()`](BitSet::subset_sum)
 //!
 //! ### Generation
+//!
+//! Generation ordered "by size" (cardinality grows slowly) is slower by a factor of about 10.
 //!
 //! | example                                                    | iterator yields
 //! | ---------------------------------------------------------- | ---------------
