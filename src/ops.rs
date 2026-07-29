@@ -24,9 +24,37 @@ impl<W: Word> Add<Element> for BitSet<W> {
     /// ```
     #[inline]
     fn add(self, rhs: Element) -> Self {
-        // TODO: Implement BitSet::with.
-        Self::debug_bound_check(rhs);
-        Self(self.0 | (W::one() << rhs))
+        self.with(rhs)
+    }
+}
+
+impl<W: Word> Add<BitSet<W>> for BitSet<W> {
+    type Output = Self;
+
+    /// The sumset obtained by adding each element in `rhs` to each element in `self`.
+    ///
+    /// If resulting elements are not representable (above [`Self::MAX`]), they are discarded.
+    ///
+    /// This operation is also known as a Minkowski sum.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let a = set![0, 10, 20];
+    /// let b = set![1, 2];
+    /// assert_eq!(a + b, set![1, 2, 11, 12, 21, 22]);
+    /// assert_eq!(a + a, set![0, 10, 20, 30, 40]);
+    /// assert_eq!(b + b, set![2, 3, 4]);
+    /// ```
+    ///
+    /// # Pitfalls
+    ///
+    /// The operation `a - b` denotes set difference of the sets `a` and `b`, which is not a
+    /// counterpart to the sumset `a + b`.
+    #[inline]
+    fn add(self, rhs: Self) -> Self {
+        self.truncating_sumset(rhs)
     }
 }
 
@@ -74,9 +102,7 @@ impl<W: Word> Sub<Element> for BitSet<W> {
     /// ```
     #[inline]
     fn sub(self, rhs: Element) -> Self {
-        // TODO: Implement BitSet::without.
-        Self::debug_bound_check(rhs);
-        Self(self.0 & !(W::one() << rhs))
+        self.without(rhs)
     }
 }
 

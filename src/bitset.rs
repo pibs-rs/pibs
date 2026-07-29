@@ -638,6 +638,78 @@ impl<W: Word> BitSet<W> {
     // Arithmetic operations
     // ---------------------
 
+    /// Try to add each element in `self` to each element in `other`.
+    ///
+    /// If resulting elements are not representable (above [`Self::MAX`]), returns [`None`].
+    ///
+    /// See [`Self::truncating_sumset`] for a variant that drops irrepresentable elements.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let a = set![2, 8];
+    /// let b = set![1, 5];
+    /// assert_eq!(a.sumset(b), Some(set![3, 7, 9, 13]));
+    /// assert_eq!(a.sumset(set![]), Some(set![]));
+    /// assert_eq!(a.sumset(set![0]), Some(a));
+    /// assert_eq!(a.sumset(Set::full()), None);
+    /// ```
+    #[inline]
+    pub fn sumset(self, other: Self) -> Option<Self> {
+        let mut result = W::zero();
+
+        let (smaller, larger_word) = if self.len() < other.len() {
+            (self, other.0)
+        } else {
+            (other, self.0)
+        };
+        let e_max = larger_word.leading_zeros() as usize;
+
+        for e in smaller {
+            if e > e_max {
+                return None;
+            }
+            result |= larger_word << e;
+        }
+
+        Some(Self(result))
+    }
+
+    /// Add each element in `self` to each element in `other`.
+    ///
+    /// If resulting elements are not representable (above [`Self::MAX`]), they are discarded.
+    ///
+    /// See [`Self::sumset`] for a checked variant.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let a = set![2, 8];
+    /// let b = set![1, 5];
+    /// assert_eq!(a.truncating_sumset(b), set![3, 7, 9, 13]);
+    /// assert_eq!(a.truncating_sumset(set![]), set![]);
+    /// assert_eq!(a.truncating_sumset(set![0]), a);
+    /// assert_eq!(a.truncating_sumset(Set::full()), Set::full() - set![0, 1]);
+    /// ```
+    #[inline]
+    pub fn truncating_sumset(self, other: Self) -> Self {
+        let mut result = W::zero();
+
+        let (smaller, larger_word) = if self.len() < other.len() {
+            (self, other.0)
+        } else {
+            (other, self.0)
+        };
+
+        for e in smaller {
+            result |= larger_word << e;
+        }
+
+        Self(result)
+    }
+
     /// Try to add a number to each element in the set.
     ///
     /// If resulting elements are not representable (above [`Self::MAX`]), returns [`None`].
