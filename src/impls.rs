@@ -14,7 +14,7 @@ impl<W: Word> PartialOrd for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert!(set![1, 2] <= set![1, 2]);
     /// assert!(!(set![1, 2] < set![1, 2]));
     /// assert!(set![1, 2] <= set![1, 2, 3]);
@@ -58,7 +58,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// use core::iter::once;
     /// assert_eq!(Set::from_iter(once(0).chain(once(5))), set![0, 5]);
     /// ```
@@ -85,7 +85,7 @@ impl<W: Word> fmt::Display for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let set = set![0, 10, 1, 20];
     /// assert_eq!(format!("{}", set), "{0, 1, 10, 20}");
     /// ```
@@ -111,7 +111,7 @@ impl<W: Word> fmt::Debug for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let set = set![0, 10, 1, 20];
     /// assert_eq!(format!("{:?}", set), "BitSet<usize>(1049603)");
     /// ```

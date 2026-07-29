@@ -20,9 +20,9 @@
 //! Add the crate to your `Cargo.toml`:
 //! ```toml
 //! [dependencies]
-//! pitset = "0.1"                                            # with default features
-//! # pitset = { version = "0.1", default-features = false }  # without default features
-//! # pitset = { version = "0.1", features = ["serde"] }      # with 'serde' feature
+//! pibs = "0.1"                                            # with default features
+//! # pibs = { version = "0.1", default-features = false }  # without default features
+//! # pibs = { version = "0.1", features = ["serde"] }      # with 'serde' feature
 //! ```
 //!
 //! ## Features and dependencies

@@ -1,6 +1,6 @@
 use core::{any::type_name, hint::black_box, ops::BitOr};
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
-use pitset::*;
+use pibs::*;
 
 /// A word with eight evenly distributed bits set.
 ///

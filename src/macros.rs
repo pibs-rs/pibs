@@ -6,7 +6,7 @@ use crate::*;
 /// # Examples
 ///
 /// ```
-/// # use pitset::prelude::*;
+/// # use pibs::prelude::*;
 /// assert_eq!(bitset![u8; 0..5], BitSet::<u8>::from(0..5));
 /// assert_eq!(bitset![usize; 1..=23], BitSet::<usize>::from(1..=23));
 /// assert_eq!(bitset![u128; 0, 63..=65, 127], BitSet::<u128>::from([0, 63, 64, 65, 127]));
@@ -15,7 +15,7 @@ use crate::*;
 /// # Compile-time checks
 ///
 /// ```compile_fail
-/// # use pitset::prelude::*;
+/// # use pibs::prelude::*;
 /// let set = bitset![u8; 6, 7, 8]; // The compiler detects out-of-bounds elements.
 /// ```
 #[macro_export]
@@ -76,7 +76,7 @@ macro_rules! bitset {
 ///  # Examples
 ///
 /// ```
-/// # use pitset::prelude::*;
+/// # use pibs::prelude::*;
 /// assert_eq!(set![], Set::new());
 /// assert_eq!(set![5], Set::singleton(5));
 /// assert_eq!(set![0, 2, 4], Set::from([0, 2, 4]));
@@ -88,7 +88,7 @@ macro_rules! bitset {
 /// # Compile-time checks
 ///
 /// ```compile_fail
-/// # use pitset::prelude::*;
+/// # use pibs::prelude::*;
 /// let set = set![10_000]; // The compiler detects out-of-bounds elements.
 /// ```
 #[macro_export]
@@ -103,7 +103,7 @@ macro_rules! set {
 /// # Examples
 ///
 /// ```
-/// # use pitset::prelude::*;
+/// # use pibs::prelude::*;
 /// assert_eq!(set128![100..105], Set128::from(100..105));
 /// assert_eq!(set128![100..=105], Set128::from(100..=105));
 /// assert_eq!(set128![0, 63..=65, 127], Set128::from([0, 63, 64, 65, 127]));
@@ -112,7 +112,7 @@ macro_rules! set {
 /// # Compile-time checks
 ///
 /// ```compile_fail
-/// # use pitset::prelude::*;
+/// # use pibs::prelude::*;
 /// let set = set128![0..=128]; // The compiler detects out-of-bounds elements.
 /// ```
 #[macro_export]

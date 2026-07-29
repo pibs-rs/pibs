@@ -20,7 +20,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(Set::from([2, 4, 6]), set![2, 4, 6]);
     /// ```
     #[inline]
@@ -43,7 +43,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(Set::from(&[2, 4, 6]), set![2, 4, 6]);
     /// ```
     #[inline]
@@ -66,7 +66,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(Set::from([2, 4, 6].as_slice()), set![2, 4, 6]);
     /// ```
     #[inline]
@@ -90,7 +90,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(Set::from(vec![2, 4, 6]), set![2, 4, 6]);
     /// ```
     #[inline]
@@ -114,7 +114,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(Set::from(&vec![2, 4, 6]), set![2, 4, 6]);
     /// ```
     #[inline]
@@ -134,7 +134,7 @@ impl<W: Word> From<Range<Element>> for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// for range in [(2..5), (2..3), (2..2), (2..1)] {
     ///     let set: Set = range.clone().into();
     ///     assert!(set.iter().eq(range));
@@ -161,7 +161,7 @@ impl<W: Word> From<RangeInclusive<Element>> for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// for range in [(2..=4), (2..=2), (2..=1)] {
     ///     let set: Set = range.clone().into();
     ///     assert!(set.iter().eq(range));
@@ -188,7 +188,7 @@ where
     ///
     /// Any element in a [`BitSet<u128>`] can fit in a [`Vec<i8>`].
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let set = Set128::interval(Set128::MIN, Set128::MAX);
     /// let vec: Vec<i8> = set.into();
     /// assert_eq!(set.len(), u128::BITS as usize);
@@ -197,7 +197,7 @@ where
     ///
     /// To avoid a type hint, use [`BitSet::to_vec`], which always produces a [`Vec<Element>`].
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let vec = set![1, 2, 3].to_vec();
     /// ```
     #[inline]

@@ -16,7 +16,7 @@ impl<W: Word> Add<Element> for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let set = set![4..=6];
     /// assert_eq!(set + 6, set);
     /// assert_eq!(set + 7, set![4..=7]);
@@ -41,7 +41,7 @@ impl<W: Word> AddAssign<Element> for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let mut set = set![4..=6];
     /// set += 7;
     /// assert_eq!(set, set![4..=7]);
@@ -66,7 +66,7 @@ impl<W: Word> Sub<Element> for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let set = set![4..=6];
     /// assert_eq!(set - 5, set.difference(set![5]));
     /// assert_eq!(set - 6, set![4..=5]);
@@ -88,7 +88,7 @@ impl<W: Word> Sub<BitSet<W>> for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let a = set![1..=3];
     /// let b = set![3..=5];
     /// assert_eq!(a - b, set![1..=2]);
@@ -115,7 +115,7 @@ impl<W: Word> SubAssign<Element> for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let mut set = set![4..=7];
     /// set -= 7;
     /// assert_eq!(set, set![4..=6]);
@@ -135,7 +135,7 @@ impl<W: Word> BitOr for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let a = set![1..=3];
     /// let b = set![3..=5];
     /// assert_eq!(a | b, set![1..=5]);
@@ -152,7 +152,7 @@ impl<W: Word> BitOrAssign for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let mut set = set![1..=3];
     /// set |= set![3..=5];
     /// assert_eq!(set, set![1..=5]);
@@ -171,7 +171,7 @@ impl<W: Word> BitAnd for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let a = set![1..=3];
     /// let b = set![3..=5];
     /// assert_eq!(a & b, set![3]);
@@ -188,7 +188,7 @@ impl<W: Word> BitAndAssign for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let mut set = set![1..=5];
     /// set &= set![3..=7];
     /// assert_eq!(set, set![3..=5]);
@@ -207,7 +207,7 @@ impl<W: Word> BitXor for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let a = set![1..=3];
     /// let b = set![3..=5];
     /// assert_eq!(a ^ b, set![1..=2, 4..=5]);
@@ -224,7 +224,7 @@ impl<W: Word> BitXorAssign for BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let mut set = set![1..=3];
     /// set ^= set![3..=5];
     /// assert_eq!(set, set![1..=2, 4..=5]);

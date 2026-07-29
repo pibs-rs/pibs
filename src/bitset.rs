@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// The examples below assume the prelude import:
 /// ```
-/// use pitset::prelude::*;
+/// use pibs::prelude::*;
 /// ```
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -26,7 +26,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(BitSet::<u32>::BITS, 32);
     /// ```
     pub const BITS: usize = size_of::<W>() * 8;
@@ -36,7 +36,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(Set::MIN, 0);
     /// ```
     pub const MIN: Element = 0;
@@ -46,7 +46,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(BitSet::<u64>::MAX, 63);
     /// assert_eq!(BitSet::<u128>::MAX, 127);
     /// ```
@@ -76,7 +76,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(set![4..=6].len(), 3);
     /// ```
     #[inline]
@@ -89,7 +89,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(set![].min(), None);
     /// assert_eq!(set![4..=6].min(), Some(4));
     /// ```
@@ -107,7 +107,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(set![].max(), None);
     /// assert_eq!(set![4..=6].max(), Some(6));
     /// ```
@@ -125,7 +125,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert!(Set::new().is_empty());
     /// ```
     #[inline]
@@ -143,7 +143,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(set![4, 5, 6].contains(5), true);
     /// assert_eq!(set![4, 5, 6].contains(8), false);
     /// ```
@@ -160,7 +160,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(set![1, 2].is_subset(set![1, 2]), true);
     /// assert_eq!(set![1, 2].is_subset(set![1, 2, 3]), true);
     /// assert_eq!(set![1, 2,3 ].is_subset(set![1, 2]), false);
@@ -177,7 +177,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(set![1, 2].is_superset(set![1, 2]), true);
     /// assert_eq!(set![1, 2].is_superset(set![1, 2, 3]), false);
     /// assert_eq!(set![1, 2,3 ].is_superset(set![1, 2]), true);
@@ -192,7 +192,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(set![1, 2].intersects(set![2, 3]), true);
     /// assert_eq!(set![1, 2].intersects(set![3, 4]), false);
     /// ```
@@ -206,7 +206,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(set![1, 2].is_disjoint(set![2, 3]), false);
     /// assert_eq!(set![1, 2].is_disjoint(set![3, 4]), true);
     /// ```
@@ -220,7 +220,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let mut set = set![4..=6];
     /// assert_eq!(set.is_interval(), true);
     /// set.remove(5);
@@ -253,7 +253,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let mut set = set![1, 3];
     /// set.insert(2);
     /// assert_eq!(set, set![1..=3]);
@@ -275,7 +275,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let mut set = set![1..=3];
     /// set.remove(2);
     /// assert_eq!(set, set![1, 3]);
@@ -297,7 +297,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let mut set = set![1..=3];
     /// set.toggle(2);
     /// assert_eq!(set, set![1, 3]);
@@ -315,7 +315,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let mut set = set![0..23];
     /// assert_eq!(set.len(), 23);
     /// set.clear();
@@ -333,7 +333,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let a = set![1..=3];
     /// let b = set![3..=5];
     /// assert_eq!(a.union(b), set![1..=5]);
@@ -350,7 +350,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let a = set![1..=3];
     /// let b = set![3..=5];
     /// assert_eq!(a.intersection(b), set![3]);
@@ -365,7 +365,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let a = set![1..=3];
     /// let b = set![3..=5];
     /// assert_eq!(a.difference(b), set![1..=2]);
@@ -382,7 +382,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let a = set![1..=3];
     /// let b = set![3..=5];
     /// assert_eq!(a.symmetric_difference(b), set![1..=2, 4..=5]);
@@ -397,7 +397,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let set: Set = (4..=6).into();
     /// assert_eq!(set.position(3), None);
     /// assert_eq!(set.position(4), Some(0));
@@ -429,7 +429,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let set = set![4..=6];
     /// assert_eq!(set.rank(3), None);
     /// assert_eq!(set.rank(4), Some(1));
@@ -460,7 +460,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let set = set![0, 5, 23];
     /// assert!(
     ///     set.subsets().eq([
@@ -500,7 +500,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let set = set![0, 5, 23];
     /// assert!(
     ///     set.subsets_of_size(2).eq([
@@ -522,7 +522,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let set = set![0, 5, 23];
     /// assert!(
     ///     set.subsets_by_size().eq([
@@ -555,7 +555,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let set = bitset![u8; 1..=3, 5];
     /// assert_eq!(set.add_to_all(2), Some(bitset![u8; 3..=5, 7]));
     /// assert_eq!(set.add_to_all(3), None);
@@ -581,7 +581,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let set = set![1..=3, 5];
     /// assert_eq!(set.sub_from_all(1), Some(set![0..=2, 4]));
     /// assert_eq!(set.sub_from_all(3), None);
@@ -607,7 +607,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let set = bitset![u8; 1..=3, 5];
     /// assert_eq!(set.truncating_add_to_all(2), bitset![u8; 3..=5, 7]);
     /// assert_eq!(set.truncating_add_to_all(3), bitset![u8; 4..=6]);
@@ -627,7 +627,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let set = set![1..=3, 5];
     /// assert_eq!(set.truncating_sub_from_all(1), set![0..=2, 4]);
     /// assert_eq!(set.truncating_sub_from_all(3), set![0, 2]);
@@ -647,7 +647,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert!(Set::new().is_empty());
     /// ```
     #[inline]
@@ -660,7 +660,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(BitSet::<u8>::full(), bitset![u8; 0..8]);
     /// assert_eq!(Set128::full().len(), 128);
     /// ```
@@ -679,7 +679,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(Set::singleton(5), set![5]);
     /// ```
     #[inline]
@@ -698,7 +698,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(Set::interval(1, 3), set![1..=3]);
     /// assert_eq!(Set::interval(2, 2), set![2]);
     /// assert!(Set::interval(3, 1).is_empty());
@@ -720,7 +720,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(Set::from_word(1 + 4 + 16), set![0, 2, 4]);
     /// assert_eq!(Set::from_word(123).word(), 123);
     /// ```
@@ -738,7 +738,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert!(
     ///     Set::iter_all().take(8).eq([
     ///         set![],
@@ -781,7 +781,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert!(
     ///     Set::iter_all_by_size().take(8).eq([
     ///         set![],
@@ -810,7 +810,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert!(
     ///     Set::iter_all_below(3).eq([
     ///         set![],
@@ -841,7 +841,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert!(
     ///     Set::iter_combinations(4, 2).eq([
     ///         set![0, 1],
@@ -905,7 +905,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(set![0, 2, 4].word(), 1 + 4 + 16);
     /// ```
     #[inline]
@@ -918,7 +918,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// let mut set = set![];
     /// *set.word_mut() |= 1 + 4 + 16; // Set bits with index 0, 2, and 4.
     /// assert_eq!(set, set![0, 2, 4]);
@@ -938,7 +938,7 @@ impl<W: Word> BitSet<W> {
     /// # Examples
     ///
     /// ```
-    /// # use pitset::prelude::*;
+    /// # use pibs::prelude::*;
     /// assert_eq!(set![1, 2, 3].to_vec(), vec![1, 2, 3]);
     /// ```
     #[cfg(feature = "alloc")]
