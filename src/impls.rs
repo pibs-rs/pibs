@@ -90,21 +90,10 @@ impl<W: Word> fmt::Display for BitSet<W> {
     /// assert_eq!(format!("{}", set), "{0, 1, 10, 20}");
     /// ```
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{{")?;
-        let mut first = true;
-        for e in self.iter() {
-            if !first {
-                write!(f, ", ")?;
-            }
-            write!(f, "{}", e)?;
-            first = false;
-        }
-        write!(f, "}}")?;
-        Ok(())
+        f.debug_set().entries(self.iter()).finish()
     }
 }
 
-// IDEA: Format the word in hex or binary.
 impl<W: Word> fmt::Debug for BitSet<W> {
     /// Debug-format a bitset.
     ///
@@ -113,11 +102,11 @@ impl<W: Word> fmt::Debug for BitSet<W> {
     /// ```
     /// # use pibs::prelude::*;
     /// let set = set![0, 10, 1, 20];
-    /// assert_eq!(format!("{:?}", set), "BitSet<usize>(1049603)");
+    /// assert_eq!(format!("{:?}", set), "BitSet<usize>({0, 1, 10, 20})");
     /// ```
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple(type_name::<Self>().rsplit("::").next().unwrap())
-            .field(&self.0)
+            .field_with(|f| f.debug_set().entries(self.iter()).finish())
             .finish()
     }
 }

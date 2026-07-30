@@ -139,6 +139,7 @@
 //! representation) may be what you are looking for.
 
 #![feature(trait_alias)]
+#![feature(debug_closure_helpers)]
 #![no_std]
 
 // -------
@@ -158,10 +159,7 @@ mod tests;
 // Imports
 // -------
 
-use core::{
-    fmt::Debug,
-    ops::{AddAssign, BitAndAssign, BitOrAssign, BitXorAssign, Shl},
-};
+use core::ops::{AddAssign, BitAndAssign, BitOrAssign, BitXorAssign};
 use num_traits::{CheckedShl, CheckedShr, PrimInt, Unsigned, WrappingNeg};
 
 // -------
@@ -199,12 +197,10 @@ pub type Element = usize;
 /// A primitive integer that [`BitSet`] can use for storage.
 pub trait Word = PrimInt
     + Unsigned
-    + Debug
     + AddAssign
     + BitAndAssign
     + BitOrAssign
     + BitXorAssign
-    + Shl<Element, Output = Self>
     + CheckedShl
     + CheckedShr
     + WrappingNeg;
