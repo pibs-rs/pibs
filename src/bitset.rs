@@ -20,6 +20,7 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BitSet<W: Word>(pub(crate) W);
 
+// IDEA: Split this into modules by topic.
 impl<W: Word> BitSet<W> {
     /// The number of bits in the [primitive integer type](Word) `W`.
     ///
@@ -707,6 +708,69 @@ impl<W: Word> BitSet<W> {
             result |= larger_word << e;
         }
 
+        Self(result)
+    }
+
+    /// Sum the elements in each subset of the set and collect these sums in a new set.
+    ///
+    /// If resulting elements are not representable (above [`Self::MAX`]), returns [`None`].
+    ///
+    /// See [`Self::truncating_subset_sums`] for a variant that drops irrepresentable elements.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// assert_eq!(set![].subset_sums(), Some(set![0]));
+    /// assert_eq!(set![0].subset_sums(), Some(set![0]));
+    /// assert_eq!(set![1, 2, 4, 8].subset_sums(), Some(set![0..16]));
+    /// assert_eq!(set![1..=5].subset_sums(), Some(set![0..16]));
+    ///
+    /// // Overflows are checked.
+    /// assert_eq!(set![1, 3, 7].subset_sums(), Some(set![0, 1, 3, 4, 7, 8, 10, 11]));
+    /// assert_eq!(bitset![u8; 1, 3, 7].subset_sums(), None);
+    /// ```
+    #[inline]
+    pub fn subset_sums(self) -> Option<Self> {
+        let mut result = W::one();
+        let mut e_max = result.leading_zeros() as usize;
+
+        for e in self {
+            if e > e_max {
+                return None;
+            }
+            e_max -= e;
+            result |= result << e;
+        }
+
+        Some(Self(result))
+    }
+
+    /// Sum the elements in each subset of the set and collect these sums in a new set.
+    ///
+    /// If resulting elements are not representable (above [`Self::MAX`]), they are discarded.
+    ///
+    /// See [`Self::subset_sums`] for a checked variant.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// assert_eq!(set![].truncating_subset_sums(), set![0]);
+    /// assert_eq!(set![0].truncating_subset_sums(), set![0]);
+    /// assert_eq!(set![1, 2, 4, 8].truncating_subset_sums(), set![0..16]);
+    /// assert_eq!(set![1..=5].truncating_subset_sums(), set![0..16]);
+    ///
+    /// // Overflows are truncated.
+    /// assert_eq!(set![1, 3, 7].truncating_subset_sums(), set![0, 1, 3, 4, 7, 8, 10, 11]);
+    /// assert_eq!(bitset![u8; 1, 3, 7].truncating_subset_sums(), bitset![u8; 0, 1, 3, 4, 7]);
+    /// ```
+    #[inline]
+    pub fn truncating_subset_sums(self) -> Self {
+        let mut result = W::one();
+        for e in self {
+            result |= result << e;
+        }
         Self(result)
     }
 

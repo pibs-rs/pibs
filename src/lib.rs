@@ -69,10 +69,10 @@
 //!
 //! | operation | definition | short form   | checked variant | truncating variant
 //! | --------- | ---------- | ------------ | --------------- | ------------------
-//! | A + B     | {x + y \| x ∈ A ∧ y ∈ B} | `a + b`  | [`a.sumset(b)`](BitSet::sumset)               | [`a.truncating_minkowski_sum(b)`](BitSet::sumset)
-//! | A + {x}   | {x + y \| y ∈ A}         | `a << x` | [`a.add_to_all(x)`](BitSet::add_to_all)       | [`a.truncating_add_to_all(x)`](BitSet::add_to_all)
-//! | A - {x}   | {x - y \| y ∈ A}         | `a >> x` | [`a.sub_from_all(x)`](BitSet::sub_from_all)   | [`a.truncating_sub_from_all(x)`](BitSet::sub_from_all)
-//! |           | {∑(x : x ∈ X) \| X ⊆ A}  |          | [`a.subset_sum()`](BitSet::subset_sum)        | [`a.truncating_subset_sum()`](BitSet::subset_sum)
+//! | A + B     | {x + y \| x ∈ A ∧ y ∈ B} | `a + b`  | [`a.sumset(b)`](BitSet::sumset)             | [`a.truncating_sumset(b)`](BitSet::truncating_sumset)
+//! | A + {x}   | {x + y \| y ∈ A}         | `a << x` | [`a.add_to_all(x)`](BitSet::add_to_all)     | [`a.truncating_add_to_all(x)`](BitSet::truncating_add_to_all)
+//! | A - {x}   | {x - y \| y ∈ A}         | `a >> x` | [`a.sub_from_all(x)`](BitSet::sub_from_all) | [`a.truncating_sub_from_all(x)`](BitSet::truncating_sub_from_all)
+//! |           | {∑(x : x ∈ X) \| X ⊆ A}  |          | [`a.subset_sums()`](BitSet::subset_sums)    | [`a.truncating_subset_sums()`](BitSet::truncating_subset_sums)
 //!
 //! ### Generation
 //!
