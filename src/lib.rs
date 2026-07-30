@@ -16,7 +16,93 @@
 //!
 //! # Examples
 //!
-//! ...
+//! All examples use:
+//!
+//! ```
+//! use pibs::prelude::*;
+//! ```
+//!
+//! ## Testing Sidon sets
+//!
+//! A set is a [Sidon set](https://en.wikipedia.org/wiki/Sidon_sequence) if every pair of elements
+//! (repetition allowed) has a unique sum. The following checks if this is the case.
+//!
+//! ```
+//! # use pibs::prelude::*;
+//! fn is_sidon(set: Set) -> bool {
+//!     let n = set.len();
+//!
+//!     // The sumset (aka Minkowski sum) a + b adds each element in a to each element in b.
+//!     (set + set).len() == n * (n + 1) / 2
+//! }
+//!
+//! assert_eq!(is_sidon(set![1, 2, 4]), true);
+//! assert_eq!(is_sidon(set![1, 2, 3]), false); // 2 + 2 = 1 + 3
+//! ```
+//!
+//! ## Subset sum problem
+//!
+//! The following solves by bruteforce the [subset sum
+//! problem](https://en.wikipedia.org/wiki/Subset_sum_problem): does a given set of integers have a
+//! subset with a particular sum?
+//!
+//! ```
+//! # use pibs::prelude::*;
+//! fn subset_with_sum(set: Set, sum: usize) -> Option<Set> {
+//!     set.subsets().find(|subset| subset.sum() == sum)
+//! }
+//!
+//! let set = set![4, 7, 10, 13, 18, 22, 27];
+//! let solution = subset_with_sum(set, 30).unwrap();
+//! assert_eq!(solution, set![7, 10, 13]);
+//! ```
+//!
+//! For deciding the problem without recovering the subset, a faster implementation uses
+//! [`truncating_subset_sums`](BitSet::truncating_subset_sums), which produces the set of
+//! representable sums of all subsets of a set.
+//!
+//! ```
+//! # use pibs::prelude::*;
+//! fn has_subset_with_sum(set: Set, sum: usize) -> bool {
+//!     if sum > Set::MAX { unimplemented!("this only works for representable numbers") }
+//!     set.truncating_subset_sums().contains(sum)
+//! }
+//!
+//! let set = set![4, 7, 10, 13, 18, 22, 27];
+//! assert_eq!(has_subset_with_sum(set, 30), true);
+//! assert_eq!(has_subset_with_sum(set, 15), false);
+//! ```
+//!
+//! ## Minimum generating set
+//!
+//! The following computes by bruteforce a minimum-cardinality set of positive integers that
+//! generate (by taking any subset of the numbers and summing them) all elements of a target set.
+//!
+//! ```
+//! # use pibs::prelude::*;
+//! fn min_generating_set(set: Set) -> Set {
+//!     let max = set.max().unwrap_or(0);
+//!     let bit_length = (usize::BITS - max.leading_zeros()) as usize; // ⌈log₂(max + 1)⌉
+//!
+//!     // Test all subsets of 1..=max, grouped by increasing cardinality.
+//!     for size in 0..bit_length {
+//!         for generator in Set::iter_combinations(max, size).map(|set| set << 1) {
+//!             if set.is_subset(generator.truncating_subset_sums()) {
+//!                 return generator;
+//!             }
+//!         }
+//!     }
+//!
+//!     // If no small generator was found, fall back to powers of two.
+//!     Set::from_iter((0..bit_length).map(|b| 1 << b))
+//! }
+//!
+//! // To generate {0, ..., 9}, we need a generating set of size four.
+//! assert_eq!(min_generating_set(set![0..=9]), set![1, 2, 4, 8]);
+//!
+//! // But if we don't need to generate 2 and 7, three numbers suffice.
+//! assert_eq!(min_generating_set(set![0..=9] - set![2, 7]), set![1, 3, 5]);
+//! ```
 //!
 //! # Usage
 //! ## Cheat Sheet
