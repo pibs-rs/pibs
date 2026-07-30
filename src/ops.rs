@@ -1,6 +1,7 @@
 use crate::*;
 use core::ops::{
-    Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Sub, SubAssign,
+    Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Shl, Shr, Sub,
+    SubAssign,
 };
 
 impl<W: Word> Add<Element> for BitSet<W> {
@@ -172,6 +173,7 @@ impl<W: Word> BitOr for BitSet<W> {
     }
 }
 
+// TODO: Implement a long form method for this.
 impl<W: Word> BitOrAssign for BitSet<W> {
     /// Insert every element from another set.
     ///
@@ -208,6 +210,7 @@ impl<W: Word> BitAnd for BitSet<W> {
     }
 }
 
+// TODO: Implement a long form method for this.
 impl<W: Word> BitAndAssign for BitSet<W> {
     /// Remove all elements not present in another set.
     ///
@@ -244,6 +247,7 @@ impl<W: Word> BitXor for BitSet<W> {
     }
 }
 
+// TODO: Implement a long form method for this.
 impl<W: Word> BitXorAssign for BitSet<W> {
     /// Toggle all elements present in another set.
     ///
@@ -258,5 +262,61 @@ impl<W: Word> BitXorAssign for BitSet<W> {
     #[inline]
     fn bitxor_assign(&mut self, rhs: Self) {
         self.0 ^= rhs.0;
+    }
+}
+
+impl<W: Word> Shl<usize> for BitSet<W> {
+    type Output = Self;
+
+    /// Add a number to each element in the set.
+    ///
+    /// If resulting elements are not representable (above [`Self::MAX`]), they are discarded.
+    ///
+    /// See [`Self::add_to_all`] for a checked variant.
+    ///
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let set = bitset![u8; 1..=3, 5];
+    /// assert_eq!(set << 2, bitset![u8; 3..=5, 7]);
+    /// assert_eq!(set << 3, bitset![u8; 4..=6]); // Truncates.
+    /// ```
+    #[inline]
+    fn shl(self, rhs: usize) -> Self::Output {
+        self.truncating_add_to_all(rhs)
+    }
+}
+
+impl<W: Word> Shr<usize> for BitSet<W> {
+    type Output = Self;
+
+    /// Subtract a number from each element in the set.
+    ///
+    /// If resulting elements are not representable (below zero), they are discarded.
+    ///
+    /// See [`Self::sub_from_all`] for a checked variant.
+    ///
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let set = set![1..=3, 5];
+    /// assert_eq!(set >> 1, set![0..=2, 4]);
+    /// assert_eq!(set >> 3, set![0, 2]); // Truncates.
+    /// ```
+    #[inline]
+    fn shr(self, rhs: usize) -> Self::Output {
+        self.truncating_sub_from_all(rhs)
     }
 }

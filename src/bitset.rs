@@ -780,6 +780,11 @@ impl<W: Word> BitSet<W> {
     ///
     /// See [`Self::truncating_add_to_all`] for a variant that drops irrepresentable elements.
     ///
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
     /// # Examples
     ///
     /// ```
@@ -787,17 +792,14 @@ impl<W: Word> BitSet<W> {
     /// let set = bitset![u8; 1..=3, 5];
     /// assert_eq!(set.add_to_all(2), Some(bitset![u8; 3..=5, 7]));
     /// assert_eq!(set.add_to_all(3), None);
-    /// assert_eq!(set.add_to_all(10_000), None);
     /// ```
     #[inline]
     pub fn add_to_all(self, e: Element) -> Option<Self> {
-        self.0.checked_shl(e as u32).and_then(|word| {
-            if word.count_ones() as usize == self.len() {
-                Some(Self(word))
-            } else {
-                None
-            }
-        })
+        if e > self.0.leading_zeros() as usize {
+            None
+        } else {
+            Some(self.truncating_add_to_all(e))
+        }
     }
 
     /// Try to subtract a number from each element in the set.
@@ -806,6 +808,11 @@ impl<W: Word> BitSet<W> {
     ///
     /// See [`Self::truncating_sub_from_all`] for a variant that drops irrepresentable elements.
     ///
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
     /// # Examples
     ///
     /// ```
@@ -813,24 +820,28 @@ impl<W: Word> BitSet<W> {
     /// let set = set![1..=3, 5];
     /// assert_eq!(set.sub_from_all(1), Some(set![0..=2, 4]));
     /// assert_eq!(set.sub_from_all(3), None);
-    /// assert_eq!(set.sub_from_all(10_000), None);
     /// ```
     #[inline]
     pub fn sub_from_all(self, e: Element) -> Option<Self> {
-        self.0.checked_shr(e as u32).and_then(|word| {
-            if word.count_ones() as usize == self.len() {
-                Some(Self(word))
-            } else {
-                None
-            }
-        })
+        if e > self.0.trailing_zeros() as usize {
+            None
+        } else {
+            Some(self.truncating_sub_from_all(e))
+        }
     }
 
     /// Add a number to each element in the set.
     ///
     /// If resulting elements are not representable (above [`Self::MAX`]), they are discarded.
     ///
+    /// This can also be written as `self << e`.
+    ///
     /// See [`Self::add_to_all`] for a checked variant.
+    ///
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
     ///
     /// # Examples
     ///
@@ -839,18 +850,25 @@ impl<W: Word> BitSet<W> {
     /// let set = bitset![u8; 1..=3, 5];
     /// assert_eq!(set.truncating_add_to_all(2), bitset![u8; 3..=5, 7]);
     /// assert_eq!(set.truncating_add_to_all(3), bitset![u8; 4..=6]);
-    /// assert_eq!(set.truncating_add_to_all(10_000), bitset![u8;]);
     /// ```
     #[inline]
     pub fn truncating_add_to_all(self, e: Element) -> Self {
-        Self(self.0.checked_shl(e as u32).unwrap_or(W::zero()))
+        Self::debug_bound_check(e);
+        Self(self.0 << e)
     }
 
     /// Subtract a number from each element in the set.
     ///
     /// If resulting elements are not representable (below zero), they are discarded.
     ///
+    /// This can also be written as `self >> e`.
+    ///
     /// See [`Self::sub_from_all`] for a checked variant.
+    ///
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
     ///
     /// # Examples
     ///
@@ -859,11 +877,11 @@ impl<W: Word> BitSet<W> {
     /// let set = set![1..=3, 5];
     /// assert_eq!(set.truncating_sub_from_all(1), set![0..=2, 4]);
     /// assert_eq!(set.truncating_sub_from_all(3), set![0, 2]);
-    /// assert_eq!(set.truncating_sub_from_all(10_000), set![]);
     /// ```
     #[inline]
     pub fn truncating_sub_from_all(self, e: Element) -> Self {
-        Self(self.0.checked_shr(e as u32).unwrap_or(W::zero()))
+        Self::debug_bound_check(e);
+        Self(self.0 >> e)
     }
 
     // ------------
