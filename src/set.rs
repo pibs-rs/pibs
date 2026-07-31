@@ -3,6 +3,9 @@ use crate::*;
 impl<W: Word> BitSet<W> {
     /// An iterator over the elements in sorted order.
     ///
+    /// This method is equivalent to [`Self::into_iter`]: both take `self` by value and yield the
+    /// elements by value.
+    ///
     /// # Examples
     ///
     /// ```

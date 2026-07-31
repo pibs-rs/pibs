@@ -37,6 +37,18 @@ impl<W: Word> IntoIterator for BitSet<W> {
     type Item = Element;
     type IntoIter = BitSetIter<W>;
 
+    /// Create an iterator over the elements in sorted order.
+    ///
+    /// This method is equivalent to [`Self::iter`]: both take `self` by value and yield the
+    /// elements by value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let set = set![7, 3..=5, 1];
+    /// assert!(set.into_iter().eq([1, 3, 4, 5, 7]));
+    /// ```
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
