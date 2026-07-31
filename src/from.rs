@@ -1,9 +1,4 @@
-#[cfg(feature = "alloc")]
-extern crate alloc;
-
 use crate::*;
-#[cfg(feature = "alloc")]
-use alloc::vec::Vec;
 use core::ops::{Range, RangeInclusive};
 
 impl<W: Word, T, const N: usize> From<[T; N]> for BitSet<W>
@@ -75,54 +70,6 @@ where
     }
 }
 
-#[cfg(feature = "alloc")]
-impl<W: Word, T> From<Vec<T>> for BitSet<W>
-where
-    T: PrimInt + TryInto<Element>,
-{
-    /// Create a [`BitSet`] from a vector.
-    ///
-    /// # Preconditions
-    ///
-    /// The caller must ensure that `e <= Self::MAX` for every vector element `e`. Violating this
-    /// precondition panics in debug builds and results in unspecified behavior in release builds.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use pibs::prelude::*;
-    /// assert_eq!(Set::from(vec![2, 4, 6]), set![2, 4, 6]);
-    /// ```
-    #[inline]
-    fn from(vec: Vec<T>) -> Self {
-        vec.into_iter().collect()
-    }
-}
-
-#[cfg(feature = "alloc")]
-impl<W: Word, T> From<&Vec<T>> for BitSet<W>
-where
-    T: PrimInt + TryInto<Element>,
-{
-    /// Create a [`BitSet`] from a vector by reference.
-    ///
-    /// # Preconditions
-    ///
-    /// The caller must ensure that `e <= Self::MAX` for every vector element `e`. Violating this
-    /// precondition panics in debug builds and results in unspecified behavior in release builds.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use pibs::prelude::*;
-    /// assert_eq!(Set::from(&vec![2, 4, 6]), set![2, 4, 6]);
-    /// ```
-    #[inline]
-    fn from(vec: &Vec<T>) -> Self {
-        vec.iter().copied().collect()
-    }
-}
-
 impl<W: Word> From<Range<Element>> for BitSet<W> {
     /// Create a [`BitSet`] from an end-exclusive range.
     ///
@@ -170,48 +117,5 @@ impl<W: Word> From<RangeInclusive<Element>> for BitSet<W> {
     #[inline]
     fn from(range: RangeInclusive<Element>) -> Self {
         Self::interval(*range.start(), *range.end())
-    }
-}
-
-// ---------------------------------
-// Implementations for foreign types
-// ---------------------------------
-
-#[cfg(feature = "alloc")]
-impl<W: Word, T> From<BitSet<W>> for Vec<T>
-where
-    T: PrimInt + TryFrom<Element>,
-{
-    /// Create a sorted [`Vec`] from a [`BitSet`].
-    ///
-    /// # Examples
-    ///
-    /// Any element in a [`BitSet<u128>`] can fit in a [`Vec<i8>`].
-    /// ```
-    /// # use pibs::prelude::*;
-    /// let set = Set128::interval(Set128::MIN, Set128::MAX);
-    /// let vec: Vec<i8> = set.into();
-    /// assert_eq!(set.len(), u128::BITS as usize);
-    /// assert_eq!(set.to_vec(), vec.into_iter().map(|x| x as usize).collect::<Vec<_>>());
-    /// ```
-    ///
-    /// To avoid a type hint, use [`BitSet::to_vec`], which always produces a [`Vec<Element>`].
-    /// ```
-    /// # use pibs::prelude::*;
-    /// let vec = set![1, 2, 3].to_vec();
-    /// ```
-    #[inline]
-    fn from(set: BitSet<W>) -> Self {
-        set.into_iter()
-            .map(|e| match T::try_from(e) {
-                Ok(x) => x,
-                Err(_) => {
-                    // Even a Vec<i8> can store the largest element in a BitSet<u128>.
-                    unreachable!(
-                        "any bitset element should be representable by any primitive integer type"
-                    )
-                }
-            })
-            .collect()
     }
 }

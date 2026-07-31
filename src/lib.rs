@@ -239,6 +239,7 @@
 
 #![feature(trait_alias)]
 #![feature(debug_closure_helpers)]
+#![feature(doc_cfg)]
 #![no_std]
 
 // -------
@@ -246,13 +247,21 @@
 // -------
 
 mod bitset;
+mod create;
+mod foreign;
 mod from;
-mod impls;
+mod r#gen;
 mod iters;
 mod macros;
+mod math;
+mod mutate;
 mod ops;
+mod query;
+mod set;
 #[cfg(test)]
 mod tests;
+#[cfg(feature = "alloc")]
+mod vec;
 
 // -------
 // Imports
