@@ -258,8 +258,6 @@ mod mutate;
 mod ops;
 mod query;
 mod set;
-#[cfg(test)]
-mod tests;
 #[cfg(feature = "alloc")]
 mod vec;
 

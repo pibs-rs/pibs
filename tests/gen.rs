@@ -1,7 +1,5 @@
-extern crate std;
-
-use crate::*;
 use itertools::Itertools;
+use pibs::prelude::*;
 use std::collections::HashSet;
 
 #[test]
