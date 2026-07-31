@@ -1104,14 +1104,14 @@ impl<W: Word> BitSet<W> {
         debug_assert!(k <= n);
         debug_assert!(n <= Self::BITS);
 
-        // TODO: Avoid cases below via unbounded shift once there is trait support for it.
-        // IDEA: Use checked shift with fallback behavior?
+        // TODO: Avoid cases via an unbounded shift once num_traits::UnboundedShl exists.
         let mut bits: W = if k == Self::BITS {
             !W::zero()
         } else {
             (W::one() << k) - W::one()
         };
 
+        // TODO: Avoid cases via an unbounded shift once num_traits::UnboundedShl exists.
         let last: W = if k == 0 {
             W::zero()
         } else {
