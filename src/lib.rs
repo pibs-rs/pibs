@@ -5,11 +5,11 @@
 //! This crate offers
 //!
 //! - zero-cost abstraction over bitwise operations without allocation or block management and
-//! - a rich interface for mathematics/combinatorics involving sets of small non-negative integers.
+//! - a rich interface for mathematics/combinatorics involving integer sets.
 //!
 //! *pibs* is best suited when the bitset should abstract a mathematical set, the performance of set
 //! operations is your primary concern, and the elements naturally lie in the representable range
-//! `0..=127`. See [Alternatives](#alternatives) if this is not the case.
+//! `0..128`. See [Alternatives](#alternatives) if this is not the case.
 //!
 //! The ambition of *pibs* is that you can't write faster code for any of its operations. If you
 //! can, please report this as an issue!
