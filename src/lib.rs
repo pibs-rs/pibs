@@ -22,29 +22,15 @@
 //! use pibs::prelude::*;
 //! ```
 //!
-//! ## Testing Sidon sets
-//!
-//! A set is a [Sidon set](https://en.wikipedia.org/wiki/Sidon_sequence) if every pair of elements
-//! (repetition allowed) has a unique sum. The following checks if this is the case.
-//!
-//! ```
-//! # use pibs::prelude::*;
-//! fn is_sidon(set: Set) -> bool {
-//!     let n = set.len();
-//!
-//!     // The sumset (aka Minkowski sum) a + b adds each element in a to each element in b.
-//!     (set + set).len() == n * (n + 1) / 2
-//! }
-//!
-//! assert_eq!(is_sidon(set![1, 2, 4]), true);
-//! assert_eq!(is_sidon(set![1, 2, 3]), false); // 2 + 2 = 1 + 3
-//! ```
-//!
 //! ## Subset sum problem
 //!
-//! The following solves by bruteforce the [subset sum
-//! problem](https://en.wikipedia.org/wiki/Subset_sum_problem): does a given set of integers have a
-//! subset with a particular sum?
+//! The [subset sum problem](https://en.wikipedia.org/wiki/Subset_sum_problem) asks: does a given
+//! set of integers have a subset with a particular sum?
+//!
+//! ### By bruteforce
+//!
+//! The following solves the problem by bruteforce. This is not efficient, but showcases the
+//! [`subsets`](BitSet::subsets) iterator.
 //!
 //! ```
 //! # use pibs::prelude::*;
@@ -56,6 +42,8 @@
 //! let solution = subset_with_sum(set, 30).unwrap();
 //! assert_eq!(solution, set![7, 10, 13]);
 //! ```
+//!
+//! ### Fast check for small sums
 //!
 //! For deciding the problem without recovering the subset, a faster implementation uses
 //! [`truncating_subset_sums`](BitSet::truncating_subset_sums), which produces the set of
@@ -73,10 +61,32 @@
 //! assert_eq!(has_subset_with_sum(set, 15), false);
 //! ```
 //!
+//! ## Testing Sidon sets
+//!
+//! A set is a [Sidon set](https://en.wikipedia.org/wiki/Sidon_sequence) if every pair of elements
+//! (repetition allowed) has a unique sum. The following makes use of the
+//! [`sumset`](https://en.wikipedia.org/wiki/Sumset) operator (`+`, aka Minkowski sum) to check if
+//! this is the case.
+//!
+//! ```
+//! # use pibs::prelude::*;
+//! fn is_sidon(set: Set) -> bool {
+//!     let n = set.len();
+//!     (set + set).len() == n * (n + 1) / 2
+//! }
+//!
+//! assert_eq!(is_sidon(set![1, 2, 4]), true);
+//! assert_eq!(is_sidon(set![1, 2, 3]), false); // 2 + 2 = 1 + 3
+//! ```
+//!
 //! ## Minimum generating set
 //!
 //! The following computes by bruteforce a minimum-cardinality set of positive integers that
 //! generate (by taking any subset of the numbers and summing them) all elements of a target set.
+//! This is done using the [`iter_combinations(n, k)`](Set::iter_combinations) generator, which
+//! yields all subsets of `0..n` of size `k`, and the
+//! [`truncating_add_to_all`](BitSet::truncating_add_to_all) operation (`<<`), to shift these
+//! subsets to `1..=n`.
 //!
 //! ```
 //! # use pibs::prelude::*;
@@ -211,18 +221,17 @@
 //! make them slower by a factor of about two. It is thus recommended to use [`Set128`] only when
 //! needed for capacity, and [`BitSet<u8>`] to [`<u32>`](BitSet<u32>) only when memory use is a
 //! concern or the platform has registers of the corresponding size. The default [`Set`] uses a
-//! [`usize`], but pinning to [`u32`] or [`u64`] can make sense to ensure a consistent capacity
-//! across platforms.
+//! [`usize`], but pinning to [`u32`] or [`u64`] can make sense to ensure a consistent capacity.
 //!
 //! ## Alternatives
 //!
 //! The obvious limitation of *pibs* is that its [`BitSet`] can only store numbers up to 127. If
-//! your numbers can be larger than this but you know an upper bound, consider using
+//! your numbers can be larger than this but you know a bound, consider using
 //! [fixedbitset](https://docs.rs/fixedbitset) (SIMD-optimized set abstraction) or
 //! [bittle](https://docs.rs/bittle) (low-level bit manipulation) instead. If you don't know your
 //! largest number ahead of time, then [bit-set](https://docs.rs/bit_set) (based on
 //! [bit-vec](https://docs.rs/bit_set)) or [roaring](https://docs.rs/bit_set) (compressed
-//! representation) may be what you are looking for.
+//! representation) may suit you.
 
 #![feature(trait_alias)]
 #![feature(debug_closure_helpers)]
