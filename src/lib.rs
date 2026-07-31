@@ -16,7 +16,8 @@
 //!
 //! # Examples
 //!
-//! All examples use:
+//! All examples assume the following import, which gives access to [`Set`] = [`BitSet<usize>`] and
+//! [`set!`].
 //!
 //! ```
 //! use pibs::prelude::*;
@@ -120,6 +121,9 @@
 //! M denotes the largest representable element [`BitSet::MAX`].
 //!
 //! ### Creation
+//!
+//! For using [`u128`]/`W` instead of [`usize`], replace [`Set`] with [`Set128`]/[`BitSet<W>`] and [`set!`] with
+//! [`set128!`]/[`bitset![W; ...]`](bitset!).
 //!
 //! | set             | short form      | long form
 //! | --------------- | --------------- | ---------
