@@ -87,7 +87,7 @@ impl<W: Word> BitSet<W> {
         } else {
             (other, self.0)
         };
-        let e_max = larger_word.leading_zeros() as usize;
+        let e_max = larger_word.leading_zeros() as Element;
 
         for e in smaller {
             if e > e_max {
@@ -155,7 +155,7 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn subset_sums(self) -> Option<Self> {
         let mut result = W::one();
-        let mut e_max = result.leading_zeros() as usize;
+        let mut e_max = result.leading_zeros() as Element;
 
         for e in self {
             if e > e_max {
@@ -217,7 +217,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn add_to_all(self, e: Element) -> Option<Self> {
-        if e > self.0.leading_zeros() as usize {
+        if e > self.0.leading_zeros() as Element {
             None
         } else {
             Some(self.truncating_add_to_all(e))
@@ -272,7 +272,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn sub_from_all(self, e: Element) -> Option<Self> {
-        if e > self.0.trailing_zeros() as usize {
+        if e > self.0.trailing_zeros() as Element {
             None
         } else {
             Some(self.truncating_sub_from_all(e))

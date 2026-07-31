@@ -46,7 +46,7 @@ impl<W: Word> BitSet<W> {
         if self.is_empty() {
             None
         } else {
-            Some((Self::MAX - self.0.leading_zeros() as usize) as Element)
+            Some(Self::MAX - self.0.leading_zeros() as Element)
         }
     }
 
@@ -62,7 +62,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set![1, 2, 4, 8].sum(), 15);
     /// ```
     #[inline]
-    pub fn sum(self) -> usize {
+    pub fn sum(self) -> Element {
         self.iter().sum()
     }
 
@@ -215,7 +215,7 @@ impl<W: Word> BitSet<W> {
         if self.is_empty() {
             true
         } else {
-            1 + self.max().unwrap() - self.min().unwrap() == self.len()
+            Self::BITS - (self.0.leading_zeros() + self.0.trailing_zeros()) as usize == self.len()
         }
     }
 }

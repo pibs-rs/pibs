@@ -34,7 +34,7 @@ impl<W: Word> PartialOrd for BitSet<W> {
 }
 
 impl<W: Word> IntoIterator for BitSet<W> {
-    type Item = usize;
+    type Item = Element;
     type IntoIter = BitSetIter<W>;
 
     #[inline]

@@ -37,7 +37,8 @@ fn _evenly_spaced_set<W: Word>() -> BitSet<W> {
 #[inline(always)]
 fn _evenly_spaced_elements<W: Word>() -> impl Iterator<Item = Element> {
     (0..8)
-        .map(|e| e * size_of::<W>() + size_of::<W>() - 1)
+        .map(|i| i * size_of::<W>() + size_of::<W>() - 1)
+        .map(|e| e as Element)
         .map(black_box)
 }
 

@@ -45,7 +45,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(BitSet::<u64>::MAX, 63);
     /// assert_eq!(BitSet::<u128>::MAX, 127);
     /// ```
-    pub const MAX: Element = Self::BITS - 1;
+    pub const MAX: Element = Self::BITS as Element - 1;
 
     /// A copy of the internal storage word.
     ///

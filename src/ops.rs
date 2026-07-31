@@ -279,7 +279,7 @@ impl<W: Word> BitXorAssign for BitSet<W> {
     }
 }
 
-impl<W: Word> Shl<usize> for BitSet<W> {
+impl<W: Word> Shl<Element> for BitSet<W> {
     type Output = Self;
 
     /// Add a number to each element in the set.
@@ -302,12 +302,12 @@ impl<W: Word> Shl<usize> for BitSet<W> {
     /// assert_eq!(set << 3, bitset![u8; 4..=6]); // Truncates.
     /// ```
     #[inline]
-    fn shl(self, rhs: usize) -> Self::Output {
+    fn shl(self, rhs: Element) -> Self::Output {
         self.truncating_add_to_all(rhs)
     }
 }
 
-impl<W: Word> Shr<usize> for BitSet<W> {
+impl<W: Word> Shr<Element> for BitSet<W> {
     type Output = Self;
 
     /// Subtract a number from each element in the set.
@@ -330,7 +330,7 @@ impl<W: Word> Shr<usize> for BitSet<W> {
     /// assert_eq!(set >> 3, set![0, 2]); // Truncates.
     /// ```
     #[inline]
-    fn shr(self, rhs: usize) -> Self::Output {
+    fn shr(self, rhs: Element) -> Self::Output {
         self.truncating_sub_from_all(rhs)
     }
 }

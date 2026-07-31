@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use pibs::prelude::*;
+use pibs::*;
 use std::collections::HashSet;
 
 #[test]
@@ -47,7 +47,10 @@ fn test_iter_all_below() {
             Set::iter_all_below(bound)
                 .map(|set| set.to_vec())
                 .collect::<HashSet<_>>(),
-            (0..bound).powerset().collect::<HashSet<_>>()
+            (0..bound)
+                .map(|e| e as Element)
+                .powerset()
+                .collect::<HashSet<_>>()
         );
     }
 }
