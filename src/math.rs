@@ -46,7 +46,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn rank(self, e: Element) -> Option<usize> {
-        self.position(e).and_then(|p| Some(p + 1))
+        self.position(e).map(|p| p + 1)
     }
 
     /// Ordinal position of an element assumed to be in the set, counted from one.

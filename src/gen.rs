@@ -138,7 +138,7 @@ impl<W: Word> BitSet<W> {
         let last: W = if k == 0 {
             W::zero()
         } else {
-            (!W::zero() << Self::BITS - k) >> Self::BITS - n
+            (!W::zero() << (Self::BITS - k)) >> (Self::BITS - n)
         };
 
         let mut stop: bool = false;

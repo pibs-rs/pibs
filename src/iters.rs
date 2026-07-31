@@ -49,11 +49,11 @@ impl<W: Word> SubsetsOfSizeIter<W> {
         let mut suffix = W::zero();
         let mut remainder = set;
         suffixes[0].write(suffix);
-        for i in 1..=size {
+        for cell in suffixes.iter_mut().skip(1).take(size) {
             let next_bit = W::one() << remainder.trailing_zeros() as usize;
             suffix |= next_bit;
             remainder &= !next_bit;
-            suffixes[i].write(suffix);
+            cell.write(suffix);
         }
         debug_assert_eq!(suffix.count_ones() as usize, size);
         Self {
