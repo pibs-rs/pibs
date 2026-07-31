@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BitSet<W: Word>(pub(crate) W);
 
-// IDEA: Split this into modules by topic.
+// TODO: Split this into modules by topic.
 impl<W: Word> BitSet<W> {
     /// The number of bits in the [primitive integer type](Word) `W`.
     ///
@@ -296,6 +296,8 @@ impl<W: Word> BitSet<W> {
 
     /// Insert an element into the set (or leave it in).
     ///
+    /// This the same as `self += e`.
+    ///
     /// # Preconditions
     ///
     /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
@@ -317,6 +319,8 @@ impl<W: Word> BitSet<W> {
     }
 
     /// Removes an element from the set (if it exists).
+    ///
+    /// This the same as `self -= e`.
     ///
     /// # Preconditions
     ///
@@ -361,6 +365,72 @@ impl<W: Word> BitSet<W> {
         self.0 ^= W::one() << e;
     }
 
+    /// Insert every element from another set.
+    ///
+    /// This the same as `self |= other`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let mut set = set![1..=3];
+    /// set.union_update(set![3..=5]);
+    /// assert_eq!(set, set![1..=5]);
+    /// ```
+    #[inline]
+    pub fn union_update(&mut self, other: Self) {
+        self.0 |= other.0;
+    }
+
+    /// Remove all elements not present in another set.
+    ///
+    /// This the same as `self &= other`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let mut set = set![1..=5];
+    /// set.intersection_update(set![3..=7]);
+    /// assert_eq!(set, set![3..=5]);
+    /// ```
+    #[inline]
+    pub fn intersection_update(&mut self, other: Self) {
+        self.0 &= other.0;
+    }
+
+    /// Remove all elements present in another set.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let mut set = set![1..=3];
+    /// set.difference_update(set![3..=5]);
+    /// assert_eq!(set, set![1..=2]);
+    /// ```
+    #[inline]
+    pub fn difference_update(&mut self, other: Self) {
+        self.0 &= !other.0;
+    }
+
+    /// Toggle all elements present in another set.
+    ///
+    /// This the same as `self ^= other`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let mut set = set![1..=3];
+    /// set.symmetric_difference_update(set![3..=5]);
+    /// assert_eq!(set, set![1..=2, 4..=5]);
+    /// ```
+    #[inline]
+    pub fn symmetric_difference_update(&mut self, other: Self) {
+        self.0 ^= other.0;
+    }
+
     /// Removes all elements from the set.
     ///
     /// # Examples
@@ -378,6 +448,8 @@ impl<W: Word> BitSet<W> {
     }
 
     /// The set with an element added to it (or left in).
+    ///
+    /// This the same as `self + e`.
     ///
     /// # Preconditions
     ///
@@ -400,6 +472,8 @@ impl<W: Word> BitSet<W> {
 
     /// The set with an element removed from it (if present).
     ///
+    /// This the same as `self - e`.
+    ///
     /// # Preconditions
     ///
     /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
@@ -421,7 +495,7 @@ impl<W: Word> BitSet<W> {
 
     /// The union of two sets.
     ///
-    /// Alternative notation for the same operation is `self | other`.
+    /// This the same as `self | other`.
     ///
     /// # Examples
     ///
@@ -438,7 +512,7 @@ impl<W: Word> BitSet<W> {
 
     /// The intersection of two sets.
     ///
-    /// Alternative notation for the same operation is `self & other`.
+    /// This the same as `self & other`.
     ///
     /// # Examples
     ///
@@ -470,7 +544,7 @@ impl<W: Word> BitSet<W> {
 
     /// The symmetric difference of two sets.
     ///
-    /// Alternative notation for the same operation is `self ^ other`.
+    /// This the same as `self ^ other`.
     ///
     /// # Examples
     ///

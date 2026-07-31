@@ -107,6 +107,29 @@ impl<W: Word> Sub<Element> for BitSet<W> {
     }
 }
 
+impl<W: Word> SubAssign<Element> for BitSet<W> {
+    /// Remove an element from the set (if it exists).
+    ///
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `rhs <= Self::MAX`. Violating this precondition panics in debug
+    /// builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let mut set = set![4..=7];
+    /// set -= 7;
+    /// assert_eq!(set, set![4..=6]);
+    /// set -= 7; // Does nothing.
+    /// ```
+    #[inline]
+    fn sub_assign(&mut self, rhs: Element) {
+        self.remove(rhs);
+    }
+}
+
 impl<W: Word> Sub<BitSet<W>> for BitSet<W> {
     type Output = Self;
 
@@ -131,26 +154,20 @@ impl<W: Word> Sub<BitSet<W>> for BitSet<W> {
     }
 }
 
-impl<W: Word> SubAssign<Element> for BitSet<W> {
-    /// Remove an element from the set (if it exists).
-    ///
-    /// # Preconditions
-    ///
-    /// The caller must ensure that `rhs <= Self::MAX`. Violating this precondition panics in debug
-    /// builds and results in unspecified behavior in release builds.
+impl<W: Word> SubAssign<BitSet<W>> for BitSet<W> {
+    /// Remove all elements present in another set.
     ///
     /// # Examples
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let mut set = set![4..=7];
-    /// set -= 7;
-    /// assert_eq!(set, set![4..=6]);
-    /// set -= 7; // Does nothing.
+    /// let mut set = set![1..=3];
+    /// set -= set![3..=5];
+    /// assert_eq!(set, set![1..=2]);
     /// ```
     #[inline]
-    fn sub_assign(&mut self, rhs: Element) {
-        self.remove(rhs);
+    fn sub_assign(&mut self, rhs: BitSet<W>) {
+        self.difference_update(rhs);
     }
 }
 
@@ -173,7 +190,6 @@ impl<W: Word> BitOr for BitSet<W> {
     }
 }
 
-// TODO: Implement a long form method for this.
 impl<W: Word> BitOrAssign for BitSet<W> {
     /// Insert every element from another set.
     ///
@@ -187,7 +203,7 @@ impl<W: Word> BitOrAssign for BitSet<W> {
     /// ```
     #[inline]
     fn bitor_assign(&mut self, rhs: Self) {
-        self.0 |= rhs.0;
+        self.union_update(rhs);
     }
 }
 
@@ -210,7 +226,6 @@ impl<W: Word> BitAnd for BitSet<W> {
     }
 }
 
-// TODO: Implement a long form method for this.
 impl<W: Word> BitAndAssign for BitSet<W> {
     /// Remove all elements not present in another set.
     ///
@@ -224,7 +239,7 @@ impl<W: Word> BitAndAssign for BitSet<W> {
     /// ```
     #[inline]
     fn bitand_assign(&mut self, rhs: Self) {
-        self.0 &= rhs.0;
+        self.intersection_update(rhs);
     }
 }
 
@@ -247,7 +262,6 @@ impl<W: Word> BitXor for BitSet<W> {
     }
 }
 
-// TODO: Implement a long form method for this.
 impl<W: Word> BitXorAssign for BitSet<W> {
     /// Toggle all elements present in another set.
     ///
@@ -261,7 +275,7 @@ impl<W: Word> BitXorAssign for BitSet<W> {
     /// ```
     #[inline]
     fn bitxor_assign(&mut self, rhs: Self) {
-        self.0 ^= rhs.0;
+        self.symmetric_difference_update(rhs);
     }
 }
 
