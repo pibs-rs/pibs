@@ -139,8 +139,8 @@ impl<W: Word> Sub<BitSet<W>> for BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let a = set![1..=3];
-    /// let b = set![3..=5];
+    /// let a = set![1..=5];
+    /// let b = set![3..=7];
     /// assert_eq!(a - b, set![1..=2]);
     /// ```
     ///
@@ -161,8 +161,8 @@ impl<W: Word> SubAssign<BitSet<W>> for BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let mut set = set![1..=3];
-    /// set -= set![3..=5];
+    /// let mut set = set![1..=5];
+    /// set -= set![3..=7];
     /// assert_eq!(set, set![1..=2]);
     /// ```
     #[inline]
@@ -180,9 +180,9 @@ impl<W: Word> BitOr for BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let a = set![1..=3];
-    /// let b = set![3..=5];
-    /// assert_eq!(a | b, set![1..=5]);
+    /// let a = set![1..=5];
+    /// let b = set![3..=7];
+    /// assert_eq!(a | b, set![1..=7]);
     /// ```
     #[inline]
     fn bitor(self, rhs: Self) -> Self {
@@ -197,9 +197,9 @@ impl<W: Word> BitOrAssign for BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let mut set = set![1..=3];
-    /// set |= set![3..=5];
-    /// assert_eq!(set, set![1..=5]);
+    /// let mut set = set![1..=5];
+    /// set |= set![3..=7];
+    /// assert_eq!(set, set![1..=7]);
     /// ```
     #[inline]
     fn bitor_assign(&mut self, rhs: Self) {
@@ -216,9 +216,9 @@ impl<W: Word> BitAnd for BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let a = set![1..=3];
-    /// let b = set![3..=5];
-    /// assert_eq!(a & b, set![3]);
+    /// let a = set![1..=5];
+    /// let b = set![3..=7];
+    /// assert_eq!(a & b, set![3..=5]);
     /// ```
     #[inline]
     fn bitand(self, rhs: Self) -> Self {
@@ -252,9 +252,9 @@ impl<W: Word> BitXor for BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let a = set![1..=3];
-    /// let b = set![3..=5];
-    /// assert_eq!(a ^ b, set![1..=2, 4..=5]);
+    /// let a = set![1..=5];
+    /// let b = set![3..=7];
+    /// assert_eq!(a ^ b, set![1..=2, 6..=7]);
     /// ```
     #[inline]
     fn bitxor(self, rhs: Self) -> Self {
@@ -269,9 +269,9 @@ impl<W: Word> BitXorAssign for BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let mut set = set![1..=3];
-    /// set ^= set![3..=5];
-    /// assert_eq!(set, set![1..=2, 4..=5]);
+    /// let mut set = set![1..=5];
+    /// set ^= set![3..=7];
+    /// assert_eq!(set, set![1..=2, 6..=7]);
     /// ```
     #[inline]
     fn bitxor_assign(&mut self, rhs: Self) {

@@ -373,9 +373,9 @@ impl<W: Word> BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let mut set = set![1..=3];
-    /// set.union_update(set![3..=5]);
-    /// assert_eq!(set, set![1..=5]);
+    /// let mut set = set![1..=5];
+    /// set.union_update(set![3..=7]);
+    /// assert_eq!(set, set![1..=7]);
     /// ```
     #[inline]
     pub fn union_update(&mut self, other: Self) {
@@ -405,8 +405,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let mut set = set![1..=3];
-    /// set.difference_update(set![3..=5]);
+    /// let mut set = set![1..=5];
+    /// set.difference_update(set![3..=7]);
     /// assert_eq!(set, set![1..=2]);
     /// ```
     #[inline]
@@ -422,9 +422,9 @@ impl<W: Word> BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let mut set = set![1..=3];
-    /// set.symmetric_difference_update(set![3..=5]);
-    /// assert_eq!(set, set![1..=2, 4..=5]);
+    /// let mut set = set![1..=5];
+    /// set.symmetric_difference_update(set![3..=7]);
+    /// assert_eq!(set, set![1..=2, 6..=7]);
     /// ```
     #[inline]
     pub fn symmetric_difference_update(&mut self, other: Self) {
@@ -501,9 +501,9 @@ impl<W: Word> BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let a = set![1..=3];
-    /// let b = set![3..=5];
-    /// assert_eq!(a.union(b), set![1..=5]);
+    /// let a = set![1..=5];
+    /// let b = set![3..=7];
+    /// assert_eq!(a.union(b), set![1..=7]);
     /// ```
     #[inline]
     pub fn union(self, other: Self) -> Self {
@@ -518,9 +518,9 @@ impl<W: Word> BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let a = set![1..=3];
-    /// let b = set![3..=5];
-    /// assert_eq!(a.intersection(b), set![3]);
+    /// let a = set![1..=5];
+    /// let b = set![3..=7];
+    /// assert_eq!(a.intersection(b), set![3..=5]);
     /// ```
     #[inline]
     pub fn intersection(self, other: Self) -> Self {
@@ -533,8 +533,8 @@ impl<W: Word> BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let a = set![1..=3];
-    /// let b = set![3..=5];
+    /// let a = set![1..=5];
+    /// let b = set![3..=7];
     /// assert_eq!(a.difference(b), set![1..=2]);
     /// ```
     #[inline]
@@ -550,9 +550,9 @@ impl<W: Word> BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let a = set![1..=3];
-    /// let b = set![3..=5];
-    /// assert_eq!(a.symmetric_difference(b), set![1..=2, 4..=5]);
+    /// let a = set![1..=5];
+    /// let b = set![3..=7];
+    /// assert_eq!(a.symmetric_difference(b), set![1..=2, 6..=7]);
     /// ```
     #[inline]
     pub fn symmetric_difference(self, other: Self) -> Self {
