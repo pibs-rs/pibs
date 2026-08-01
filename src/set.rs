@@ -5,10 +5,11 @@
 use crate::*;
 
 impl<W: Word> BitSet<W> {
-    /// An iterator over the elements in sorted order.
+    /// An iterator over the elements in ascending order.
     ///
-    /// This method is equivalent to [`Self::into_iter`]: both take `self` by value and yield the
-    /// elements by value.
+    /// Note that [`Self::iter`] takes the set by value and yields elements by value, making it
+    /// equivalent to [`Self::into_iter`]. This is because [`BitSet`] implements [`Copy`] at a
+    /// trivial cost and only stores elements in a compressed representation.
     ///
     /// # Examples
     ///

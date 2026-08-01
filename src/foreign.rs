@@ -39,10 +39,7 @@ impl<W: Word> IntoIterator for BitSet<W> {
     type Item = Element;
     type IntoIter = BitSetIter<W>;
 
-    /// Create an iterator over the elements in sorted order.
-    ///
-    /// This method is equivalent to [`Self::iter`]: both take `self` by value and yield the
-    /// elements by value.
+    /// An iterator over the elements in ascending order.
     ///
     /// # Examples
     ///
