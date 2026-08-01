@@ -54,6 +54,25 @@ impl<W: Word> IntoIterator for BitSet<W> {
     }
 }
 
+impl<W: Word> IntoIterator for &BitSet<W> {
+    type Item = Element;
+    type IntoIter = BitSetIter<W>;
+
+    /// An iterator over the elements in ascending order.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let set = set![7, 3..=5, 1];
+    /// assert!((&set).into_iter().eq([1, 3, 4, 5, 7]));  // Still yields elements by value.
+    /// ```
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        (*self).iter()
+    }
+}
+
 impl<W: Word, T> FromIterator<T> for BitSet<W>
 where
     T: PrimInt + TryInto<Element>,
