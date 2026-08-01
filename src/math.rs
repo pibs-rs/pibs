@@ -1,6 +1,60 @@
+//! [`BitSet`] methods that treat it as a set of integers specifically.
+
 use crate::*;
 
 impl<W: Word> BitSet<W> {
+    /// The smallest element in the set, if any.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// assert_eq!(set![].min(), None);
+    /// assert_eq!(set![4..=6].min(), Some(4));
+    /// ```
+    #[inline]
+    pub fn min(self) -> Option<Element> {
+        if self.is_empty() {
+            None
+        } else {
+            Some(self.0.trailing_zeros() as Element)
+        }
+    }
+
+    /// The largest element in the set, if any.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// assert_eq!(set![].max(), None);
+    /// assert_eq!(set![4..=6].max(), Some(6));
+    /// ```
+    #[inline]
+    pub fn max(self) -> Option<Element> {
+        if self.is_empty() {
+            None
+        } else {
+            Some(Self::MAX - self.0.leading_zeros() as Element)
+        }
+    }
+
+    /// The sum of all elements in the set.
+    ///
+    /// Returns `0` for the the empty set.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// assert_eq!(set![].sum(), 0);
+    /// assert_eq!(set![1, 2, 4, 8].sum(), 15);
+    /// ```
+    #[inline]
+    pub fn sum(self) -> Element {
+        self.iter().sum()
+    }
+
     /// Ordinal position of an element in the set, counted from zero.
     ///
     /// # Examples
@@ -304,5 +358,29 @@ impl<W: Word> BitSet<W> {
     pub fn truncating_sub_from_all(self, e: Element) -> Self {
         Self::debug_bound_check(e);
         Self(self.0 >> e)
+    }
+
+    /// Whether the elements form a contiguous interval.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let mut set = set![4..=6];
+    /// assert_eq!(set.is_interval(), true);
+    /// set.remove(5);
+    /// assert_eq!(set.is_interval(), false);
+    ///
+    /// // Empty sets and singletons are intervals.
+    /// assert!(set![].is_interval());
+    /// assert!(set![5].is_interval());
+    /// ```
+    #[inline]
+    pub fn is_interval(self) -> bool {
+        if self.is_empty() {
+            true
+        } else {
+            Self::BITS - (self.0.leading_zeros() + self.0.trailing_zeros()) as usize == self.len()
+        }
     }
 }

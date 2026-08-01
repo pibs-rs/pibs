@@ -1,3 +1,5 @@
+//! Macros to create a [`BitSet`].
+
 #[allow(unused_imports)]
 use crate::*;
 

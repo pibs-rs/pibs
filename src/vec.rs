@@ -1,3 +1,5 @@
+//! Conversion methods between [`BitSet`] and [`Vec`].
+
 extern crate alloc;
 
 use crate::*;

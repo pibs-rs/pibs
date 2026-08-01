@@ -1,3 +1,5 @@
+//! Declaration and low-level implementation of [`BitSet`].
+
 use crate::*;
 use core::any::type_name;
 #[cfg(feature = "serde")]

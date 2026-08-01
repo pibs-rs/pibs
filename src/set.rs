@@ -1,3 +1,7 @@
+//! Set operations for [`BitSet`] that make sense over any universe.
+//!
+//! For methods specific to integer sets, see [`math`].
+
 use crate::*;
 
 impl<W: Word> BitSet<W> {

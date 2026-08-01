@@ -1,3 +1,5 @@
+//! Mutating [`BitSet`] methods.
+
 use crate::*;
 
 impl<W: Word> BitSet<W> {

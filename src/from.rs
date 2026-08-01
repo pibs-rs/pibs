@@ -1,3 +1,5 @@
+//! [`From`] trait implementations for [`BitSet`].
+
 use crate::*;
 use core::ops::{Range, RangeInclusive};
 

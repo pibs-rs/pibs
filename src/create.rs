@@ -1,3 +1,5 @@
+//! Methods to create a single [`BitSet`].
+
 use crate::*;
 
 impl<W: Word> BitSet<W> {

@@ -1,3 +1,5 @@
+//! Miscellaneous foreign trait implementations for [`BitSet`].
+
 use crate::*;
 use core::{any::type_name, cmp::Ordering, fmt};
 

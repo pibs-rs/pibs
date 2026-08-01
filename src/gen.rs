@@ -1,3 +1,5 @@
+//! Generators: methods that return iterators which yield [`BitSet`].
+
 use crate::*;
 use core::iter;
 

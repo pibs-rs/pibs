@@ -1,3 +1,5 @@
+//! Iterators returned by [`BitSet`] methods.
+
 use crate::*;
 use core::mem::MaybeUninit;
 

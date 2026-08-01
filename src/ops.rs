@@ -1,3 +1,5 @@
+//! Operator trait implementations for [`BitSet`].
+
 use crate::*;
 use core::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Shl, Shr, Sub,
