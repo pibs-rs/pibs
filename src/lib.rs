@@ -209,23 +209,39 @@
 //! only non-optional dependency is [`num_traits`].
 //!
 //! # Discussion
-//! ## Checks and preconditions
+//! ## Performance
+//! ### Checks and preconditions
 //!
-//! Almost all methods that take an [`Element`] as an argument require the caller to ensure that it
-//! does not exceed [`BitSet::MAX`]. This condition is checked in debug builds. In release builds,
-//! the outcome of providing out-of-bounds elements is unspecified.
+//! *pibs* aims for true zero-cost abstraction, to the point that many methods declare a
+//! precondition (typically that the argument must not exceed [`BitSet::MAX`]) instead of performing
+//! a runtime check. Runtime checks are still performed
 //!
-//! On the other hand, creation macros such as [`set!`] will check the numbers provided at compile
-//! time.
+//! 1. in debug builds,
+//! 1. if a foreign trait asks for it, or
+//! 2. if no precondition on the arguments can replace the check.
 //!
-//! ## Impact of word size on performance
+//! An example of the second exception is that [`try_from`](TryFrom::try_from) is expected to reject
+//! a lossy conversion, so that our implementation needs to compare every number obtained from the
+//! source collection against [`BitSet::MAX`]. An example of the third exception is that testing
+//! whether [`BitSet::add_to_all`] produces only representable numbers requires knowledge of the
+//! set's state in addition to the method's argument. The method thus probes for an overflow and
+//! returns an [`Option<BitSet>`].
+//!
+//! Where such checks are performed, *pibs* offers alternative methods that omit them. For example,
+//! [`truncating_add_to_all`](BitSet::truncating_add_to_all) discards irrepresentable sums, which is
+//! a zero-cost side effect of the shift used to compute them.
+//!
+//! Creation macros such as [`set!`] check their arguments at compile time, which introduces no
+//! runtime cost.
+//!
+//! ### Impact of word size
 //!
 //! Benchmarking suggests that on a 64 bit system, [`BitSet`] operations are often equally fast for
 //! the primitives [`u32`] and [`u64`], while using [`u8`], [`u16`], or [`u128`] for storage can
 //! make them slower by a factor of about two. It is thus recommended to use [`Set128`] only when
 //! needed for capacity, and [`BitSet<u8>`] to [`<u32>`](BitSet<u32>) only when memory use is a
 //! concern or the platform has registers of the corresponding size. The default [`Set`] uses a
-//! [`usize`], but pinning to [`u32`] or [`u64`] can make sense to ensure a consistent capacity.
+//! [`usize`] for best performance.
 //!
 //! ## Alternatives
 //!
