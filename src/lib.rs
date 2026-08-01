@@ -153,14 +153,14 @@
 //!
 //! ### Set operations
 //!
-//! | operation | short form | long form
-//! | --------- | ---------- | ---------
-//! | A ∪ B     | `a \| b`   | [`a.union(b)`](BitSet::union)
-//! | A ∩ B     | `a & b`    | [`a.intersection(b)`](BitSet::intersection)
-//! | A ∖ B     | `a - b`    | [`a.difference(b)`](BitSet::difference)
-//! | A ∆ B     | `a ^ b`    | [`a.symmetric_difference(b)`](BitSet::symmetric_difference)
-//! | A ∪ {x}   | `a + x`    | [`a.with(x)`](BitSet::with)
-//! | A ∖ {x}   | `a - x`    | [`a.without(x)`](BitSet::without)
+//! | operation | short form | mutating | long form | mutating long form
+//! | --------- | ---------- | -------- | --------- | ------------------
+//! | A ∪ B     | `a \| b`   | a \|= b  | [`a.union(b)`](BitSet::union) | [`a.union_update(b)`](BitSet::union_update)
+//! | A ∩ B     | `a & b`    | a &= b   | [`a.intersection(b)`](BitSet::intersection) | [`a.intersection_update(b)`](BitSet::intersection_update)
+//! | A ∖ B     | `a - b`    | a -= b   | [`a.difference(b)`](BitSet::difference) | [`a.difference_update(b)`](BitSet::difference_update)
+//! | A ∆ B     | `a ^ b`    | a ^= b   | [`a.symmetric_difference(b)`](BitSet::symmetric_difference) | [`a.symmetric_difference_update(b)`](BitSet::symmetric_difference_update)
+//! | A ∪ {x}   | `a + x`    | a += x   | [`a.with(x)`](BitSet::with) | [`a.insert(x)`](BitSet::insert)
+//! | A ∖ {x}   | `a - x`    | a -= x   | [`a.without(x)`](BitSet::without) | [`a.remove(x)`](BitSet::remove)
 //!
 //! ### Arithmetic operations
 //!
