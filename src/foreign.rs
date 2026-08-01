@@ -22,6 +22,7 @@ impl<W: Word> PartialOrd for BitSet<W> {
     /// assert!(set![1, 2] <= set![1, 2, 3]);
     /// assert!(set![1, 2] < set![1, 2, 3]);
     /// ```
+    #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         if self == other {
             Some(Ordering::Equal)
