@@ -43,7 +43,7 @@ impl<W: Word> BitSet<W> {
         })
     }
 
-    /// Generate all representable subsets, with the cardinality growing slowly.
+    /// Generate all representable sets, with the cardinality growing slowly.
     ///
     /// This is a shorthand for `Self::iter_all_below(Self::BITS)`.
     ///
