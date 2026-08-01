@@ -1,7 +1,15 @@
 [package]
 name = "pibs"
 version = "0.1.0"
+authors = ["Maximilian Stahlberg"]
 edition = "2024"
+description = "A primitive integer bitset for high-performance combinatorics"
+documentation = "https://docs.rs/pibs"
+readme = "README.md"
+repository = "https://github.com/pibs-rs/pibs"
+license = "MIT OR Apache-2.0"
+keywords = ["bitset", "performance", "combinatorics", "math", "no_std"]
+categories = ["algorithms", "data-structures", "mathematics", "no-std::no-alloc"]
 
 [features]
 default = ["alloc"]
