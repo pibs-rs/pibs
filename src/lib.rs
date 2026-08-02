@@ -212,24 +212,25 @@
 //! ## Performance
 //! ### Checks and preconditions
 //!
-//! *pibs* aims for true zero-cost abstraction, to the point that many methods declare a
-//! precondition (typically that the argument must not exceed [`BitSet::MAX`]) instead of performing
-//! a runtime check. Runtime checks are still performed
+//! As *pibs* aims for zero-cost abstraction, it prefers preconditions over runtime checks. The
+//! latter are still performed
 //!
 //! 1. in debug builds,
-//! 1. if a foreign trait asks for it, or
-//! 2. if no precondition on the arguments can replace the check.
+//! 1. if a foreign trait requires it, or
+//! 2. whenever a precondition on a method's arguments alone is not sufficient to ensure correct
+//!    operation.
 //!
-//! An example of the second exception is that [`try_from`](TryFrom::try_from) is expected to reject
-//! a lossy conversion, so that our implementation needs to compare every number obtained from the
-//! source collection against [`BitSet::MAX`]. An example of the third exception is that testing
-//! whether [`BitSet::add_to_all`] produces only representable numbers requires knowledge of the
-//! set's state in addition to the method's argument. The method thus probes for an overflow and
-//! returns an [`Option<BitSet>`].
+//! An example of (2) is [`try_from`](TryFrom::try_from), which needs to ensure that every number
+//! obtained from the source collection is at most [`BitSet::MAX`]. An instance of (3) is
+//! [`add_to_all`](BitSet::add_to_all): testing whether the outcome is representable requires
+//! knowledge of the set's largest element in addition to the number being added, so the method
+//! takes care of this check and returns an [`Option<BitSet>`]. On the other hand, a successful
+//! [`insert`](BitSet::insert) only requires the argument to be within bounds, which is a
+//! precondition on its use.
 //!
-//! Where such checks are performed, *pibs* offers alternative methods that omit them. For example,
-//! [`truncating_add_to_all`](BitSet::truncating_add_to_all) discards irrepresentable sums, which is
-//! a zero-cost side effect of the shift used to compute them.
+//! Where checks are performed in release builds, *pibs* still offers alternative methods that omit
+//! them. For example, [`truncating_add_to_all`](BitSet::truncating_add_to_all) discards
+//! irrepresentable sums, which is a zero-cost side effect of the shift used to compute them.
 //!
 //! Creation macros such as [`set!`] check their arguments at compile time, which introduces no
 //! runtime cost.
