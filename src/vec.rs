@@ -87,19 +87,35 @@ where
     ///
     /// # Examples
     ///
-    /// Any element in a [`BitSet<u128>`] can fit in a [`Vec<i8>`].
     /// ```
     /// # use pibs::prelude::*;
-    /// let set = Set128::interval(Set128::MIN, Set128::MAX);
-    /// let vec: Vec<i8> = set.into();
-    /// assert_eq!(set.len(), u128::BITS as usize);
-    /// assert_eq!(set.to_vec(), vec.into_iter().map(|x| x as usize).collect::<Vec<_>>());
+    /// let vec: Vec<usize> = set![7, 2, 5].into();
+    /// assert_eq!(vec, vec![2, 5, 7]);
     /// ```
     ///
-    /// To avoid a type hint, use [`BitSet::to_vec`], which always produces a [`Vec<Element>`].
+    /// A full type hint is needed, as this method can produce any primitive integer vector.
+    ///
+    /// ```compile_fail
+    /// # use pibs::prelude::*;
+    /// let vec: Vec<_> = set![7, 2, 5].into(); // Does not compile.
+    /// ```
+    ///
+    /// Using [`BitSet::to_vec`] avoids the type hint, as it always produces a [`Vec<Element>`].
+    ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let vec = set![1, 2, 3].to_vec();
+    /// let vec = set![7, 2, 5].to_vec();
+    /// assert_eq!(vec, vec![2, 5, 7]);
+    /// ```
+    ///
+    /// This method is infallible, as any element in a [`BitSet<u128>`] can still fit in a
+    /// [`Vec<i8>`].
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let set = Set128::full();
+    /// let vec: Vec<i8> = set.into();
+    /// assert!(vec.iter().map(|&x| x as usize).eq(set.iter()));
     /// ```
     #[inline]
     #[doc(cfg(feature = "alloc"))]
