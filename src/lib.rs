@@ -153,26 +153,26 @@
 //!
 //! ### Set operations
 //!
-//! | operation | short form | mutating  | long form | mutating long form
-//! | --------- | ---------- | --------- | --------- | ------------------
-//! | A ∪ B     | `a \| b`   | `a \|= b` | [`a.union(b)`](BitSet::union) | [`a.union_update(b)`](BitSet::union_update)
-//! | A ∩ B     | `a & b`    | `a &= b`  | [`a.intersection(b)`](BitSet::intersection) | [`a.intersection_update(b)`](BitSet::intersection_update)
-//! | A ∖ B     | `a - b`    | `a -= b`  | [`a.difference(b)`](BitSet::difference) | [`a.difference_update(b)`](BitSet::difference_update)
-//! | A ∆ B     | `a ^ b`    | `a ^= b`  | [`a.symmetric_difference(b)`](BitSet::symmetric_difference) | [`a.symmetric_difference_update(b)`](BitSet::symmetric_difference_update)
-//! | A ∪ {x}   | `a + x`    | `a += x`  | [`a.with(x)`](BitSet::with) | [`a.insert(x)`](BitSet::insert)
-//! | A ∖ {x}   | `a - x`    | `a -= x`  | [`a.without(x)`](BitSet::without) | [`a.remove(x)`](BitSet::remove)
+//! | operation | short form | long form                                                   | mutating  | mutating long form
+//! | --------- | ---------- | ----------------------------------------------------------- | --------- | ------------------
+//! | A ∪ B     | `a \| b`   | [`a.union(b)`](BitSet::union)                               | `a \|= b` | [`a.union_update(b)`](BitSet::union_update)
+//! | A ∩ B     | `a & b`    | [`a.intersection(b)`](BitSet::intersection)                 | `a &= b`  | [`a.intersection_update(b)`](BitSet::intersection_update)
+//! | A ∖ B     | `a - b`    | [`a.difference(b)`](BitSet::difference)                     | `a -= b`  | [`a.difference_update(b)`](BitSet::difference_update)
+//! | A ∆ B     | `a ^ b`    | [`a.symmetric_difference(b)`](BitSet::symmetric_difference) | `a ^= b`  | [`a.symmetric_difference_update(b)`](BitSet::symmetric_difference_update)
+//! | A ∪ {x}   | `a + x`    | [`a.with(x)`](BitSet::with)                                 | `a += x`  | [`a.insert(x)`](BitSet::insert)
+//! | A ∖ {x}   | `a - x`    | [`a.without(x)`](BitSet::without)                           | `a -= x`  | [`a.remove(x)`](BitSet::remove)
 //!
 //! ### Arithmetic operations
 //!
 //! Default long forms are checked and return `None` if an output element cannot be represented;
 //! truncating variants instead drop any values `< 0` or `> M`. The short forms are truncating.
 //!
-//! | operation | definition | short form   | checked variant | truncating variant
-//! | --------- | ---------- | ------------ | --------------- | ------------------
-//! | A + B     | {x + y \| x ∈ A ∧ y ∈ B} | `a + b`  | [`a.sumset(b)`](BitSet::sumset)             | [`a.truncating_sumset(b)`](BitSet::truncating_sumset)
-//! | A + {x}   | {x + y \| y ∈ A}         | `a << x` | [`a.add_to_all(x)`](BitSet::add_to_all)     | [`a.truncating_add_to_all(x)`](BitSet::truncating_add_to_all)
-//! | A - {x}   | {x - y \| y ∈ A}         | `a >> x` | [`a.sub_from_all(x)`](BitSet::sub_from_all) | [`a.truncating_sub_from_all(x)`](BitSet::truncating_sub_from_all)
-//! |           | {∑(x : x ∈ X) \| X ⊆ A}  |          | [`a.subset_sums()`](BitSet::subset_sums)    | [`a.truncating_subset_sums()`](BitSet::truncating_subset_sums)
+//! | operation | definition               | short form | checked variant                             | truncating variant
+//! | --------- | ------------------------ | ---------- | ------------------------------------------- | ------------------
+//! | A + B     | {x + y \| x ∈ A ∧ y ∈ B} | `a + b`    | [`a.sumset(b)`](BitSet::sumset)             | [`a.truncating_sumset(b)`](BitSet::truncating_sumset)
+//! | A + {x}   | {x + y \| y ∈ A}         | `a << x`   | [`a.add_to_all(x)`](BitSet::add_to_all)     | [`a.truncating_add_to_all(x)`](BitSet::truncating_add_to_all)
+//! | A - {x}   | {x - y \| y ∈ A}         | `a >> x`   | [`a.sub_from_all(x)`](BitSet::sub_from_all) | [`a.truncating_sub_from_all(x)`](BitSet::truncating_sub_from_all)
+//! |           | {∑(x : x ∈ X) \| X ⊆ A}  |            | [`a.subset_sums()`](BitSet::subset_sums)    | [`a.truncating_subset_sums()`](BitSet::truncating_subset_sums)
 //!
 //! ### Generation
 //!
@@ -210,6 +210,15 @@
 //!
 //! # Discussion
 //! ## Performance
+//! ### Impact of word size
+//!
+//! Benchmarking suggests that on a 64 bit system, [`BitSet`] operations are often equally fast for
+//! the primitives [`u32`] and [`u64`], while using [`u8`], [`u16`], or [`u128`] for storage can
+//! make them slower by a factor of about two. It is thus recommended to use [`Set128`] only when
+//! needed for capacity, and [`BitSet<u8>`] to [`<u32>`](BitSet<u32>) only when memory use is a
+//! concern or the platform has registers of the corresponding size. The default [`Set`] uses a
+//! [`usize`] for best performance.
+//!
 //! ### Checks and preconditions
 //!
 //! As *pibs* aims for zero-cost abstraction, it prefers preconditions over runtime checks. The
@@ -230,19 +239,10 @@
 //!
 //! Where checks are performed in release builds, *pibs* still offers alternative methods that omit
 //! them. For example, [`truncating_add_to_all`](BitSet::truncating_add_to_all) discards
-//! irrepresentable sums, which is a zero-cost side effect of the shift used to compute them.
+//! irrepresentable sums, which is a zero-cost side effect of the shift used to compute the result.
 //!
 //! Creation macros such as [`set!`] check their arguments at compile time, which introduces no
 //! runtime cost.
-//!
-//! ### Impact of word size
-//!
-//! Benchmarking suggests that on a 64 bit system, [`BitSet`] operations are often equally fast for
-//! the primitives [`u32`] and [`u64`], while using [`u8`], [`u16`], or [`u128`] for storage can
-//! make them slower by a factor of about two. It is thus recommended to use [`Set128`] only when
-//! needed for capacity, and [`BitSet<u8>`] to [`<u32>`](BitSet<u32>) only when memory use is a
-//! concern or the platform has registers of the corresponding size. The default [`Set`] uses a
-//! [`usize`] for best performance.
 //!
 //! ## Alternatives
 //!
