@@ -86,8 +86,8 @@
 //! generate (by taking any subset of the numbers and summing them) all elements of a target set.
 //! This is done using the [`iter_combinations(n, k)`](Set::iter_combinations) generator, which
 //! yields all subsets of `0..n` of size `k`, and the
-//! [`truncating_add_to_all`](BitSet::truncating_add_to_all) operation (`<<`), to shift these
-//! subsets to `1..=n`.
+//! [`truncating_map_add`](BitSet::truncating_map_add) operation (`<<`), to shift these subsets to
+//! `1..=n`.
 //!
 //! ```
 //! # use pibs::prelude::*;
@@ -122,8 +122,8 @@
 //!
 //! ### Creation
 //!
-//! For using [`u128`]/`W` instead of [`usize`], replace [`Set`] with [`Set128`]/[`BitSet<W>`] and [`set!`] with
-//! [`set128!`]/[`bitset![W; ...]`](bitset!).
+//! For using [`u128`]/`W` instead of [`usize`], replace [`Set`] with [`Set128`]/[`BitSet<W>`] and
+//! [`set!`] with [`set128!`]/[`bitset![W; ...]`](bitset!).
 //!
 //! | set             | short form      | long form | checked variant
 //! | --------------- | --------------- | --------- | ---------------
@@ -166,12 +166,14 @@
 //! Default long forms are checked and return `None` if an output element cannot be represented;
 //! truncating variants instead drop any values `< 0` or `> M`. The short forms are truncating.
 //!
-//! | operation | definition               | short form | checked variant                             | truncating variant
-//! | --------- | ------------------------ | ---------- | ------------------------------------------- | ------------------
-//! | A + B     | {x + y \| x ∈ A ∧ y ∈ B} | `a + b`    | [`a.sumset(b)`](BitSet::sumset)             | [`a.truncating_sumset(b)`](BitSet::truncating_sumset)
-//! | A + {x}   | {x + y \| y ∈ A}         | `a << x`   | [`a.add_to_all(x)`](BitSet::add_to_all)     | [`a.truncating_add_to_all(x)`](BitSet::truncating_add_to_all)
-//! | A - {x}   | {x - y \| y ∈ A}         | `a >> x`   | [`a.sub_from_all(x)`](BitSet::sub_from_all) | [`a.truncating_sub_from_all(x)`](BitSet::truncating_sub_from_all)
-//! |           | {∑(x : x ∈ X) \| X ⊆ A}  |            | [`a.subset_sums()`](BitSet::subset_sums)    | [`a.truncating_subset_sums()`](BitSet::truncating_subset_sums)
+//! | operation | definition               | short form | checked variant                          | truncating variant
+//! | --------- | ------------------------ | ---------- | ---------------------------------------- | ------------------
+//! | A + B     | {a + b \| a ∈ A ∧ b ∈ B} | `a + b`    | [`a.sumset(b)`](BitSet::sumset)          | [`a.truncating_sumset(b)`](BitSet::truncating_sumset)
+//! | A + {x}   | {a + x \| a ∈ A}         | `a << x`   | [`a.map_add(x)`](BitSet::map_add)¹       | [`a.truncating_map_add(x)`](BitSet::truncating_map_add)¹
+//! | A - {x}   | {a - x \| a ∈ A}         | `a >> x`   | [`a.map_sub(x)`](BitSet::map_sub)¹       | [`a.truncating_map_sub(x)`](BitSet::truncating_map_sub)¹
+//! |           | {∑(x : x ∈ X) \| X ⊆ A}  |            | [`a.subset_sums()`](BitSet::subset_sums) | [`a.truncating_subset_sums()`](BitSet::truncating_subset_sums)
+//!
+//! ¹For signed `x`, use [`a.translate(x)`](BitSet::translate) and [`a.truncating_translate(x)`](BitSet::truncating_translate).
 //!
 //! ### Generation
 //!
@@ -230,15 +232,15 @@
 //!
 //! An example of (2) is [`try_from`](TryFrom::try_from), which needs to ensure that every number
 //! obtained from the source collection is at most [`BitSet::MAX`]. An instance of (3) is
-//! [`add_to_all`](BitSet::add_to_all): testing whether the outcome is representable requires
-//! knowledge of the set's largest element in addition to the number being added, so the method
-//! takes care of this check and returns an [`Option<BitSet>`]. On the other hand, a successful
-//! [`insert`](BitSet::insert) only requires the argument to be within bounds, which is a
+//! [`translate`](BitSet::translate): testing whether the outcome is representable requires
+//! knowledge of the set's extremal elements in addition to the number being added, so the method
+//! takes care of this check and returns a [`Result`]. On the other hand, a successful
+//! [`insert`](BitSet::insert) only requires the *argument* to be within bounds, which is a
 //! precondition on its use.
 //!
 //! Where checks are performed in release builds, *pibs* still offers alternative methods that omit
-//! them. For example, [`truncating_add_to_all`](BitSet::truncating_add_to_all) discards
-//! irrepresentable sums, which is a zero-cost side effect of the shift used to compute the result.
+//! them. For example, [`truncating_map_add`](BitSet::truncating_map_add) discards irrepresentable
+//! sums, which is a zero-cost side effect of the shift used to compute the result.
 //!
 //! Creation macros such as [`set!`] check their arguments at compile time, which introduces no
 //! runtime cost.

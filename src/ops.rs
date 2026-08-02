@@ -288,7 +288,7 @@ impl<W: Word> Shl<Element> for BitSet<W> {
     ///
     /// If resulting elements are not representable (above [`Self::MAX`]), they are discarded.
     ///
-    /// See [`Self::add_to_all`] for a checked variant.
+    /// See [`Self::map_add`] for a checked variant.
     ///
     /// # Preconditions
     ///
@@ -305,7 +305,7 @@ impl<W: Word> Shl<Element> for BitSet<W> {
     /// ```
     #[inline]
     fn shl(self, rhs: Element) -> Self::Output {
-        self.truncating_add_to_all(rhs)
+        self.truncating_map_add(rhs)
     }
 }
 
@@ -316,7 +316,7 @@ impl<W: Word> Shr<Element> for BitSet<W> {
     ///
     /// If resulting elements are not representable (below zero), they are discarded.
     ///
-    /// See [`Self::sub_from_all`] for a checked variant.
+    /// See [`Self::map_sub`] for a checked variant.
     ///
     /// # Preconditions
     ///
@@ -333,6 +333,6 @@ impl<W: Word> Shr<Element> for BitSet<W> {
     /// ```
     #[inline]
     fn shr(self, rhs: Element) -> Self::Output {
-        self.truncating_sub_from_all(rhs)
+        self.truncating_map_sub(rhs)
     }
 }

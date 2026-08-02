@@ -3,6 +3,30 @@
 use crate::*;
 
 impl<W: Word> BitSet<W> {
+    /// Whether the elements form a contiguous interval.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let mut set = set![4..=6];
+    /// assert_eq!(set.is_interval(), true);
+    /// set.remove(5);
+    /// assert_eq!(set.is_interval(), false);
+    ///
+    /// // Empty sets and singletons are intervals.
+    /// assert!(set![].is_interval());
+    /// assert!(set![5].is_interval());
+    /// ```
+    #[inline]
+    pub fn is_interval(self) -> bool {
+        if self.is_empty() {
+            true
+        } else {
+            Self::BITS - (self.0.leading_zeros() + self.0.trailing_zeros()) as usize == self.len()
+        }
+    }
+
     /// The smallest element in the set, if any.
     ///
     /// # Examples
@@ -252,40 +276,71 @@ impl<W: Word> BitSet<W> {
 
     /// Try to add a number to each element in the set.
     ///
-    /// If resulting elements are not representable (above [`Self::MAX`]), returns [`None`].
+    /// # Errors
     ///
-    /// See [`Self::truncating_add_to_all`] for a variant that drops irrepresentable elements.
+    /// If resulting elements are not representable (above [`Self::MAX`]).
     ///
-    /// # Preconditions
-    ///
-    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
-    /// builds and results in unspecified behavior in release builds.
+    /// See [`Self::truncating_map_add`] for a variant that drops irrepresentable elements.
     ///
     /// # Examples
     ///
     /// ```
     /// # use pibs::prelude::*;
+    /// use pibs::Error::Irrepresentable;
+    ///
     /// let set = bitset![u8; 1..=3, 5];
-    /// assert_eq!(set.add_to_all(2), Some(bitset![u8; 3..=5, 7]));
-    /// assert_eq!(set.add_to_all(3), None);
+    /// assert_eq!(set.map_add(2), Ok(bitset![u8; 3..=5, 7]));
+    /// assert_eq!(set.map_add(3), Err(Irrepresentable));
     /// ```
     #[inline]
-    #[must_use = "not a mutating method"]
-    pub fn add_to_all(self, e: Element) -> Option<Self> {
+    pub fn map_add(self, e: Element) -> Result<Self, Error> {
         if e > self.0.leading_zeros() as Element {
-            None
+            Err(Error::Irrepresentable)
+        } else if self.0 == W::zero() {
+            // Avoid a possible shift by Self::BITS.
+            Ok(Self::new())
         } else {
-            Some(self.truncating_add_to_all(e))
+            Ok(self.truncating_map_add(e))
+        }
+    }
+
+    /// Try to subtract a number from each element in the set.
+    ///
+    /// # Errors
+    ///
+    /// If resulting elements are not representable (below zero).
+    ///
+    /// See [`Self::truncating_map_sub`] for a variant that drops irrepresentable elements.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// use pibs::Error::Irrepresentable;
+    ///
+    /// let set = set![1..=3, 5];
+    /// assert_eq!(set.map_sub(1), Ok(set![0..=2, 4]));
+    /// assert_eq!(set.map_sub(3), Err(Irrepresentable));
+    /// ```
+    #[inline]
+    pub fn map_sub(self, e: Element) -> Result<Self, Error> {
+        if e > self.0.trailing_zeros() as Element {
+            Err(Error::Irrepresentable)
+        } else if self.0 == W::zero() {
+            // Avoid a possible shift by Self::BITS.
+            Ok(Self::new())
+        } else {
+            Ok(self.truncating_map_sub(e))
         }
     }
 
     /// Add a number to each element in the set.
     ///
+    /// This is the same as `self << e`.
+    ///
     /// If resulting elements are not representable (above [`Self::MAX`]), they are discarded.
     ///
-    /// This can also be written as `self << e`.
-    ///
-    /// See [`Self::add_to_all`] for a checked variant.
+    /// See [`Self::map_add`] for a checked variant.
     ///
     /// # Preconditions
     ///
@@ -297,52 +352,22 @@ impl<W: Word> BitSet<W> {
     /// ```
     /// # use pibs::prelude::*;
     /// let set = bitset![u8; 1..=3, 5];
-    /// assert_eq!(set.truncating_add_to_all(2), bitset![u8; 3..=5, 7]);
-    /// assert_eq!(set.truncating_add_to_all(3), bitset![u8; 4..=6]);
+    /// assert_eq!(set.truncating_map_add(2), bitset![u8; 3..=5, 7]);
+    /// assert_eq!(set.truncating_map_add(3), bitset![u8; 4..=6]);
     /// ```
     #[inline]
-    #[must_use = "not a mutating method"]
-    pub fn truncating_add_to_all(self, e: Element) -> Self {
+    pub fn truncating_map_add(self, e: Element) -> Self {
         Self::debug_bound_check(e);
         Self(self.0 << e)
     }
 
-    /// Try to subtract a number from each element in the set.
-    ///
-    /// If resulting elements are not representable (below zero), returns [`None`].
-    ///
-    /// See [`Self::truncating_sub_from_all`] for a variant that drops irrepresentable elements.
-    ///
-    /// # Preconditions
-    ///
-    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
-    /// builds and results in unspecified behavior in release builds.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use pibs::prelude::*;
-    /// let set = set![1..=3, 5];
-    /// assert_eq!(set.sub_from_all(1), Some(set![0..=2, 4]));
-    /// assert_eq!(set.sub_from_all(3), None);
-    /// ```
-    #[inline]
-    #[must_use = "not a mutating method"]
-    pub fn sub_from_all(self, e: Element) -> Option<Self> {
-        if e > self.0.trailing_zeros() as Element {
-            None
-        } else {
-            Some(self.truncating_sub_from_all(e))
-        }
-    }
-
     /// Subtract a number from each element in the set.
+    ///
+    /// This is the same as `self >> e`.
     ///
     /// If resulting elements are not representable (below zero), they are discarded.
     ///
-    /// This can also be written as `self >> e`.
-    ///
-    /// See [`Self::sub_from_all`] for a checked variant.
+    /// See [`Self::map_sub`] for a checked variant.
     ///
     /// # Preconditions
     ///
@@ -354,37 +379,74 @@ impl<W: Word> BitSet<W> {
     /// ```
     /// # use pibs::prelude::*;
     /// let set = set![1..=3, 5];
-    /// assert_eq!(set.truncating_sub_from_all(1), set![0..=2, 4]);
-    /// assert_eq!(set.truncating_sub_from_all(3), set![0, 2]);
+    /// assert_eq!(set.truncating_map_sub(1), set![0..=2, 4]);
+    /// assert_eq!(set.truncating_map_sub(3), set![0, 2]);
     /// ```
     #[inline]
-    #[must_use = "not a mutating method"]
-    pub fn truncating_sub_from_all(self, e: Element) -> Self {
+    pub fn truncating_map_sub(self, e: Element) -> Self {
         Self::debug_bound_check(e);
         Self(self.0 >> e)
     }
 
-    /// Whether the elements form a contiguous interval.
+    /// Try to add or subtract a number to or from each element in the set.
+    ///
+    /// # Errors
+    ///
+    /// If resulting elements are not representable (below zero or above [`Self::MAX`]).
+    ///
+    /// See [`Self::truncating_translate`] for a variant that drops irrepresentable elements.
     ///
     /// # Examples
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let mut set = set![4..=6];
-    /// assert_eq!(set.is_interval(), true);
-    /// set.remove(5);
-    /// assert_eq!(set.is_interval(), false);
+    /// use pibs::Error::Irrepresentable;
     ///
-    /// // Empty sets and singletons are intervals.
-    /// assert!(set![].is_interval());
-    /// assert!(set![5].is_interval());
+    /// let set = bitset![u8; 1..=3, 5];
+    /// assert_eq!(set.translate(2), Ok(bitset![u8; 3..=5, 7]));
+    /// assert_eq!(set.translate(-1), Ok(bitset![u8; 0..=2, 4]));
+    /// assert_eq!(set.translate(-2), Err(Irrepresentable));
     /// ```
     #[inline]
-    pub fn is_interval(self) -> bool {
-        if self.is_empty() {
-            true
+    pub fn translate(self, add: i32) -> Result<Self, Error> {
+        if add >= 0 {
+            self.map_add(add.try_into().map_err(|_| Error::Irrepresentable)?)
         } else {
-            Self::BITS - (self.0.leading_zeros() + self.0.trailing_zeros()) as usize == self.len()
+            self.map_sub(
+                add.unsigned_abs()
+                    .try_into()
+                    .map_err(|_| Error::Irrepresentable)?,
+            )
+        }
+    }
+
+    /// Add or subtract a number to or from each element in the set.
+    ///
+    /// If resulting elements are not representable (below zero or above [`Self::MAX`]), they are
+    /// discarded.
+    ///
+    /// See [`Self::translate`] for a checked variant.
+    ///
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `e.unsigned_abs() <= Self::MAX`. Violating this precondition
+    /// panics in debug builds and results in unspecified behavior in release builds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let set = bitset![u8; 1..=3, 5];
+    /// assert_eq!(set.truncating_translate(2), bitset![u8; 3..=5, 7]);
+    /// assert_eq!(set.truncating_translate(-1), bitset![u8; 0..=2, 4]);
+    /// assert_eq!(set.truncating_translate(-2), bitset![u8; 0, 1, 3]);
+    /// ```
+    #[inline]
+    pub fn truncating_translate(self, add: i32) -> Self {
+        if add >= 0 {
+            self.truncating_map_add(add as Element)
+        } else {
+            self.truncating_map_sub(add.unsigned_abs() as Element)
         }
     }
 }
