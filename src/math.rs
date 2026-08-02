@@ -270,6 +270,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set.add_to_all(3), None);
     /// ```
     #[inline]
+    #[must_use = "not a mutating method"]
     pub fn add_to_all(self, e: Element) -> Option<Self> {
         if e > self.0.leading_zeros() as Element {
             None
@@ -300,6 +301,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set.truncating_add_to_all(3), bitset![u8; 4..=6]);
     /// ```
     #[inline]
+    #[must_use = "not a mutating method"]
     pub fn truncating_add_to_all(self, e: Element) -> Self {
         Self::debug_bound_check(e);
         Self(self.0 << e)
@@ -325,6 +327,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set.sub_from_all(3), None);
     /// ```
     #[inline]
+    #[must_use = "not a mutating method"]
     pub fn sub_from_all(self, e: Element) -> Option<Self> {
         if e > self.0.trailing_zeros() as Element {
             None
@@ -355,6 +358,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set.truncating_sub_from_all(3), set![0, 2]);
     /// ```
     #[inline]
+    #[must_use = "not a mutating method"]
     pub fn truncating_sub_from_all(self, e: Element) -> Self {
         Self::debug_bound_check(e);
         Self(self.0 >> e)
