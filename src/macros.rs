@@ -9,9 +9,12 @@ use crate::*;
 ///
 /// ```
 /// # use pibs::prelude::*;
-/// assert_eq!(bitset![u8; 0..5], BitSet::<u8>::from(0..5));
-/// assert_eq!(bitset![usize; 1..=23], BitSet::<usize>::from(1..=23));
-/// assert_eq!(bitset![u128; 0, 63..=65, 127], BitSet::<u128>::from([0, 63, 64, 65, 127]));
+/// assert_eq!(bitset![u8; 0..5], BitSet::<u8>::try_from(0..5).unwrap());
+/// assert_eq!(bitset![usize; 1..=23], BitSet::<usize>::try_from(1..=23).unwrap());
+/// assert_eq!(
+///     bitset![u128; 0, 63..=65, 127],
+///     BitSet::<u128>::try_from([0, 63, 64, 65, 127]).unwrap()
+/// );
 /// ```
 ///
 /// # Compile-time checks
@@ -81,10 +84,10 @@ macro_rules! bitset {
 /// # use pibs::prelude::*;
 /// assert_eq!(set![], Set::new());
 /// assert_eq!(set![5], Set::singleton(5));
-/// assert_eq!(set![0, 2, 4], Set::from([0, 2, 4]));
-/// assert_eq!(set![0..4], Set::from(0..4));
-/// assert_eq!(set![0..=4], Set::from(0..=4));
-/// assert_eq!(set![0..2, 2, 10, 4..6, 6], Set::from(0..=6) - 3 + 10);
+/// assert_eq!(set![0, 2, 4], Set::try_from([0, 2, 4]).unwrap());
+/// assert_eq!(set![0..4], Set::try_from(0..4).unwrap());
+/// assert_eq!(set![0..=4], Set::try_from(0..=4).unwrap());
+/// assert_eq!(set![0..2, 2, 10, 4..6, 6], Set::try_from(0..=6).unwrap() - 3 + 10);
 /// ```
 ///
 /// # Compile-time checks
@@ -106,9 +109,9 @@ macro_rules! set {
 ///
 /// ```
 /// # use pibs::prelude::*;
-/// assert_eq!(set128![100..105], Set128::from(100..105));
-/// assert_eq!(set128![100..=105], Set128::from(100..=105));
-/// assert_eq!(set128![0, 63..=65, 127], Set128::from([0, 63, 64, 65, 127]));
+/// assert_eq!(set128![100..105], Set128::try_from(100..105).unwrap());
+/// assert_eq!(set128![100..=105], Set128::try_from(100..=105).unwrap());
+/// assert_eq!(set128![0, 63..=65, 127], Set128::try_from([0, 63, 64, 65, 127]).unwrap());
 /// ```
 ///
 /// # Compile-time checks

@@ -61,7 +61,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let set: Set = (4..=6).into();
+    /// let set = set![4..=6];
     /// assert_eq!(set.position(3), None);
     /// assert_eq!(set.position(4), Some(0));
     /// assert_eq!(set.position(6), Some(2));

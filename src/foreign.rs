@@ -17,10 +17,10 @@ impl<W: Word> PartialOrd for BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// assert!(set![1, 2] <= set![1, 2]);
-    /// assert!(!(set![1, 2] < set![1, 2]));
-    /// assert!(set![1, 2] <= set![1, 2, 3]);
-    /// assert!(set![1, 2] < set![1, 2, 3]);
+    /// assert_eq!(set![1, 2] <= set![1, 2], true);
+    /// assert_eq!(set![1, 2] < set![1, 2], false);
+    /// assert_eq!(set![1, 2] <= set![1, 2, 3], true);
+    /// assert_eq!(set![1, 2] < set![1, 2, 3], true);
     /// ```
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -71,42 +71,6 @@ impl<W: Word> IntoIterator for &BitSet<W> {
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         (*self).iter()
-    }
-}
-
-impl<W: Word, T> FromIterator<T> for BitSet<W>
-where
-    T: PrimInt + TryInto<Element>,
-{
-    /// Create a [`BitSet`] from an integer iterator.
-    ///
-    /// # Preconditions
-    ///
-    /// The caller must ensure that `e <= Self::MAX` for every element `e` produced by the iterator.
-    /// Violating this precondition panics in debug builds and results in unspecified behavior in
-    /// release builds.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use pibs::prelude::*;
-    /// use core::iter::once;
-    /// assert_eq!(Set::from_iter(once(0).chain(once(5))), set![0, 5]);
-    /// ```
-    #[inline]
-    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        let mut word = W::zero();
-
-        for e in iter {
-            let e = match e.try_into() {
-                Ok(x) => x,
-                Err(_) => panic!("failed to load a bitset element from an iterator"),
-            };
-            Self::debug_bound_check(e);
-            word += W::one() << e;
-        }
-
-        Self(word)
     }
 }
 

@@ -21,51 +21,61 @@ impl<W: Word> BitSet<W> {
     }
 }
 
-impl<W: Word, T> From<Vec<T>> for BitSet<W>
+impl<W: Word, T> TryFrom<Vec<T>> for BitSet<W>
 where
     T: PrimInt + TryInto<Element>,
 {
-    /// Create a [`BitSet`] from a vector.
+    type Error = Error;
+
+    /// Try to create a [`BitSet`] from a vector.
     ///
-    /// # Preconditions
+    /// # Errors
     ///
-    /// The caller must ensure that `e <= Self::MAX` for every vector element `e`. Violating this
-    /// precondition panics in debug builds and results in unspecified behavior in release builds.
+    /// If any vector element fails to convert to an [`Element`] or is greater than [`Self::MAX`].
     ///
     /// # Examples
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// assert_eq!(Set::from(vec![2, 4, 6]), set![2, 4, 6]);
+    /// use pibs::Error::Irrepresentable;
+    ///
+    /// assert_eq!(Set::try_from(vec![2, 4, 6]), Ok(set![2, 4, 6]));
+    /// assert_eq!(Set::try_from(vec![-2, 4, 6]), Err(Irrepresentable));
+    /// assert_eq!(Set::try_from(vec![10_000]), Err(Irrepresentable));
     /// ```
     #[inline]
     #[doc(cfg(feature = "alloc"))]
-    fn from(vec: Vec<T>) -> Self {
-        vec.into_iter().collect()
+    fn try_from(vec: Vec<T>) -> Result<Self, Self::Error> {
+        Self::try_from_iter(vec)
     }
 }
 
-impl<W: Word, T> From<&Vec<T>> for BitSet<W>
+impl<W: Word, T> TryFrom<&Vec<T>> for BitSet<W>
 where
     T: PrimInt + TryInto<Element>,
 {
-    /// Create a [`BitSet`] from a vector by reference.
+    type Error = Error;
+
+    /// Try to create a [`BitSet`] from a vector by reference.
     ///
-    /// # Preconditions
+    /// # Errors
     ///
-    /// The caller must ensure that `e <= Self::MAX` for every vector element `e`. Violating this
-    /// precondition panics in debug builds and results in unspecified behavior in release builds.
+    /// If any vector element fails to convert to an [`Element`] or is greater than [`Self::MAX`].
     ///
     /// # Examples
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// assert_eq!(Set::from(&vec![2, 4, 6]), set![2, 4, 6]);
+    /// use pibs::Error::Irrepresentable;
+    ///
+    /// assert_eq!(Set::try_from(&vec![2, 4, 6]), Ok(set![2, 4, 6]));
+    /// assert_eq!(Set::try_from(&vec![-2, 4, 6]), Err(Irrepresentable));
+    /// assert_eq!(Set::try_from(&vec![10_000]), Err(Irrepresentable));
     /// ```
     #[inline]
     #[doc(cfg(feature = "alloc"))]
-    fn from(vec: &Vec<T>) -> Self {
-        vec.iter().copied().collect()
+    fn try_from(vec: &Vec<T>) -> Result<Self, Self::Error> {
+        Self::try_from_iter(vec.iter().copied())
     }
 }
 

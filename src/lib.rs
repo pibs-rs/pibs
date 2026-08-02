@@ -105,7 +105,7 @@
 //!     }
 //!
 //!     // If no small generator was found, fall back to powers of two.
-//!     Set::from_iter((0..bit_length).map(|b| 1 << b))
+//!     Set::from_unchecked((0..bit_length).map(|b| 1 << b))
 //! }
 //!
 //! // To generate {0, ..., 9}, we need a generating set of size four.
@@ -125,14 +125,13 @@
 //! For using [`u128`]/`W` instead of [`usize`], replace [`Set`] with [`Set128`]/[`BitSet<W>`] and [`set!`] with
 //! [`set128!`]/[`bitset![W; ...]`](bitset!).
 //!
-//! | set             | short form      | long form
-//! | --------------- | --------------- | ---------
-//! | ∅               | `set![]`        | [`Set::new()`]
-//! | {0}             | `set![0]`       | [`Set::singleton(0)`](BitSet::singleton)
-//! | {1, ..., n}     | `set![1..=n]`   | [`Set::interval(1, n)`](BitSet::interval)
-//! | {0, ..., n - 1} | `set![0..n]`    | `Set::from(0..n)`
-//! | {0, ..., M}     |                 | [`Set::full()`]
-//! | {2, 3, 5}       | `set![2, 3, 5]` | `Set::from([2, 3, 5])`
+//! | set             | short form      | long form | checked variant
+//! | --------------- | --------------- | --------- | ---------------
+//! | ∅               | `set![]`        | [`Set::new()`] |
+//! | {0}             | `set![0]`       | [`Set::singleton(0)`](BitSet::singleton) |
+//! | {a, b, c}       | `set![a, b, c]` | [`Set::from_unchecked([a, b, c])`](BitSet::from_unchecked) | [`Set::try_from([a, b, c])`](BitSet::try_from)
+//! | {m, ..., n}     | `set![m..=n]`   | [`Set::interval(m, n)`](BitSet::interval) |
+//! | {0, ..., M}     |                 | [`Set::full()`] |
 //!
 //! ### Queries
 //!
@@ -327,3 +326,13 @@ pub trait Word = PrimInt
     + CheckedShl
     + CheckedShr
     + WrappingNeg;
+
+/// Errors returned for [`BitSet`] operations.
+#[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
+#[non_exhaustive]
+pub enum Error {
+    /// A number cannot be represented as a [`BitSet`] element.
+    ///
+    /// This occurs when the number is negative or exceeds [`BitSet::MAX`].
+    Irrepresentable,
+}
