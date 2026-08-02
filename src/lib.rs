@@ -1,4 +1,4 @@
-//! A [primitive integer bitset](BitSet) for high-performance combinatorics involving small numbers.
+//! A primitive integer [`BitSet`] for high-performance combinatorics involving small numbers.
 //!
 //! # Scope
 //!
@@ -222,8 +222,10 @@
 //!
 //! ### Checks and preconditions
 //!
-//! As *pibs* aims for zero-cost abstraction, it prefers preconditions over runtime checks. The
-//! latter are still performed
+//! As *pibs* aims for zero-cost abstraction, it prefers preconditions over runtime checks.
+//! Violating a stated precondition panics in a debug build. In a release build, no guarantees with
+//! respect to the method's behavior are made: it may panic or produce unexpected results. Runtime
+//! checks are still performed
 //!
 //! 1. in debug builds,
 //! 1. if a foreign trait requires it, or
@@ -235,12 +237,12 @@
 //! [`translate`](BitSet::translate): testing whether the outcome is representable requires
 //! knowledge of the set's extremal elements in addition to the number being added, so the method
 //! takes care of this check and returns a [`Result`]. On the other hand, a successful
-//! [`insert`](BitSet::insert) only requires the *argument* to be within bounds, which is a
-//! precondition on its use.
+//! [`insert`](BitSet::insert) only requires the *argument* to be within bounds, which is thus a
+//! precondition.
 //!
-//! Where checks are performed in release builds, *pibs* still offers alternative methods that omit
-//! them. For example, [`truncating_map_add`](BitSet::truncating_map_add) discards irrepresentable
-//! sums, which is a zero-cost side effect of the shift used to compute the result.
+//! Whenever checks would be performed in release builds, *pibs* offers alternative methods that
+//! omit them. For example, [`truncating_translate`](BitSet::truncating_translate) discards
+//! irrepresentable sums, which is a zero-cost side effect of the shift used to compute the result.
 //!
 //! Creation macros such as [`set!`] check their arguments at compile time, which introduces no
 //! runtime cost.

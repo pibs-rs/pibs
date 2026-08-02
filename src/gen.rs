@@ -75,8 +75,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `n <= Self::BITS`. Violating this precondition panics in debug
-    /// builds and results in unspecified behavior in release builds.
+    /// The caller must ensure that `n <= Self::BITS`.
     ///
     /// # Examples
     ///
@@ -106,8 +105,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `k <= n <= Self::BITS`. Violating this precondition panics in
-    /// debug builds and results in unspecified behavior in release builds.
+    /// The caller must ensure that `k <= n <= Self::BITS`.
     ///
     /// # Examples
     ///

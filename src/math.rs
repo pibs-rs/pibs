@@ -103,8 +103,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `e` is contained in the set. Violating this precondition panics
-    /// in debug builds and results in unspecified behavior in release builds.
+    /// The caller must ensure that `e` is contained in the set.
     #[inline]
     pub fn position_unchecked(self, e: Element) -> usize {
         debug_assert!(self.contains(e));
@@ -131,8 +130,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `e` is contained in the set. Violating this precondition panics
-    /// in debug builds and results in unspecified behavior in release builds.
+    /// The caller must ensure that `e` is contained in the set.
     #[inline]
     pub fn rank_unchecked(self, e: Element) -> usize {
         debug_assert!(self.contains(e));
@@ -344,8 +342,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
-    /// builds and results in unspecified behavior in release builds.
+    /// The caller must ensure that `e <= Self::MAX`.
     ///
     /// # Examples
     ///
@@ -371,8 +368,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
-    /// builds and results in unspecified behavior in release builds.
+    /// The caller must ensure that `e <= Self::MAX`.
     ///
     /// # Examples
     ///
@@ -429,8 +425,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `e.unsigned_abs() <= Self::MAX`. Violating this precondition
-    /// panics in debug builds and results in unspecified behavior in release builds.
+    /// The caller must ensure that `e.unsigned_abs() <= Self::MAX`.
     ///
     /// # Examples
     ///

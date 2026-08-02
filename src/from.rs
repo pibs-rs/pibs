@@ -45,8 +45,6 @@ impl<W: Word> BitSet<W> {
     /// # Preconditions
     ///
     /// The caller must ensure that `e <= Self::MAX` for every element `e` produced by the iterator.
-    /// Violating this precondition panics in debug builds and results in unspecified behavior in
-    /// release builds.
     ///
     /// # Examples
     ///

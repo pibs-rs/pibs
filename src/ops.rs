@@ -13,8 +13,7 @@ impl<W: Word> Add<Element> for BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `rhs <= Self::MAX`. Violating this precondition panics in debug
-    /// builds and results in unspecified behavior in release builds.
+    /// The caller must ensure that `rhs <= Self::MAX`.
     ///
     /// # Examples
     ///
@@ -66,8 +65,7 @@ impl<W: Word> AddAssign<Element> for BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `rhs <= Self::MAX`. Violating this precondition panics in debug
-    /// builds and results in unspecified behavior in release builds.
+    /// The caller must ensure that `rhs <= Self::MAX`.
     ///
     /// # Examples
     ///
@@ -91,8 +89,7 @@ impl<W: Word> Sub<Element> for BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `rhs <= Self::MAX`. Violating this precondition panics in debug
-    /// builds and results in unspecified behavior in release builds.
+    /// The caller must ensure that `rhs <= Self::MAX`.
     ///
     /// # Examples
     ///
@@ -114,8 +111,7 @@ impl<W: Word> SubAssign<Element> for BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `rhs <= Self::MAX`. Violating this precondition panics in debug
-    /// builds and results in unspecified behavior in release builds.
+    /// The caller must ensure that `rhs <= Self::MAX`.
     ///
     /// # Examples
     ///
@@ -292,8 +288,7 @@ impl<W: Word> Shl<Element> for BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
-    /// builds and results in unspecified behavior in release builds.
+    /// The caller must ensure that `e <= Self::MAX`.
     ///
     /// # Examples
     ///
@@ -320,8 +315,7 @@ impl<W: Word> Shr<Element> for BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
-    /// builds and results in unspecified behavior in release builds.
+    /// The caller must ensure that `e <= Self::MAX`.
     ///
     /// # Examples
     ///

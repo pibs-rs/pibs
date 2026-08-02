@@ -35,8 +35,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `e <= Self::MAX`. Violating this precondition panics in debug
-    /// builds and results in unspecified behavior in release builds.
+    /// The caller must ensure that `e <= Self::MAX`.
     ///
     /// # Examples
     ///
