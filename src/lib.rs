@@ -222,27 +222,28 @@
 //!
 //! ### Checks and preconditions
 //!
-//! As *pibs* aims for zero-cost abstraction, it prefers preconditions over runtime checks.
-//! Violating a stated precondition panics in a debug build. In a release build, no guarantees with
-//! respect to the method's behavior are made: it may panic or produce unexpected results. Runtime
-//! checks are still performed
+//! As *pibs* aims for zero-cost abstraction, it prefers preconditions over runtime checks. In a
+//! debug build, violating a stated precondition always panics. In a release build, no guarantees
+//! with respect to the method's behavior are made: it may panic or produce unexpected results.
+//! Runtime checks are only performed
 //!
-//! 1. in debug builds,
-//! 1. if a foreign trait requires it, or
-//! 2. whenever a precondition on a method's arguments alone is not sufficient to ensure correct
+//! 1. if a foreign trait dictates it, or
+//! 2. if a precondition on a method's arguments alone is not sufficient to ensure correct
 //!    operation.
 //!
-//! An example of (2) is [`try_from`](TryFrom::try_from), which needs to ensure that every number
-//! obtained from the source collection is at most [`BitSet::MAX`]. An instance of (3) is
-//! [`translate`](BitSet::translate): testing whether the outcome is representable requires
-//! knowledge of the set's extremal elements in addition to the number being added, so the method
-//! takes care of this check and returns a [`Result`]. On the other hand, a successful
-//! [`insert`](BitSet::insert) only requires the *argument* to be within bounds, which is thus a
-//! precondition.
+//! An example of the first condition is [`try_from`](TryFrom::try_from), which needs to ensure that
+//! every number obtained from the source collection is at most [`BitSet::MAX`]. The second rule
+//! applies to [`translate`](BitSet::translate): testing whether the outcome is representable
+//! requires knowledge of the set's extremal elements in addition to the number being added, so the
+//! method takes care of this check and returns a [`Result`]. On the other hand, a successful
+//! [`insert`](BitSet::insert) only requires the argument to be within bounds, which is imposed by
+//! a precondition.
 //!
-//! Whenever checks would be performed in release builds, *pibs* offers alternative methods that
-//! omit them. For example, [`truncating_translate`](BitSet::truncating_translate) discards
-//! irrepresentable sums, which is a zero-cost side effect of the shift used to compute the result.
+//! Whenever such runtime checks occur, *pibs* offers alternative methods that omit them. For
+//! example, [`from_unchecked`](BitSet::from_unchecked) has the precondition that the source
+//! collection only contains representable elements, while
+//! [`truncating_translate`](BitSet::truncating_translate) discards irrepresentable sums as a
+//! zero-cost side effect of the shift used to compute the result.
 //!
 //! Creation macros such as [`set!`] check their arguments at compile time, which introduces no
 //! runtime cost.
