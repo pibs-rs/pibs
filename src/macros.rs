@@ -5,6 +5,8 @@ use crate::*;
 
 /// Create a [`BitSet`] using the given primitive type to store the arguments.
 ///
+/// All arguments must be constant expressions, and are checked at compile time.
+///
 /// # Examples
 ///
 /// ```
@@ -17,11 +19,19 @@ use crate::*;
 /// );
 /// ```
 ///
-/// # Compile-time checks
+/// The compiler performs out-of-bounds checks.
 ///
 /// ```compile_fail
 /// # use pibs::prelude::*;
-/// let set = bitset![u8; 6, 7, 8]; // The compiler detects out-of-bounds elements.
+/// let set = bitset![u32; 32]; // Cannot be represented.
+/// ```
+///
+/// This requires the arguments to be constant.
+///
+/// ```compile_fail
+/// # use pibs::prelude::*;
+/// let x = 5;
+/// let set = bitset![u8; x]; // Not a constant expression.
 /// ```
 #[macro_export]
 macro_rules! bitset {
@@ -78,7 +88,9 @@ macro_rules! bitset {
 
 /// Create a [`Set`] containing the arguments.
 ///
-///  # Examples
+/// All arguments must be constant expressions, and are checked at compile time.
+///
+/// # Examples
 ///
 /// ```
 /// # use pibs::prelude::*;
@@ -90,11 +102,19 @@ macro_rules! bitset {
 /// assert_eq!(set![0..2, 2, 10, 4..6, 6], Set::try_from(0..=6).unwrap() - 3 + 10);
 /// ```
 ///
-/// # Compile-time checks
+/// The compiler performs out-of-bounds checks.
 ///
 /// ```compile_fail
 /// # use pibs::prelude::*;
-/// let set = set![10_000]; // The compiler detects out-of-bounds elements.
+/// let set = set![10_000]; // Cannot be represented.
+/// ```
+///
+/// This requires the arguments to be constant.
+///
+/// ```compile_fail
+/// # use pibs::prelude::*;
+/// let x = 5;
+/// let set = set![x]; // Not a constant expression.
 /// ```
 #[macro_export]
 macro_rules! set {
@@ -105,6 +125,8 @@ macro_rules! set {
 
 /// Create a [`Set128`] containing the arguments.
 ///
+/// All arguments must be constant expressions, and are checked at compile time.
+///
 /// # Examples
 ///
 /// ```
@@ -114,11 +136,19 @@ macro_rules! set {
 /// assert_eq!(set128![0, 63..=65, 127], Set128::try_from([0, 63, 64, 65, 127]).unwrap());
 /// ```
 ///
-/// # Compile-time checks
+/// The compiler performs out-of-bounds checks.
 ///
 /// ```compile_fail
 /// # use pibs::prelude::*;
-/// let set = set128![0..=128]; // The compiler detects out-of-bounds elements.
+/// let set = set128![0..=128]; // Cannot be represented.
+/// ```
+///
+/// This requires the arguments to be constant.
+///
+/// ```compile_fail
+/// # use pibs::prelude::*;
+/// let x = 5;
+/// let set = set128![x]; // Not a constant expression.
 /// ```
 #[macro_export]
 macro_rules! set128 {
