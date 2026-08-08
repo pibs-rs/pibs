@@ -15,6 +15,7 @@ use serde::{Deserialize, Serialize};
 /// ```
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[repr(transparent)]
 pub struct BitSet<W: Word>(pub(crate) W);
 
 impl<W: Word> BitSet<W> {
