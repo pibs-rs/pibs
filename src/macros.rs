@@ -116,6 +116,7 @@ macro_rules! bitset {
 /// let x = 5;
 /// let set = set![x]; // Not a constant expression.
 /// ```
+// TODO: Allow importing only this alongside Set; right now BitSet is needed.
 #[macro_export]
 macro_rules! set {
     ($($tt:tt)*) => {
@@ -150,6 +151,7 @@ macro_rules! set {
 /// let x = 5;
 /// let set = set128![x]; // Not a constant expression.
 /// ```
+// TODO: Allow importing only this alongside Set128; right now BitSet is needed.
 #[macro_export]
 macro_rules! set128 {
     ($($tt:tt)*) => {

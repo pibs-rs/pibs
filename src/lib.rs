@@ -131,6 +131,7 @@
 //! | {0}             | `set![0]`       | [`Set::singleton(0)`](BitSet::singleton) |
 //! | {a, b, c}       | `set![a, b, c]` | [`Set::from_unchecked([a, b, c])`](BitSet::from_unchecked) | [`Set::try_from([a, b, c])`](BitSet::try_from)
 //! | {m, ..., n}     | `set![m..=n]`   | [`Set::interval(m, n)`](BitSet::interval) |
+//! | {0, ..., n - 1} | `set![0..n]`    | [`Set::range(n)`](BitSet::range) |
 //! | {0, ..., M}     |                 | [`Set::full()`] |
 //!
 //! ### Queries

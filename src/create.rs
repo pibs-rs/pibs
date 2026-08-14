@@ -48,11 +48,11 @@ impl<W: Word> BitSet<W> {
         Self(W::one() << e)
     }
 
-    /// Create a contiguous interval.
+    /// Create a contiguous interval with given endpoints (included).
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `e <= Self::MAX`.
+    /// The caller must ensure that `last <= Self::MAX`.
     ///
     /// # Examples
     ///
@@ -71,6 +71,30 @@ impl<W: Word> BitSet<W> {
             Self(!W::zero() << first)
         } else {
             Self(((W::one() << (last - first + 1)) - W::one()) << first)
+        }
+    }
+
+    /// Create the set {0, ..., stop - 1}.
+    ///
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `stop <= Self::MAX + 1`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// assert_eq!(Set::range(3), set![0..3]);
+    /// assert_eq!(Set::range(1), Set::singleton(0));
+    /// assert!(Set::range(0).is_empty());
+    /// ```
+    #[inline]
+    pub fn range(stop: Element) -> Self {
+        Self::debug_bound_check(if stop > 0 { stop - 1 } else { 0 });
+        if stop == Self::BITS {
+            Self(!W::zero())
+        } else {
+            Self((W::one() << stop) - W::one())
         }
     }
 
