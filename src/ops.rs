@@ -2,8 +2,8 @@
 
 use crate::*;
 use core::ops::{
-    Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Shl, Shr, Sub,
-    SubAssign,
+    Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Shl, ShlAssign,
+    Shr, ShrAssign, Sub, SubAssign,
 };
 
 impl<W: Word> Add<Element> for BitSet<W> {
@@ -280,7 +280,7 @@ impl<W: Word> BitXorAssign for BitSet<W> {
 impl<W: Word> Shl<Element> for BitSet<W> {
     type Output = Self;
 
-    /// Add a number to each element in the set.
+    /// The set with a number added to each element.
     ///
     /// If resulting elements are not representable (above [`Self::MAX`]), they are discarded.
     ///
@@ -288,7 +288,7 @@ impl<W: Word> Shl<Element> for BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `e <= Self::MAX`.
+    /// The caller must ensure that `rhs <= Self::MAX`.
     ///
     /// # Examples
     ///
@@ -304,6 +304,31 @@ impl<W: Word> Shl<Element> for BitSet<W> {
     }
 }
 
+impl<W: Word> ShlAssign<Element> for BitSet<W> {
+    /// Add a number to each element in the set.
+    ///
+    /// If resulting elements are not representable (above [`Self::MAX`]), they are discarded.
+    ///
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `rhs <= Self::MAX`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let mut set = bitset![u8; 1..=3, 5];
+    /// set <<= 2;
+    /// assert_eq!(set, bitset![u8; 3..=5, 7]);
+    /// set <<= 1;
+    /// assert_eq!(set, bitset![u8; 4..=6]); // Truncates.
+    /// ```
+    #[inline]
+    fn shl_assign(&mut self, rhs: Element) {
+        self.0 <<= rhs;
+    }
+}
+
 impl<W: Word> Shr<Element> for BitSet<W> {
     type Output = Self;
 
@@ -315,7 +340,7 @@ impl<W: Word> Shr<Element> for BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `e <= Self::MAX`.
+    /// The caller must ensure that `rhs <= Self::MAX`.
     ///
     /// # Examples
     ///
@@ -328,5 +353,30 @@ impl<W: Word> Shr<Element> for BitSet<W> {
     #[inline]
     fn shr(self, rhs: Element) -> Self::Output {
         self.truncating_map_sub(rhs)
+    }
+}
+
+impl<W: Word> ShrAssign<Element> for BitSet<W> {
+    /// Add a number to each element in the set.
+    ///
+    /// If resulting elements are not representable (above [`Self::MAX`]), they are discarded.
+    ///
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `rhs <= Self::MAX`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let mut set = set![1..=3, 5];
+    /// set >>= 1;
+    /// assert_eq!(set, set![0..=2, 4]);
+    /// set >>= 2;
+    /// assert_eq!(set, set![0, 2]); // Truncates.
+    /// ```
+    #[inline]
+    fn shr_assign(&mut self, rhs: Element) {
+        self.0 >>= rhs;
     }
 }

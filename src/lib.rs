@@ -167,12 +167,12 @@
 //! Default long forms are checked and return `None` if an output element cannot be represented;
 //! truncating variants instead drop any values `< 0` or `> M`. The short forms are truncating.
 //!
-//! | operation | definition               | short form | checked variant                          | truncating variant
-//! | --------- | ------------------------ | ---------- | ---------------------------------------- | ------------------
-//! | A + B     | {a + b \| a ∈ A ∧ b ∈ B} | `a + b`    | [`a.sumset(b)`](BitSet::sumset)          | [`a.truncating_sumset(b)`](BitSet::truncating_sumset)
-//! | A + {x}   | {a + x \| a ∈ A}         | `a << x`   | [`a.map_add(x)`](BitSet::map_add)¹       | [`a.truncating_map_add(x)`](BitSet::truncating_map_add)¹
-//! | A - {x}   | {a - x \| a ∈ A}         | `a >> x`   | [`a.map_sub(x)`](BitSet::map_sub)¹       | [`a.truncating_map_sub(x)`](BitSet::truncating_map_sub)¹
-//! |           | {∑(x : x ∈ X) \| X ⊆ A}  |            | [`a.subset_sums()`](BitSet::subset_sums) | [`a.truncating_subset_sums()`](BitSet::truncating_subset_sums)
+//! | operation | definition               | short form | mutating  | checked variant                          | truncating variant
+//! | --------- | ------------------------ | ---------- | --------- | ---------------------------------------- | ------------------
+//! | A + B     | {a + b \| a ∈ A ∧ b ∈ B} | `a + b`    |           | [`a.sumset(b)`](BitSet::sumset)          | [`a.truncating_sumset(b)`](BitSet::truncating_sumset)
+//! | A + {x}   | {a + x \| a ∈ A}         | `a << x`   | `a <<= x` | [`a.map_add(x)`](BitSet::map_add)¹       | [`a.truncating_map_add(x)`](BitSet::truncating_map_add)¹
+//! | A - {x}   | {a - x \| a ∈ A}         | `a >> x`   | `a >>= x` | [`a.map_sub(x)`](BitSet::map_sub)¹       | [`a.truncating_map_sub(x)`](BitSet::truncating_map_sub)¹
+//! |           | {∑(x : x ∈ X) \| X ⊆ A}  |            |           | [`a.subset_sums()`](BitSet::subset_sums) | [`a.truncating_subset_sums()`](BitSet::truncating_subset_sums)
 //!
 //! ¹For signed `x`, use [`a.translate(x)`](BitSet::translate) and [`a.truncating_translate(x)`](BitSet::truncating_translate).
 //!
@@ -287,7 +287,7 @@ mod vec;
 // Imports
 // -------
 
-use core::ops::{AddAssign, BitAndAssign, BitOrAssign, BitXorAssign};
+use core::ops::{AddAssign, BitAndAssign, BitOrAssign, BitXorAssign, ShlAssign, ShrAssign};
 use num_traits::{CheckedShl, CheckedShr, PrimInt, Unsigned, WrappingNeg};
 
 // -------
@@ -329,6 +329,8 @@ pub trait Word = PrimInt
     + BitAndAssign
     + BitOrAssign
     + BitXorAssign
+    + ShlAssign<Element>
+    + ShrAssign<Element>
     + CheckedShl
     + CheckedShr
     + WrappingNeg;
