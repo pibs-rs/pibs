@@ -29,6 +29,15 @@ jobs:
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
 
+      - name: Check version consistency
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          if [ "${TAG#v}" != "$(cargo pkgid | sed 's/.*#//')" ]; then
+            echo "::error::git tag and Cargo.toml versions don't match"
+            exit 1
+          fi
+
       - name: Authenticate with crates.io
         id: auth
         uses: rust-lang/crates-io-auth-action@v1
