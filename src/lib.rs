@@ -12,7 +12,7 @@
 //! `0..128`. See [Alternatives](#alternatives) if this is not the case.
 //!
 //! The ambition of *pibs* is that you can't write faster code for any of its operations. If you
-//! can, please report this as an issue!
+//! can, please open an issue!
 //!
 //! # Examples
 //!
@@ -92,12 +92,12 @@
 //! ```
 //! # use pibs::prelude::*;
 //! fn min_generating_set(set: Set) -> Set {
-//!     let max = set.max().unwrap_or(0);
+//!     let max: usize = set.max().unwrap_or(0);
 //!     let bit_length = (usize::BITS - max.leading_zeros()) as usize; // ⌈log₂(max + 1)⌉
 //!
 //!     // Test all subsets of 1..=max, grouped by increasing cardinality.
 //!     for size in 0..bit_length {
-//!         for generator in Set::iter_combinations(max, size).map(|set| set << 1) {
+//!         for generator in Set::iter_combinations(max, size).map(|g| g << 1) {
 //!             if set.is_subset(generator.truncating_subset_sums()) {
 //!                 return generator;
 //!             }
@@ -256,7 +256,7 @@
 //! [fixedbitset](https://docs.rs/fixedbitset) (SIMD-optimized set abstraction) or
 //! [bittle](https://docs.rs/bittle) (low-level bit manipulation) instead. If you don't know your
 //! largest number ahead of time, then [bit-set](https://docs.rs/bit_set) (based on
-//! [bit-vec](https://docs.rs/bit_set)) or [roaring](https://docs.rs/bit_set) (compressed
+//! [bit-vec](https://docs.rs/bit_vec)) or [roaring](https://docs.rs/roaring) (compressed
 //! representation) may suit you.
 
 #![feature(trait_alias)]
