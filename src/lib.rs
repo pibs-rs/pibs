@@ -169,7 +169,7 @@
 //!
 //! | operation | definition               | short form | mutating  | checked variant                          | truncating variant
 //! | --------- | ------------------------ | ---------- | --------- | ---------------------------------------- | ------------------
-//! | A + B     | {a + b \| a ∈ A ∧ b ∈ B} | `a + b`    |           | [`a.sumset(b)`](BitSet::sumset)          | [`a.truncating_sumset(b)`](BitSet::truncating_sumset)
+//! | A + B     | {a + b \| a ∈ A ∧ b ∈ B} | `a + b`    | `a += b`  | [`a.sumset(b)`](BitSet::sumset)          | [`a.truncating_sumset(b)`](BitSet::truncating_sumset)
 //! | A + {x}   | {a + x \| a ∈ A}         | `a << x`   | `a <<= x` | [`a.map_add(x)`](BitSet::map_add)¹       | [`a.truncating_map_add(x)`](BitSet::truncating_map_add)¹
 //! | A - {x}   | {a - x \| a ∈ A}         | `a >> x`   | `a >>= x` | [`a.map_sub(x)`](BitSet::map_sub)¹       | [`a.truncating_map_sub(x)`](BitSet::truncating_map_sub)¹
 //! |           | {∑(x : x ∈ X) \| X ⊆ A}  |            |           | [`a.subset_sums()`](BitSet::subset_sums) | [`a.truncating_subset_sums()`](BitSet::truncating_subset_sums)

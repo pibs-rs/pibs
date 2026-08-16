@@ -30,6 +30,28 @@ impl<W: Word> Add<Element> for BitSet<W> {
     }
 }
 
+impl<W: Word> AddAssign<Element> for BitSet<W> {
+    /// Add an element to the set (or leave it in).
+    ///
+    /// # Preconditions
+    ///
+    /// The caller must ensure that `rhs <= Self::MAX`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let mut set = set![4..=6];
+    /// set += 7;
+    /// assert_eq!(set, set![4..=7]);
+    /// set += 7; // Does nothing.
+    /// ```
+    #[inline]
+    fn add_assign(&mut self, rhs: Element) {
+        self.insert(rhs);
+    }
+}
+
 impl<W: Word> Add<BitSet<W>> for BitSet<W> {
     type Output = Self;
 
@@ -60,25 +82,27 @@ impl<W: Word> Add<BitSet<W>> for BitSet<W> {
     }
 }
 
-impl<W: Word> AddAssign<Element> for BitSet<W> {
-    /// Add an element to the set (or leave it in).
+impl<W: Word> AddAssign<BitSet<W>> for BitSet<W> {
+    /// Add each element in `rhs` to each element in `self`.
     ///
-    /// # Preconditions
-    ///
-    /// The caller must ensure that `rhs <= Self::MAX`.
+    /// If resulting elements are not representable (above [`Self::MAX`]), they are discarded.
     ///
     /// # Examples
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let mut set = set![4..=6];
-    /// set += 7;
-    /// assert_eq!(set, set![4..=7]);
-    /// set += 7; // Does nothing.
+    /// let mut a = set![0, 10, 20];
+    /// a += set![1, 2];
+    /// assert_eq!(a, set![1, 2, 11, 12, 21, 22]);
     /// ```
+    ///
+    /// # Pitfalls
+    ///
+    /// The operation `a -= b` removes all elements in `b` from `a`, which is not a counterpart to
+    /// the in-place Minkowski sum `a += b`.
     #[inline]
-    fn add_assign(&mut self, rhs: Element) {
-        self.insert(rhs);
+    fn add_assign(&mut self, rhs: BitSet<W>) {
+        self.0 = self.truncating_sumset(rhs).0;
     }
 }
 
@@ -144,8 +168,7 @@ impl<W: Word> Sub<BitSet<W>> for BitSet<W> {
     ///
     /// # Pitfalls
     ///
-    /// While `a - b` denotes the difference of sets `a` and `b`, the counterpart of set union is
-    /// written as `a | b` and not `a + b`.
+    /// The counterpart of set union is written as `a | b` and not `a + b`.
     #[inline]
     fn sub(self, rhs: Self) -> Self {
         self.difference(rhs)
@@ -163,6 +186,10 @@ impl<W: Word> SubAssign<BitSet<W>> for BitSet<W> {
     /// set -= set![3..=7];
     /// assert_eq!(set, set![1..=2]);
     /// ```
+    ///
+    /// # Pitfalls
+    ///
+    /// The counterpart of adding all elements in `b` to `a` is written as `a |= b`, not `a += b`.
     #[inline]
     fn sub_assign(&mut self, rhs: BitSet<W>) {
         self.difference_update(rhs);
