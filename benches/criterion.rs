@@ -62,7 +62,7 @@ fn _bench_mutation<W: Word>(
 }
 
 fn bench_mutation(criterion: &mut Criterion) {
-    let mut group = criterion.benchmark_group(format!("mutation"));
+    let mut group = criterion.benchmark_group("mutation");
     _bench_mutation::<u8>(&mut group);
     _bench_mutation::<u16>(&mut group);
     _bench_mutation::<u32>(&mut group);
@@ -188,7 +188,7 @@ fn _bench_subsets<W: Word>(
 }
 
 fn bench_subsets(criterion: &mut Criterion) {
-    let mut group = criterion.benchmark_group(format!("subsets"));
+    let mut group = criterion.benchmark_group("subsets");
     _bench_subsets::<u8>(&mut group);
     _bench_subsets::<u16>(&mut group);
     _bench_subsets::<u32>(&mut group);
