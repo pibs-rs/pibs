@@ -85,14 +85,15 @@ impl<W: Word> BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let set = set![4..=6];
+    /// let set = bitset![u8; 4..=6];
     /// assert_eq!(set.position(3), None);
     /// assert_eq!(set.position(4), Some(0));
     /// assert_eq!(set.position(6), Some(2));
+    /// assert_eq!(set.position(8), None);
     /// ```
     #[inline]
     pub fn position(self, e: Element) -> Option<usize> {
-        if self.contains(e) {
+        if e <= Self::MAX && self.contains(e) {
             Some(self.position_unchecked(e))
         } else {
             None
@@ -116,10 +117,11 @@ impl<W: Word> BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let set = set![4..=6];
+    /// let set = bitset![u8; 4..=6];
     /// assert_eq!(set.rank(3), None);
     /// assert_eq!(set.rank(4), Some(1));
     /// assert_eq!(set.rank(6), Some(3));
+    /// assert_eq!(set.rank(8), None);
     /// ```
     #[inline]
     pub fn rank(self, e: Element) -> Option<usize> {
