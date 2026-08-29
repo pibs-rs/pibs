@@ -73,7 +73,7 @@ fn bench_mutation(criterion: &mut Criterion) {
 fn _bench_enumerate<W: Word>(
     group: &mut criterion::BenchmarkGroup<'_, criterion::measurement::WallTime>,
 ) {
-    group.throughput(Throughput::Elements(2.pow(BitSet::<W>::BITS as u32)));
+    group.throughput(Throughput::Elements(2u64.pow(BitSet::<W>::BITS as u32)));
     group.bench_function(BenchmarkId::from_parameter("iter_all"), |b| {
         b.iter(|| {
             for set in BitSet::<W>::iter_all() {
@@ -150,7 +150,7 @@ fn _bench_iter_all_below<W: Word>(
 fn bench_iter_all_below(criterion: &mut Criterion) {
     for n in [8, 16] {
         let mut group = criterion.benchmark_group(format!("iter_all_below_{n}"));
-        group.throughput(Throughput::Elements(2.pow(n as u32)));
+        group.throughput(Throughput::Elements(2u64.pow(n as u32)));
         _bench_iter_all_below::<u8>(&mut group, n);
         _bench_iter_all_below::<u16>(&mut group, n);
         _bench_iter_all_below::<u32>(&mut group, n);
@@ -163,7 +163,7 @@ fn bench_iter_all_below(criterion: &mut Criterion) {
 fn _bench_subsets<W: Word>(
     group: &mut criterion::BenchmarkGroup<'_, criterion::measurement::WallTime>,
 ) {
-    group.throughput(Throughput::Elements(2.pow(8)));
+    group.throughput(Throughput::Elements(2u64.pow(8)));
     group.bench_function(
         BenchmarkId::from_parameter(format!("subsets/{}", type_name::<W>())),
         |b| {
