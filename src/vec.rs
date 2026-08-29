@@ -8,6 +8,8 @@ use alloc::vec::Vec;
 impl<W: Word> BitSet<W> {
     /// The elements as a sorted vector of type [`Vec<Element>`].
     ///
+    /// Available with the `alloc` feature, which is enabled by default.
+    ///
     /// # Examples
     ///
     /// ```
@@ -15,7 +17,6 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set![1, 2, 3].to_vec(), vec![1, 2, 3]);
     /// ```
     #[inline]
-    #[doc(cfg(feature = "alloc"))]
     pub fn to_vec(self) -> Vec<Element> {
         self.iter().collect()
     }
@@ -28,6 +29,8 @@ where
     type Error = Error;
 
     /// Try to create a [`BitSet`] from a vector.
+    ///
+    /// Available with the `alloc` feature, which is enabled by default.
     ///
     /// # Errors
     ///
@@ -44,7 +47,6 @@ where
     /// assert_eq!(Set::try_from(vec![10_000]), Err(Irrepresentable));
     /// ```
     #[inline]
-    #[doc(cfg(feature = "alloc"))]
     fn try_from(vec: Vec<T>) -> Result<Self, Self::Error> {
         Self::try_from_iter(vec)
     }
@@ -57,6 +59,8 @@ where
     type Error = Error;
 
     /// Try to create a [`BitSet`] from a vector by reference.
+    ///
+    /// Available with the `alloc` feature, which is enabled by default.
     ///
     /// # Errors
     ///
@@ -73,7 +77,6 @@ where
     /// assert_eq!(Set::try_from(&vec![10_000]), Err(Irrepresentable));
     /// ```
     #[inline]
-    #[doc(cfg(feature = "alloc"))]
     fn try_from(vec: &Vec<T>) -> Result<Self, Self::Error> {
         Self::try_from_iter(vec.iter().copied())
     }

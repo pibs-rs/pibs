@@ -259,7 +259,6 @@
 //! [bit-vec](https://docs.rs/bit_vec)) or [roaring](https://docs.rs/roaring) (compressed
 //! representation) may suit you.
 
-#![feature(doc_cfg)]
 #![no_std]
 
 // -------
