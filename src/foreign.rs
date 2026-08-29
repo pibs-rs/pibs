@@ -89,6 +89,14 @@ impl<W: Word> fmt::Display for BitSet<W> {
     }
 }
 
+struct DebugElements<W: Word>(BitSet<W>);
+
+impl<W: Word> fmt::Debug for DebugElements<W> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
+    }
+}
+
 impl<W: Word> fmt::Debug for BitSet<W> {
     /// Debug-format a bitset.
     ///
@@ -101,7 +109,9 @@ impl<W: Word> fmt::Debug for BitSet<W> {
     /// ```
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple(type_name::<Self>().rsplit("::").next().unwrap())
-            .field_with(|f| f.debug_set().entries(self.iter()).finish())
+            // TODO: Once stable, use field_with instead of the helper struct:
+            // .field_with(|f| f.debug_set().entries(self.iter()).finish())
+            .field(&DebugElements(*self))
             .finish()
     }
 }
