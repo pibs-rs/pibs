@@ -167,7 +167,7 @@ impl<W: Word> TryFrom<Range<Element>> for BitSet<W> {
     ///
     /// # Errors
     ///
-    /// If `range.end > Self::BITS`.
+    /// If `range.end > Self::BITS` for a non-empty range.
     ///
     /// # Examples
     ///
@@ -181,11 +181,12 @@ impl<W: Word> TryFrom<Range<Element>> for BitSet<W> {
     /// ```
     #[inline]
     fn try_from(range: Range<Element>) -> Result<Self, Self::Error> {
-        if range.end > Self::BITS {
-            Err(Error::Irrepresentable)
-        } else if range.end == 0 {
+        if range.is_empty() {
             Ok(Self::new())
+        } else if range.end > Self::BITS {
+            Err(Error::Irrepresentable)
         } else {
+            debug_assert!(range.end >= 1);
             Ok(Self::interval(range.start, range.end - 1))
         }
     }
@@ -198,7 +199,7 @@ impl<W: Word> TryFrom<RangeInclusive<Element>> for BitSet<W> {
     ///
     /// # Errors
     ///
-    /// If `range.end() > Self::MAX`.
+    /// If `range.end() > Self::MAX` for a non-empty range.
     ///
     /// # Examples
     ///
@@ -212,7 +213,9 @@ impl<W: Word> TryFrom<RangeInclusive<Element>> for BitSet<W> {
     /// ```
     #[inline]
     fn try_from(range: RangeInclusive<Element>) -> Result<Self, Self::Error> {
-        if *range.end() > Self::MAX {
+        if range.is_empty() {
+            Ok(Self::new())
+        } else if *range.end() > Self::MAX {
             Err(Error::Irrepresentable)
         } else {
             Ok(Self::interval(*range.start(), *range.end()))
