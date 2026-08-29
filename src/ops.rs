@@ -65,11 +65,11 @@ impl<W: Word> Add<BitSet<W>> for BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// let a = set![0, 10, 20];
-    /// let b = set![1, 2];
-    /// assert_eq!(a + b, set![1, 2, 11, 12, 21, 22]);
-    /// assert_eq!(a + a, set![0, 10, 20, 30, 40]);
-    /// assert_eq!(b + b, set![2, 3, 4]);
+    /// let a = set128![0, 10, 20];
+    /// let b = set128![1, 2];
+    /// assert_eq!(a + b, set128![1, 2, 11, 12, 21, 22]);
+    /// assert_eq!(a + a, set128![0, 10, 20, 30, 40]);
+    /// assert_eq!(b + b, set128![2, 3, 4]);
     /// ```
     ///
     /// # Pitfalls
