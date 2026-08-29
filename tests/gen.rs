@@ -45,7 +45,7 @@ fn test_iter_all_below() {
     for bound in 0..=10 {
         assert_eq!(
             Set::iter_all_below(bound)
-                .map(|set| set.to_vec())
+                .map(|set| set.iter().collect::<Vec<_>>())
                 .collect::<HashSet<_>>(),
             (0..bound)
                 .map(|e| e as Element)
@@ -63,7 +63,7 @@ fn test_subsets() {
             set.subsets()
                 .map(|subset| {
                     assert!(subset.is_subset(set) && set.is_superset(subset));
-                    subset.to_vec()
+                    subset.iter().collect::<Vec<_>>()
                 })
                 .collect::<HashSet<_>>(),
             set.iter().powerset().collect::<HashSet<_>>()
@@ -79,7 +79,7 @@ fn test_subsets_by_size() {
             set.subsets_by_size()
                 .map(|subset| {
                     assert!(subset.is_subset(set) && set.is_superset(subset));
-                    subset.to_vec()
+                    subset.iter().collect::<Vec<_>>()
                 })
                 .collect::<HashSet<_>>(),
             set.iter().powerset().collect::<HashSet<_>>()
