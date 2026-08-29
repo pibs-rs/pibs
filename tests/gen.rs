@@ -72,6 +72,22 @@ fn test_subsets() {
 }
 
 #[test]
+fn test_subsets_of_size_extremes() {
+    let empty = BitSet::<u128>::new();
+    assert!(empty.subsets_of_size(0).eq([empty]));
+    assert!(empty.subsets_of_size(1).eq([]));
+
+    let full = BitSet::<u128>::full();
+    assert!(full.subsets_of_size(0).eq([empty]));
+    assert_eq!(full.subsets_of_size(1).count(), 128);
+    assert_eq!(full.subsets_of_size(2).count(), 128 * 127 / 2);
+    assert_eq!(full.subsets_of_size(126).count(), 128 * 127 / 2);
+    assert_eq!(full.subsets_of_size(127).count(), 128);
+    assert!(full.subsets_of_size(128).eq([full]));
+    assert!(full.subsets_of_size(129).eq([]));
+}
+
+#[test]
 fn test_subsets_by_size() {
     for mut set in Set::iter_all_below(8) {
         set.insert(Set::MAX); // Test for overflows.
