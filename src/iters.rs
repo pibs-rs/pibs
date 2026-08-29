@@ -47,7 +47,11 @@ impl<W: Word> SubsetsOfSizeIter<W> {
                 stop: true,
             };
         }
-        debug_assert!(size < suffixes.len());
+        assert!(
+            size < suffixes.len(),
+            "can only generate subsets of size up to {}",
+            suffixes.len() - 1
+        );
         let mut suffix = W::zero();
         let mut remainder = set;
         suffixes[0].write(suffix);
@@ -85,7 +89,8 @@ impl<W: Word> Iterator for SubsetsOfSizeIter<W> {
             {
                 let prefix = x & self.set;
                 let lost = (self.subset.count_ones() - prefix.count_ones()) as usize;
-                let suffix = unsafe { self.suffixes[lost].assume_init() };
+                assert!(lost <= self.size); // SAFETY: self.suffixes is initialized up to self.size.
+                let suffix = unsafe { self.suffixes.get_unchecked(lost).assume_init() };
                 debug_assert!(prefix & suffix == W::zero());
                 self.subset = prefix | suffix;
             } else {

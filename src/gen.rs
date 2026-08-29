@@ -223,6 +223,11 @@ impl<W: Word> BitSet<W> {
     ///     ])
     /// );
     /// ```
+    ///
+    /// # Panics
+    ///
+    /// If `size <= self.len()` and `size > 128`. Note that this requires the storage word `W` to
+    /// have capacity for more than 128 elements; builtin primitives up to [`u128`] are infallible.
     #[inline]
     pub fn subsets_of_size(self, size: usize) -> SubsetsOfSizeIter<W> {
         SubsetsOfSizeIter::<W>::new(self.0, size)
