@@ -14,7 +14,23 @@ impl<W: Word> BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// assert_eq!(set![1, 2, 3].to_vec(), vec![1, 2, 3]);
+    /// assert_eq!(set![3, 2, 1].to_vec(), vec![1, 2, 3]);
+    /// ```
+    ///
+    /// To produce a [`Vec<T>`] for a different primitive integer type `T`, use `into` or `from`
+    /// with a type hint.
+    ///
+    /// ```
+    /// # use pibs::prelude::*;
+    /// let set = set128![127, 5, 23];
+    ///
+    /// // Via BitSet::into.
+    /// let vec: Vec<i8> = set.into();
+    /// assert_eq!(vec, vec![5, 23, 127]);
+    ///
+    /// // Via Vec::from.
+    /// let vec = Vec::<i8>::from(set);
+    /// assert_eq!(vec, vec![5, 23, 127]);
     /// ```
     #[inline]
     pub fn to_vec(self) -> Vec<Element> {
@@ -82,57 +98,32 @@ where
     }
 }
 
-impl<W: Word, T> From<BitSet<W>> for Vec<T>
-where
-    T: PrimInt + TryFrom<Element>,
-{
-    /// Create a sorted [`Vec`] from a [`BitSet`].
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use pibs::prelude::*;
-    /// let vec: Vec<usize> = set![7, 2, 5].into();
-    /// assert_eq!(vec, vec![2, 5, 7]);
-    /// ```
-    ///
-    /// A full type hint is needed, as this method can produce any primitive integer vector.
-    ///
-    /// ```compile_fail
-    /// # use pibs::prelude::*;
-    /// let vec: Vec<_> = set![7, 2, 5].into(); // Does not compile.
-    /// ```
-    ///
-    /// Using [`BitSet::to_vec`] avoids the type hint, as it always produces a [`Vec<Element>`].
-    ///
-    /// ```
-    /// # use pibs::prelude::*;
-    /// let vec = set![7, 2, 5].to_vec();
-    /// assert_eq!(vec, vec![2, 5, 7]);
-    /// ```
-    ///
-    /// This method is infallible, as any element in a [`BitSet<u128>`] can still fit in a
-    /// [`Vec<i8>`].
-    ///
-    /// ```
-    /// # use pibs::prelude::*;
-    /// let set = Set128::full();
-    /// let vec: Vec<i8> = set.into();
-    /// assert!(vec.iter().map(|&x| x as usize).eq(set.iter()));
-    /// ```
-    #[inline]
-    #[doc(cfg(feature = "alloc"))]
-    fn from(set: BitSet<W>) -> Self {
-        set.into_iter()
-            .map(|e| match T::try_from(e) {
-                Ok(x) => x,
-                Err(_) => {
-                    // Even a Vec<i8> can store the largest element in a BitSet<u128>.
-                    unreachable!(
-                        "any bitset element should be representable by any primitive integer type"
-                    )
+macro_rules! impl_vec_from_bitset {
+    (@to $word:ty; $($target:ty),+) => {
+        $(
+            #[doc(hidden)]
+            impl From<BitSet<$word>> for Vec<$target> {
+                /// Create a sorted [`Vec`] from a [`BitSet`].
+                #[inline]
+                fn from(set: BitSet<$word>) -> Self {
+                    // This is lossless as any element in a BitSet<u128> can fit in a i8.
+                    set.into_iter().map(|e| e as $target).collect()
                 }
-            })
-            .collect()
-    }
+            }
+        )+
+    };
+
+    (@from $word:ty) => {
+        impl_vec_from_bitset!(
+            @to $word;
+            u8, u16, u32, u64, u128, usize,
+            i8, i16, i32, i64, i128, isize
+        );
+    };
+
+    ($($word:ty),+) => {
+        $(impl_vec_from_bitset!(@from $word);)+
+    };
 }
+
+impl_vec_from_bitset!(u8, u16, u32, u64, u128, usize);
