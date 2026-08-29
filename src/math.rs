@@ -425,7 +425,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `e.unsigned_abs() <= Self::MAX`.
+    /// The caller must ensure that `add.unsigned_abs() <= Self::MAX`.
     ///
     /// # Examples
     ///

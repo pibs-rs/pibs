@@ -384,9 +384,9 @@ impl<W: Word> Shr<Element> for BitSet<W> {
 }
 
 impl<W: Word> ShrAssign<Element> for BitSet<W> {
-    /// Add a number to each element in the set.
+    /// Subtract a number from each element in the set.
     ///
-    /// If resulting elements are not representable (above [`Self::MAX`]), they are discarded.
+    /// If resulting elements are not representable (below zero), they are discarded.
     ///
     /// # Preconditions
     ///

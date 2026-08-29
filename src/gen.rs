@@ -168,7 +168,7 @@ impl<W: Word> BitSet<W> {
     /// Generate all subsets, with the maximum number growing slowly.
     ///
     /// See [`Self::subsets_by_size`] for a different iteration order.
-    /// To generate all subsets of `0..=Self::BITS`, use the faster [`Self::iter_all`].
+    /// To generate all subsets of `0..=Self::MAX`, use the faster [`Self::iter_all`].
     ///
     /// # Examples
     ///
