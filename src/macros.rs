@@ -5,7 +5,8 @@ use crate::*;
 
 /// Create a [`BitSet`] using the given primitive type to store the arguments.
 ///
-/// All arguments must be constant expressions, and are checked at compile time.
+/// Explicit elements and range ends must be constant expressions and are bounds-checked at compile
+/// time. Range starts may be runtime values.
 ///
 /// # Examples
 ///
@@ -26,7 +27,7 @@ use crate::*;
 /// let set = bitset![u32; 32]; // Cannot be represented.
 /// ```
 ///
-/// This requires the arguments to be constant.
+/// Explicit elements and range ends must be constant expressions.
 ///
 /// ```compile_fail
 /// # use pibs::prelude::*;
@@ -42,14 +43,14 @@ macro_rules! bitset {
 
     // Finalize.
     (@accum $word:expr; $ty:ty;) => {
-        BitSet::<$ty>::from_word($word)
+        $crate::BitSet::<$ty>::from_word($word)
     };
 
     // Parse a singleton.
     (@accum $word:expr; $ty:ty; $element:tt $(, $($rest:tt)*)?) => {
         $crate::bitset!(
             @accum $word | ({
-                const _: () = assert!($element <= BitSet::<$ty>::MAX);
+                const _: () = assert!($element <= $crate::BitSet::<$ty>::MAX);
                 (1 as $ty) << $element
             });
             $ty;
@@ -61,11 +62,11 @@ macro_rules! bitset {
     (@accum $word:expr; $ty:ty; $start:tt .. $end:tt $(, $($rest:tt)*)?) => {
         $crate::bitset!(
             @accum $word | ({
-                const _: () = assert!($end <= BitSet::<$ty>::BITS);
+                const _: () = assert!($end <= $crate::BitSet::<$ty>::BITS);
                 if $end <= 0 {
                     0 as $ty
                 } else {
-                    BitSet::<$ty>::interval($start, $end - 1).word()
+                    $crate::BitSet::<$ty>::interval($start, $end - 1).word()
                 }
             });
             $ty;
@@ -77,8 +78,8 @@ macro_rules! bitset {
     (@accum $word:expr; $ty:ty; $start:tt ..= $last:tt $(, $($rest:tt)*)?) => {
         $crate::bitset!(
             @accum $word | ({
-                const _: () = assert!($last <= BitSet::<$ty>::MAX);
-                BitSet::<$ty>::interval($start, $last).word()
+                const _: () = assert!($last <= $crate::BitSet::<$ty>::MAX);
+                $crate::BitSet::<$ty>::interval($start, $last).word()
             });
             $ty;
             $($($rest)*)?
@@ -88,7 +89,8 @@ macro_rules! bitset {
 
 /// Create a [`Set`] containing the arguments.
 ///
-/// All arguments must be constant expressions, and are checked at compile time.
+/// Explicit elements and range ends must be constant expressions and are bounds-checked at compile
+/// time. Range starts may be runtime values.
 ///
 /// # Examples
 ///
@@ -109,14 +111,13 @@ macro_rules! bitset {
 /// let set = set![10_000]; // Cannot be represented.
 /// ```
 ///
-/// This requires the arguments to be constant.
+/// Explicit elements and range ends must be constant expressions.
 ///
 /// ```compile_fail
 /// # use pibs::prelude::*;
 /// let x = 5;
 /// let set = set![x]; // Not a constant expression.
 /// ```
-// TODO: Allow importing only this alongside Set; right now BitSet is needed.
 #[macro_export]
 macro_rules! set {
     ($($tt:tt)*) => {
@@ -126,7 +127,8 @@ macro_rules! set {
 
 /// Create a [`Set128`] containing the arguments.
 ///
-/// All arguments must be constant expressions, and are checked at compile time.
+/// Explicit elements and range ends must be constant expressions and are bounds-checked at compile
+/// time. Range starts may be runtime values.
 ///
 /// # Examples
 ///
@@ -144,14 +146,13 @@ macro_rules! set {
 /// let set = set128![0..=128]; // Cannot be represented.
 /// ```
 ///
-/// This requires the arguments to be constant.
+/// Explicit elements and range ends must be constant expressions.
 ///
 /// ```compile_fail
 /// # use pibs::prelude::*;
 /// let x = 5;
 /// let set = set128![x]; // Not a constant expression.
 /// ```
-// TODO: Allow importing only this alongside Set128; right now BitSet is needed.
 #[macro_export]
 macro_rules! set128 {
     ($($tt:tt)*) => {
