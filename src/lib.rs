@@ -247,8 +247,8 @@
 //! [`truncating_translate`](BitSet::truncating_translate) discards irrepresentable sums as a
 //! zero-cost side effect of the shift used to compute the result.
 //!
-//! Creation macros such as [`set!`] check their arguments at compile time, which introduces no
-//! runtime cost.
+//! Creation macros such as [`set!`] bounds-check relevant arguments at compile time. This
+//! introduces no runtime cost but requires those arguments to be constant expressions.
 //!
 //! ## Alternatives
 //!
