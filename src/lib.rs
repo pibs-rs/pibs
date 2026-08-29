@@ -259,7 +259,6 @@
 //! [bit-vec](https://docs.rs/bit_vec)) or [roaring](https://docs.rs/roaring) (compressed
 //! representation) may suit you.
 
-#![feature(trait_alias)]
 #![feature(debug_closure_helpers)]
 #![feature(doc_cfg)]
 #![no_std]
@@ -322,8 +321,9 @@ pub type Set128 = BitSet<u128>;
 /// Alias for [`usize`], the default input and output type for the numbers stored in a [`BitSet`].
 pub type Element = usize;
 
-/// A primitive integer that [`BitSet`] can use for storage.
-pub trait Word = PrimInt
+/// A primitive unsigned integer that [`BitSet`] can use for storage.
+pub trait Word:
+    PrimInt
     + Unsigned
     + AddAssign
     + BitAndAssign
@@ -333,7 +333,25 @@ pub trait Word = PrimInt
     + ShrAssign<Element>
     + CheckedShl
     + CheckedShr
-    + WrappingNeg;
+    + WrappingNeg
+{
+}
+
+// TODO: Once they are stable, turn Word into a trait alias.
+impl<T> Word for T where
+    T: PrimInt
+        + Unsigned
+        + AddAssign
+        + BitAndAssign
+        + BitOrAssign
+        + BitXorAssign
+        + ShlAssign<Element>
+        + ShrAssign<Element>
+        + CheckedShl
+        + CheckedShr
+        + WrappingNeg
+{
+}
 
 /// Errors returned for [`BitSet`] operations.
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
