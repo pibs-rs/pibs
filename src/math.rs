@@ -141,7 +141,9 @@ impl<W: Word> BitSet<W> {
 
     /// Try to add each element in `self` to each element in `other`.
     ///
-    /// If resulting elements are not representable (above [`Self::MAX`]), returns [`None`].
+    /// # Errors
+    ///
+    /// If resulting elements are not representable (above [`Self::MAX`]).
     ///
     /// See [`Self::truncating_sumset`] for a variant that drops irrepresentable elements.
     ///
@@ -149,15 +151,17 @@ impl<W: Word> BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
+    /// use pibs::Error::Irrepresentable;
+    ///
     /// let a = set![2, 8];
     /// let b = set![1, 5];
-    /// assert_eq!(a.sumset(b), Some(set![3, 7, 9, 13]));
-    /// assert_eq!(a.sumset(set![]), Some(set![]));
-    /// assert_eq!(a.sumset(set![0]), Some(a));
-    /// assert_eq!(a.sumset(Set::full()), None);
+    /// assert_eq!(a.sumset(b), Ok(set![3, 7, 9, 13]));
+    /// assert_eq!(a.sumset(set![]), Ok(set![]));
+    /// assert_eq!(a.sumset(set![0]), Ok(a));
+    /// assert_eq!(a.sumset(Set::full()), Err(Irrepresentable));
     /// ```
     #[inline]
-    pub fn sumset(self, other: Self) -> Option<Self> {
+    pub fn sumset(self, other: Self) -> Result<Self, Error> {
         let mut result = W::zero();
 
         let (smaller, larger_word) = if self.len() < other.len() {
@@ -169,12 +173,12 @@ impl<W: Word> BitSet<W> {
 
         for e in smaller {
             if e > e_max {
-                return None;
+                return Err(Error::Irrepresentable);
             }
             result |= larger_word << e;
         }
 
-        Some(Self(result))
+        Ok(Self(result))
     }
 
     /// Add each element in `self` to each element in `other`.
@@ -213,7 +217,9 @@ impl<W: Word> BitSet<W> {
 
     /// Sum the elements in each subset of the set and collect these sums in a new set.
     ///
-    /// If resulting elements are not representable (above [`Self::MAX`]), returns [`None`].
+    /// # Errors
+    ///
+    /// If resulting elements are not representable (above [`Self::MAX`]).
     ///
     /// See [`Self::truncating_subset_sums`] for a variant that drops irrepresentable elements.
     ///
@@ -221,29 +227,31 @@ impl<W: Word> BitSet<W> {
     ///
     /// ```
     /// # use pibs::prelude::*;
-    /// assert_eq!(set![].subset_sums(), Some(set![0]));
-    /// assert_eq!(set![0].subset_sums(), Some(set![0]));
-    /// assert_eq!(set![1, 2, 4, 8].subset_sums(), Some(set![0..16]));
-    /// assert_eq!(set![1..=5].subset_sums(), Some(set![0..16]));
+    /// use pibs::Error::Irrepresentable;
+    ///
+    /// assert_eq!(set![].subset_sums(), Ok(set![0]));
+    /// assert_eq!(set![0].subset_sums(), Ok(set![0]));
+    /// assert_eq!(set![1, 2, 4, 8].subset_sums(), Ok(set![0..16]));
+    /// assert_eq!(set![1..=5].subset_sums(), Ok(set![0..16]));
     ///
     /// // Overflows are checked.
-    /// assert_eq!(set![1, 3, 7].subset_sums(), Some(set![0, 1, 3, 4, 7, 8, 10, 11]));
-    /// assert_eq!(bitset![u8; 1, 3, 7].subset_sums(), None);
+    /// assert_eq!(set![1, 3, 7].subset_sums(), Ok(set![0, 1, 3, 4, 7, 8, 10, 11]));
+    /// assert_eq!(bitset![u8; 1, 3, 7].subset_sums(), Err(Irrepresentable));
     /// ```
     #[inline]
-    pub fn subset_sums(self) -> Option<Self> {
+    pub fn subset_sums(self) -> Result<Self, Error> {
         let mut result = W::one();
         let mut e_max = result.leading_zeros() as Element;
 
         for e in self {
             if e > e_max {
-                return None;
+                return Err(Error::Irrepresentable);
             }
             e_max -= e;
             result |= result << e;
         }
 
-        Some(Self(result))
+        Ok(Self(result))
     }
 
     /// Sum the elements in each subset of the set and collect these sums in a new set.

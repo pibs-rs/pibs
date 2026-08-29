@@ -164,8 +164,9 @@
 //!
 //! ### Arithmetic operations
 //!
-//! Default long forms are checked and return `None` if an output element cannot be represented;
-//! truncating variants instead drop any values `< 0` or `> M`. The short forms are truncating.
+//! Checked variants return [`Err(Irrepresentable)`](Error::Irrepresentable) if an output element
+//! cannot be represented; truncating variants instead drop any values `< 0` or `> M`. The short
+//! forms are truncating.
 //!
 //! | operation | definition               | short form | mutating  | checked variant                          | truncating variant
 //! | --------- | ------------------------ | ---------- | --------- | ---------------------------------------- | ------------------
