@@ -53,7 +53,9 @@
 //! ```
 //! # use pibs::prelude::*;
 //! fn has_subset_with_sum(set: Set, sum: usize) -> bool {
-//!     if sum > Set::MAX { unimplemented!("this only works for representable numbers") }
+//!     if sum > Set::MAX {
+//!         unimplemented!("the target sum must be representable");
+//!     }
 //!     set.truncating_subset_sums().contains(sum)
 //! }
 //!
@@ -64,20 +66,23 @@
 //!
 //! ## Testing Sidon sets
 //!
-//! A set is a [Sidon set](https://en.wikipedia.org/wiki/Sidon_sequence) if every pair of elements
-//! (repetition allowed) has a unique sum. The following makes use of the
-//! [`sumset`](https://en.wikipedia.org/wiki/Sumset) operator (`+`, aka Minkowski sum) to check if
-//! this is the case.
+//! A set is a [Sidon set](https://en.wikipedia.org/wiki/Sidon_sequence) if every unordered pair of
+//! elements (repetition allowed) has a unique sum. One can use the [`sumset`](BitSet::sumset)
+//! operator (also known as Minkowski sum) to check this property given that every pair sum is
+//! representable.
 //!
 //! ```
 //! # use pibs::prelude::*;
-//! fn is_sidon(set: Set) -> bool {
+//! use pibs::Error;
+//!
+//! fn is_sidon(set: Set) -> Result<bool, Error> {
 //!     let n = set.len();
-//!     (set + set).len() == n * (n + 1) / 2
+//!     Ok(set.sumset(set)?.len() == n * (n + 1) / 2)
 //! }
 //!
-//! assert_eq!(is_sidon(set![1, 2, 4]), true);
-//! assert_eq!(is_sidon(set![1, 2, 3]), false); // 2 + 2 = 1 + 3
+//! assert_eq!(is_sidon(set![1, 2, 3]), Ok(false)); // 2 + 2 = 1 + 3
+//! assert_eq!(is_sidon(set![1, 2, 4, 8, 16]), Ok(true));
+//! assert_eq!(is_sidon(set![1, 2, 4, 8, 16] + Set::MAX), Err(Error::Irrepresentable));
 //! ```
 //!
 //! ## Minimum generating set
