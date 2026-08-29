@@ -299,14 +299,14 @@ impl<W: Word> BitSet<W> {
     /// let set = bitset![u8; 1..=3, 5];
     /// assert_eq!(set.map_add(2), Ok(bitset![u8; 3..=5, 7]));
     /// assert_eq!(set.map_add(3), Err(Irrepresentable));
+    /// assert_eq!(set![].map_add(usize::MAX), Ok(set![]));
     /// ```
     #[inline]
     pub fn map_add(self, e: Element) -> Result<Self, Error> {
-        if e > self.0.leading_zeros() as Element {
-            Err(Error::Irrepresentable)
-        } else if self.0 == W::zero() {
-            // Avoid a possible shift by Self::BITS.
+        if self.is_empty() {
             Ok(Self::new())
+        } else if e > self.0.leading_zeros() as Element {
+            Err(Error::Irrepresentable)
         } else {
             Ok(self.truncating_map_add(e))
         }
@@ -329,14 +329,14 @@ impl<W: Word> BitSet<W> {
     /// let set = set![1..=3, 5];
     /// assert_eq!(set.map_sub(1), Ok(set![0..=2, 4]));
     /// assert_eq!(set.map_sub(3), Err(Irrepresentable));
+    /// assert_eq!(set![].map_sub(usize::MAX), Ok(set![]));
     /// ```
     #[inline]
     pub fn map_sub(self, e: Element) -> Result<Self, Error> {
-        if e > self.0.trailing_zeros() as Element {
-            Err(Error::Irrepresentable)
-        } else if self.0 == W::zero() {
-            // Avoid a possible shift by Self::BITS.
+        if self.is_empty() {
             Ok(Self::new())
+        } else if e > self.0.trailing_zeros() as Element {
+            Err(Error::Irrepresentable)
         } else {
             Ok(self.truncating_map_sub(e))
         }
@@ -352,7 +352,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `e <= Self::MAX`.
+    /// The caller must ensure that `e <= Self::MAX`, even if `self.is_empty()`.
     ///
     /// # Examples
     ///
@@ -378,7 +378,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `e <= Self::MAX`.
+    /// The caller must ensure that `e <= Self::MAX`, even if `self.is_empty()`.
     ///
     /// # Examples
     ///
@@ -412,10 +412,14 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set.translate(2), Ok(bitset![u8; 3..=5, 7]));
     /// assert_eq!(set.translate(-1), Ok(bitset![u8; 0..=2, 4]));
     /// assert_eq!(set.translate(-2), Err(Irrepresentable));
+    /// assert_eq!(set![].translate(i32::MIN), Ok(set![]));
+    /// assert_eq!(set![].translate(i32::MAX), Ok(set![]));
     /// ```
     #[inline]
     pub fn translate(self, add: i32) -> Result<Self, Error> {
-        if add >= 0 {
+        if self.is_empty() {
+            Ok(Self::new())
+        } else if add >= 0 {
             self.map_add(add.try_into().map_err(|_| Error::Irrepresentable)?)
         } else {
             self.map_sub(
@@ -435,7 +439,7 @@ impl<W: Word> BitSet<W> {
     ///
     /// # Preconditions
     ///
-    /// The caller must ensure that `add.unsigned_abs() <= Self::MAX`.
+    /// The caller must ensure that `add.unsigned_abs() <= Self::MAX`, even if `self.is_empty()`.
     ///
     /// # Examples
     ///
