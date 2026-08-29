@@ -33,7 +33,6 @@ fn _evenly_spaced_set<W: Word>() -> BitSet<W> {
 /// Yield eight black-boxed elements with evenly distributed bit positions in the target primitive.
 ///
 /// The bits are the same as are set in [`_evenly_spaced_bitmask`].
-/// ```
 #[inline(always)]
 fn _evenly_spaced_elements<W: Word>() -> impl Iterator<Item = Element> {
     (0..8)
