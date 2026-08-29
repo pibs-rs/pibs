@@ -5,31 +5,40 @@ on:
     tags:
       - "v*"
 
-permissions:
-  id-token: write
-  contents: read
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
   test:
     name: Run CI
+    if: github.event.created
+    permissions:
+      contents: read
     uses: ./.github/workflows/ci.yml
 
   publish:
     name: Publish
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     env:
       GOT_CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN != '' }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
-      - name: Install rust
+      - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo
+      - name: Cache Cargo
         uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: cargo
 
       - name: Check version consistency
         env:
