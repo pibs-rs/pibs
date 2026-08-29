@@ -59,7 +59,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set![0, 2, 4].word(), 1 + 4 + 16);
     /// ```
     #[inline]
-    pub fn word(self) -> W {
+    pub const fn word(self) -> W {
         self.0
     }
 
@@ -74,7 +74,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set, set![0, 2, 4]);
     /// ```
     #[inline]
-    pub fn word_mut(&mut self) -> &mut W {
+    pub const fn word_mut(&mut self) -> &mut W {
         &mut self.0
     }
 

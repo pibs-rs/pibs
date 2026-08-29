@@ -108,7 +108,7 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(Set::from_word(123).word(), 123);
     /// ```
     #[inline]
-    pub fn from_word(word: W) -> Self {
+    pub const fn from_word(word: W) -> Self {
         Self(word)
     }
 }
