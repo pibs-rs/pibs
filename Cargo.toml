@@ -3,6 +3,7 @@ name = "pibs"
 version = "0.1.0"
 authors = ["Maximilian Stahlberg"]
 edition = "2024"
+rust-version = "1.88"
 description = "A primitive integer bitset for high-performance combinatorics"
 documentation = "https://docs.rs/pibs"
 readme = "README.md"
