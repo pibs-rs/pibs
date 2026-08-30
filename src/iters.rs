@@ -1,7 +1,7 @@
 //! Iterators returned by [`BitSet`] methods.
 
 use crate::*;
-use core::mem::MaybeUninit;
+use core::{iter::ExactSizeIterator, mem::MaybeUninit};
 
 /// Iterator returned by [`BitSet::iter`] and [`BitSet::into_iter`].
 pub struct BitSetIter<W: Word>(pub(crate) W);
@@ -18,7 +18,15 @@ impl<W: Word> Iterator for BitSetIter<W> {
         self.0 &= self.0 - W::one();
         Some(item)
     }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let remaining = self.0.count_ones() as usize;
+        (remaining, Some(remaining))
+    }
 }
+
+impl<W: Word> ExactSizeIterator for BitSetIter<W> {}
 
 /// Iterator returned by [`BitSet::subsets_of_size`].
 pub struct SubsetsOfSizeIter<W> {
