@@ -273,6 +273,7 @@
 
 mod bitset;
 mod create;
+mod error;
 mod foreign;
 mod from;
 mod r#gen;
@@ -308,6 +309,7 @@ pub mod prelude {
 }
 
 pub use bitset::BitSet;
+pub use error::Error;
 pub use iters::{BitSetIter, SubsetsOfSizeIter};
 
 /// Alias for [`BitSet<usize>`]; the set offering the best performance.
@@ -355,14 +357,4 @@ impl<T> Word for T where
         + CheckedShr
         + WrappingNeg
 {
-}
-
-/// Errors returned for [`BitSet`] operations.
-#[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
-#[non_exhaustive]
-pub enum Error {
-    /// A number cannot be represented as a [`BitSet`] element.
-    ///
-    /// This occurs when the number is negative or exceeds [`BitSet::MAX`].
-    Irrepresentable,
 }
