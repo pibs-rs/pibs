@@ -12,6 +12,9 @@ license = "MIT OR Apache-2.0"
 keywords = ["bitset", "performance", "combinatorics", "math", "no_std"]
 categories = ["algorithms", "data-structures", "mathematics", "no-std::no-alloc"]
 
+[package.metadata.docs.rs]
+all-features = true
+
 [features]
 default = ["alloc"]
 alloc = []
