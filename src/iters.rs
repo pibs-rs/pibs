@@ -33,10 +33,12 @@ impl<W: Word> ExactSizeIterator for BitSetIter<W> {}
 
 impl<W: Word> FusedIterator for BitSetIter<W> {}
 
+const SUFFIX_CACHE_SIZE: usize = u128::BITS as usize + 1;
+
 /// Iterator returned by [`BitSet::subsets_of_size`].
 pub struct SubsetsOfSizeIter<W> {
     /// `suffixes[i]` for `i` in `0..=size` stores `subset` with all but the last `i` ones zeroed.
-    suffixes: [MaybeUninit<W>; u128::BITS as usize + 1],
+    suffixes: [MaybeUninit<W>; SUFFIX_CACHE_SIZE],
     /// Cardinality of the subsets to generate.
     size: usize,
     /// The base set.
@@ -50,7 +52,7 @@ pub struct SubsetsOfSizeIter<W> {
 impl<W: Word> SubsetsOfSizeIter<W> {
     #[inline]
     pub(crate) fn new(set: W, size: usize) -> Self {
-        let mut suffixes = [const { MaybeUninit::uninit() }; _];
+        let mut suffixes = [const { MaybeUninit::uninit() }; SUFFIX_CACHE_SIZE];
         if size > set.count_ones() as usize {
             return Self {
                 suffixes,          // Unused.
@@ -61,9 +63,9 @@ impl<W: Word> SubsetsOfSizeIter<W> {
             };
         }
         assert!(
-            size < suffixes.len(),
-            "can only generate subsets of size up to {}",
-            suffixes.len() - 1
+            size < SUFFIX_CACHE_SIZE,
+            "can only generate subsets of size less than {}",
+            SUFFIX_CACHE_SIZE
         );
         let mut suffix = W::zero();
         let mut remainder = set;
