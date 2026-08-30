@@ -246,9 +246,9 @@
 //! [`insert`](BitSet::insert) only requires the argument to be within bounds, which is imposed by
 //! a precondition.
 //!
-//! Whenever such runtime checks occur, *pibs* offers alternative methods that omit them. For
-//! example, [`from_unchecked`](BitSet::from_unchecked) has the precondition that the source
-//! collection only contains representable elements, while
+//! Whenever such runtime checks would occur in a release build, *pibs* offers alternative methods
+//! that omit them. For example, [`from_unchecked`](BitSet::from_unchecked) has the precondition
+//! that the source collection only contains representable elements, while
 //! [`truncating_translate`](BitSet::truncating_translate) discards irrepresentable sums as a
 //! zero-cost side effect of the shift used to compute the result.
 //!
