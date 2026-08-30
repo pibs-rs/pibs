@@ -101,7 +101,7 @@ impl<W: Word> Iterator for SubsetsOfSizeIter<W> {
                 && let Some(x) = (self.subset | !self.set).checked_add(&bit)
             {
                 let prefix = x & self.set;
-                let lost = (self.subset.count_ones() - prefix.count_ones()) as usize;
+                let lost = self.size - prefix.count_ones() as usize;
                 assert!(lost <= self.size); // SAFETY: self.suffixes is initialized up to self.size.
                 let suffix = unsafe { self.suffixes.get_unchecked(lost).assume_init() };
                 debug_assert!(prefix & suffix == W::zero());
