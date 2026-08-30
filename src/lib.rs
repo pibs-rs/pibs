@@ -210,7 +210,7 @@
 //!
 //! | feature | default | implements
 //! | ------- | ------- | ----------
-//! | `alloc` | yes     | conversion from and to [`Vec`](https://doc.rust-lang.org/alloc/vec/struct.Vec.html)
+//! | `alloc` | yes     | conversion to and from [`Vec`](https://doc.rust-lang.org/alloc/vec/struct.Vec.html)
 //! | `serde` | no      | (de)serialization via [`serde`](https://serde.rs/)
 //!
 //! *pibs* is [no_std](https://docs.rust-embedded.org/book/intro/no-std.html)-compatible and its
