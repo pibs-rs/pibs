@@ -1,7 +1,10 @@
 //! Iterators returned by [`BitSet`] methods.
 
 use crate::*;
-use core::{iter::ExactSizeIterator, mem::MaybeUninit};
+use core::{
+    iter::{ExactSizeIterator, FusedIterator},
+    mem::MaybeUninit,
+};
 
 /// Iterator returned by [`BitSet::iter`] and [`BitSet::into_iter`].
 pub struct BitSetIter<W: Word>(pub(crate) W);
@@ -28,9 +31,11 @@ impl<W: Word> Iterator for BitSetIter<W> {
 
 impl<W: Word> ExactSizeIterator for BitSetIter<W> {}
 
+impl<W: Word> FusedIterator for BitSetIter<W> {}
+
 /// Iterator returned by [`BitSet::subsets_of_size`].
 pub struct SubsetsOfSizeIter<W> {
-    /// `suffixes[i]` for `i` in `0..=size` stores `subset` with all but the last `i`` ones zeroed.
+    /// `suffixes[i]` for `i` in `0..=size` stores `subset` with all but the last `i` ones zeroed.
     suffixes: [MaybeUninit<W>; u128::BITS as usize + 1],
     /// Cardinality of the subsets to generate.
     size: usize,
@@ -108,3 +113,5 @@ impl<W: Word> Iterator for SubsetsOfSizeIter<W> {
         }
     }
 }
+
+impl<W: Word> FusedIterator for SubsetsOfSizeIter<W> {}
