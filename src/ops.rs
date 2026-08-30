@@ -352,6 +352,7 @@ impl<W: Word> ShlAssign<Element> for BitSet<W> {
     /// ```
     #[inline]
     fn shl_assign(&mut self, rhs: Element) {
+        Self::debug_bound_check(rhs);
         self.0 <<= rhs;
     }
 }
@@ -404,6 +405,7 @@ impl<W: Word> ShrAssign<Element> for BitSet<W> {
     /// ```
     #[inline]
     fn shr_assign(&mut self, rhs: Element) {
+        Self::debug_bound_check(rhs);
         self.0 >>= rhs;
     }
 }
