@@ -21,7 +21,7 @@ impl<W: Word> BitSet<W> {
 
     /// Insert an element into the set (or leave it in).
     ///
-    /// This the same as `self += e`.
+    /// This is the same as `self += e`.
     ///
     /// # Preconditions
     ///
@@ -44,7 +44,7 @@ impl<W: Word> BitSet<W> {
 
     /// Removes an element from the set (if it exists).
     ///
-    /// This the same as `self -= e`.
+    /// This is the same as `self -= e`.
     ///
     /// # Preconditions
     ///
@@ -89,7 +89,7 @@ impl<W: Word> BitSet<W> {
 
     /// Insert every element from another set.
     ///
-    /// This the same as `self |= other`.
+    /// This is the same as `self |= other`.
     ///
     /// # Examples
     ///
@@ -106,7 +106,7 @@ impl<W: Word> BitSet<W> {
 
     /// Remove all elements not present in another set.
     ///
-    /// This the same as `self &= other`.
+    /// This is the same as `self &= other`.
     ///
     /// # Examples
     ///
@@ -138,7 +138,7 @@ impl<W: Word> BitSet<W> {
 
     /// Toggle all elements present in another set.
     ///
-    /// This the same as `self ^= other`.
+    /// This is the same as `self ^= other`.
     ///
     /// # Examples
     ///

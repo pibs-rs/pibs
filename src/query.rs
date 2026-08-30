@@ -86,7 +86,7 @@ impl<W: Word> BitSet<W> {
 
     /// Whether `self` is a strict subset of `other`.
     ///
-    /// his can also be written as `self < other`.
+    /// This can also be written as `self < other`.
     ///
     /// # Examples
     ///

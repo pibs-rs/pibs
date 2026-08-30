@@ -25,7 +25,7 @@ impl<W: Word> BitSet<W> {
 
     /// The set with an element added to it (or left in).
     ///
-    /// This the same as `self + e`.
+    /// This is the same as `self + e`.
     ///
     /// # Preconditions
     ///
@@ -47,7 +47,7 @@ impl<W: Word> BitSet<W> {
 
     /// The set with an element removed from it (if present).
     ///
-    /// This the same as `self - e`.
+    /// This is the same as `self - e`.
     ///
     /// # Preconditions
     ///
@@ -69,7 +69,7 @@ impl<W: Word> BitSet<W> {
 
     /// The union of two sets.
     ///
-    /// This the same as `self | other`.
+    /// This is the same as `self | other`.
     ///
     /// # Examples
     ///
@@ -86,7 +86,7 @@ impl<W: Word> BitSet<W> {
 
     /// The intersection of two sets.
     ///
-    /// This the same as `self & other`.
+    /// This is the same as `self & other`.
     ///
     /// # Examples
     ///
@@ -118,7 +118,7 @@ impl<W: Word> BitSet<W> {
 
     /// The symmetric difference of two sets.
     ///
-    /// This the same as `self ^ other`.
+    /// This is the same as `self ^ other`.
     ///
     /// # Examples
     ///

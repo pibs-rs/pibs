@@ -65,7 +65,7 @@ impl<W: Word> BitSet<W> {
 
     /// The sum of all elements in the set.
     ///
-    /// Returns `0` for the the empty set.
+    /// Returns `0` for the empty set.
     ///
     /// # Examples
     ///
