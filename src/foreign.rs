@@ -36,6 +36,20 @@ impl<W: Word> PartialOrd for BitSet<W> {
     }
 }
 
+impl<W: Word> Extend<Element> for BitSet<W> {
+    /// Extend the set with elements from an iterator.
+    ///
+    /// # Panics
+    ///
+    /// If any element is greater than [`Self::MAX`].
+    #[inline]
+    fn extend<I: IntoIterator<Item = Element>>(&mut self, iter: I) {
+        self.union_update(
+            Self::try_from_iter(iter).expect("cannot extend with an irrepresentable element"),
+        );
+    }
+}
+
 impl<W: Word> IntoIterator for BitSet<W> {
     type Item = Element;
     type IntoIter = BitSetIter<W>;
