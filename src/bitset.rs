@@ -7,6 +7,10 @@ use serde::{Deserialize, Serialize};
 
 /// A high-performance generic bitset that wraps a single primitive integer for storage.
 ///
+/// # Preconditions
+///
+/// It must be the case that `size_of::<W>() * 8 == W::zero().count_zeros()`.
+///
 /// # Example conventions
 ///
 /// The examples below assume the prelude import:
