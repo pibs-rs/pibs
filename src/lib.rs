@@ -217,6 +217,25 @@
 //! only non-optional dependency is [`num_traits`].
 //!
 //! # Discussion
+//! ## Pitfalls
+//! ### Two overloads for the plus operator
+//!
+//! The `+` operator has two different meanings: for sets `a` and `b` and an element `e`, `a + b`
+//! denotes the sumset (Minkowski sum) of `a` and `b`, whereas `a + e` denotes the union of `a` with
+//! the singleton set containing `e`:
+//!
+//! ```
+//! # use pibs::prelude::*;
+//! assert_eq!(set![1, 2, 3] + 4, set![1, 2, 3, 4]);
+//! assert_eq!(set![1, 2, 3] + set![4], set![5, 6, 7]);
+//! ```
+//!
+//! ### Precondition on the bit length of non-builtin primitive integer types
+//!
+//! Currently, [`num_traits`] provides no trait that lets one infer the logical bit length of a
+//! [`Word`] `W` at compile time. Thus, *pibs* computes the bit length as `size_of::<W>() * 8`, and
+//! it is precondition to using `BitSet<W>` that `size_of::<W>() * 8 == W::zero().count_zeros()`.
+//!
 //! ## Performance
 //! ### Impact of word size
 //!
