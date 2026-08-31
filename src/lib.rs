@@ -9,7 +9,7 @@
 //!
 //! *pibs* is best suited when the bitset should abstract a mathematical set, the performance of set
 //! operations is your primary concern, and the elements naturally lie in the representable range
-//! `0..128`. See [Alternatives](#alternatives) if this is not the case.
+//! (`0..128` for [`Set128`]). See [Alternatives](#alternatives) if this is not the case.
 //!
 //! The ambition of *pibs* is that you can't write faster code for any of its operations. If you
 //! can, please open an issue!
@@ -135,14 +135,15 @@
 //! | ∅               | `set![]`        | [`Set::new()`] |
 //! | {0}             | `set![0]`       | [`Set::singleton(0)`](BitSet::singleton) |
 //! | {a, b, c}       | `set![a, b, c]` | [`Set::from_unchecked([a, b, c])`](BitSet::from_unchecked) | [`Set::try_from([a, b, c])`](BitSet::try_from)
+//! | from `iter`     |                 | [`Set::from_unchecked(iter)`](BitSet::from_unchecked) | [`Set::try_from_iter(iter)`](BitSet::try_from_iter)
 //! | {m, ..., n}     | `set![m..=n]`   | [`Set::interval(m, n)`](BitSet::interval) |
 //! | {0, ..., n - 1} | `set![0..n]`    | [`Set::range(n)`](BitSet::range) |
 //! | {0, ..., M}     |                 | [`Set::full()`] |
 //!
 //! ### Queries
 //!
-//! | set          | short form | long form
-//! | ------------ | ---------- | ---------
+//! | set          | short form | long form | unchecked variant | note
+//! | ------------ | ---------- | --------- | ----------------- | ----
 //! | \|A\|        |            | [`a.len()`](BitSet::len)
 //! | min A, max A |            | [`a.min()`](BitSet::min), [`a.max()`](BitSet::max)
 //! | ∑(x : x ∈ A) |            | [`a.sum()`](BitSet::sum)
@@ -155,17 +156,21 @@
 //! | A ∩ B = ∅    |            | [`a.is_disjoint(b)`](BitSet::is_disjoint)
 //! | x ∈ A        |            | [`a.contains(x)`](BitSet::contains)
 //! | \|A\| = max A - min A + 1 | | [`a.is_interval()`](BitSet::is_interval)
+//! | pos(x)       |            | [`a.position(x)`](BitSet::position) | [`a.position_unchecked(x)`](BitSet::rank) | indexed from zero
+//! | rank(x)      |            | [`a.rank(x)`](BitSet::rank) | [`a.rank_unchecked(x)`](BitSet::rank) | indexed from one
 //!
 //! ### Set operations
 //!
-//! | operation | short form | long form                                                   | mutating  | mutating long form
-//! | --------- | ---------- | ----------------------------------------------------------- | --------- | ------------------
-//! | A ∪ B     | `a \| b`   | [`a.union(b)`](BitSet::union)                               | `a \|= b` | [`a.union_update(b)`](BitSet::union_update)
-//! | A ∩ B     | `a & b`    | [`a.intersection(b)`](BitSet::intersection)                 | `a &= b`  | [`a.intersection_update(b)`](BitSet::intersection_update)
-//! | A ∖ B     | `a - b`    | [`a.difference(b)`](BitSet::difference)                     | `a -= b`  | [`a.difference_update(b)`](BitSet::difference_update)
-//! | A ∆ B     | `a ^ b`    | [`a.symmetric_difference(b)`](BitSet::symmetric_difference) | `a ^= b`  | [`a.symmetric_difference_update(b)`](BitSet::symmetric_difference_update)
-//! | A ∪ {x}   | `a + x`    | [`a.with(x)`](BitSet::with)                                 | `a += x`  | [`a.insert(x)`](BitSet::insert)
-//! | A ∖ {x}   | `a - x`    | [`a.without(x)`](BitSet::without)                           | `a -= x`  | [`a.remove(x)`](BitSet::remove)
+//! | operation   | short form | long form                                                   | mutating  | mutating long form
+//! | ----------- | ---------- | ----------------------------------------------------------- | --------- | ------------------
+//! | A ∪ B       | `a \| b`   | [`a.union(b)`](BitSet::union)                               | `a \|= b` | [`a.union_update(b)`](BitSet::union_update)
+//! | A ∩ B       | `a & b`    | [`a.intersection(b)`](BitSet::intersection)                 | `a &= b`  | [`a.intersection_update(b)`](BitSet::intersection_update)
+//! | A ∖ B       | `a - b`    | [`a.difference(b)`](BitSet::difference)                     | `a -= b`  | [`a.difference_update(b)`](BitSet::difference_update)
+//! | A ∆ B       | `a ^ b`    | [`a.symmetric_difference(b)`](BitSet::symmetric_difference) | `a ^= b`  | [`a.symmetric_difference_update(b)`](BitSet::symmetric_difference_update)
+//! | A ∪ {x}     | `a + x`    | [`a.with(x)`](BitSet::with)                                 | `a += x`  | [`a.insert(x)`](BitSet::insert)
+//! | A ∖ {x}     | `a - x`    | [`a.without(x)`](BitSet::without)                           | `a -= x`  | [`a.remove(x)`](BitSet::remove)
+//! | A ← A ∆ {x} |            |                                                             |           | [`a.toggle(x)`](BitSet::toggle)
+//! | A ← ∅       |            |                                                             |           | [`a.clear()`](BitSet::clear)
 //!
 //! ### Arithmetic operations
 //!
@@ -176,11 +181,10 @@
 //! | operation | definition               | short form | mutating  | checked variant                          | truncating variant
 //! | --------- | ------------------------ | ---------- | --------- | ---------------------------------------- | ------------------
 //! | A + B     | {a + b \| a ∈ A ∧ b ∈ B} | `a + b`    | `a += b`  | [`a.sumset(b)`](BitSet::sumset)          | [`a.truncating_sumset(b)`](BitSet::truncating_sumset)
-//! | A + {x}   | {a + x \| a ∈ A}         | `a << x`   | `a <<= x` | [`a.map_add(x)`](BitSet::map_add)¹       | [`a.truncating_map_add(x)`](BitSet::truncating_map_add)¹
-//! | A - {x}   | {a - x \| a ∈ A}         | `a >> x`   | `a >>= x` | [`a.map_sub(x)`](BitSet::map_sub)¹       | [`a.truncating_map_sub(x)`](BitSet::truncating_map_sub)¹
+//! | A + {x}   | {a + x \| a ∈ A}         | `a << x`   | `a <<= x` | [`a.map_add(x)`](BitSet::map_add)        | [`a.truncating_map_add(x)`](BitSet::truncating_map_add)
+//! | A - {x}   | {a - x \| a ∈ A}         | `a >> x`   | `a >>= x` | [`a.map_sub(x)`](BitSet::map_sub)        | [`a.truncating_map_sub(x)`](BitSet::truncating_map_sub)
+//! | A ± {x}   | {a ± x \| a ∈ A}         |            |           | [`a.translate(x)`](BitSet::translate)    | [`a.truncating_translate(x)`](BitSet::truncating_translate)
 //! |           | {∑(x : x ∈ X) \| X ⊆ A}  |            |           | [`a.subset_sums()`](BitSet::subset_sums) | [`a.truncating_subset_sums()`](BitSet::truncating_subset_sums)
-//!
-//! ¹For signed `x`, use [`a.translate(x)`](BitSet::translate) and [`a.truncating_translate(x)`](BitSet::truncating_translate).
 //!
 //! ### Generation
 //!
@@ -220,21 +224,30 @@
 //! ## Pitfalls
 //! ### Two overloads for the plus operator
 //!
-//! The `+` operator has two different meanings: for sets `a` and `b` and an element `e`, `a + b`
-//! denotes the sumset (Minkowski sum) of `a` and `b`, whereas `a + e` denotes the union of `a` with
-//! the singleton set containing `e`:
+//! The `+` operator has two different meanings: for sets `a` and `b` and an element `x`, `a + b`
+//! denotes the sumset (Minkowski sum) of `a` and `b`, whereas `a + x` denotes the union of `a` with
+//! the singleton set containing `x`:
 //!
 //! ```
 //! # use pibs::prelude::*;
-//! assert_eq!(set![1, 2, 3] + 4, set![1, 2, 3, 4]);
-//! assert_eq!(set![1, 2, 3] + set![4], set![5, 6, 7]);
+//! let a = set![1, 2, 3];
+//! let b = set![4];
+//! let x = 4;
+//! assert_eq!(a + b, set![5, 6, 7]);    // sumset
+//! assert_eq!(a + x, set![1, 2, 3, 4]); // singleton union
 //! ```
 //!
-//! ### Precondition on the bit length of non-builtin primitive integer types
+//! ### Precondition on the bit length of primitive integer types
 //!
 //! Currently, [`num_traits`] provides no trait that lets one infer the logical bit length of a
-//! [`Word`] `W` at compile time. Thus, *pibs* computes the bit length as `size_of::<W>() * 8`, and
-//! it is precondition to using `BitSet<W>` that `size_of::<W>() * 8 == W::zero().count_zeros()`.
+//! [`Word`] `W` at compile time. For this reason, *pibs* computes the logical bit length from the
+//! physical one. This results in a precondition to using `BitSet<W>` that:
+//!
+//! ```
+//! # use num_traits::Zero;
+//! # type W = usize;
+//! assert_eq!(size_of::<W>() * 8, W::zero().count_zeros() as usize);
+//! ```
 //!
 //! ## Performance
 //! ### Impact of word size
@@ -276,11 +289,11 @@
 //!
 //! ## Alternatives
 //!
-//! The obvious limitation of *pibs* is that its [`BitSet`] can only store numbers up to 127. If
-//! your numbers can be larger than this but you know a bound, consider using
-//! [fixedbitset](https://docs.rs/fixedbitset) (SIMD-optimized set abstraction) or
-//! [bittle](https://docs.rs/bittle) (low-level bit manipulation) instead. If you don't know your
-//! largest number ahead of time, then [bit-set](https://docs.rs/bit_set) (based on
+//! The obvious limitation of *pibs* is that its [`BitSet`] can only store numbers less than the bit
+//! length of the underlying primitive. If your numbers can be larger than this but you know a
+//! bound, consider using [fixedbitset](https://docs.rs/fixedbitset) (SIMD-optimized set
+//! abstraction) or [bittle](https://docs.rs/bittle) (low-level bit manipulation) instead. If you
+//! don't know your largest number ahead of time, then [bit-set](https://docs.rs/bit_set) (based on
 //! [bit-vec](https://docs.rs/bit_vec)) or [roaring](https://docs.rs/roaring) (compressed
 //! representation) may suit you.
 
