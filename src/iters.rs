@@ -33,7 +33,8 @@ impl<W: Word> ExactSizeIterator for BitSetIter<W> {}
 
 impl<W: Word> FusedIterator for BitSetIter<W> {}
 
-const SUFFIX_CACHE_SIZE: usize = u128::BITS as usize + 1;
+pub(crate) const MAX_SUBSET_CARDINALITY: usize = u128::BITS as usize;
+const SUFFIX_CACHE_SIZE: usize = MAX_SUBSET_CARDINALITY + 1;
 
 /// Iterator returned by [`BitSet::subsets_of_size`].
 pub struct SubsetsOfSizeIter<W> {
@@ -63,9 +64,9 @@ impl<W: Word> SubsetsOfSizeIter<W> {
             };
         }
         assert!(
-            size < SUFFIX_CACHE_SIZE,
-            "can only generate subsets of size less than {}",
-            SUFFIX_CACHE_SIZE
+            size <= MAX_SUBSET_CARDINALITY,
+            "can only generate subsets of size up to {}",
+            MAX_SUBSET_CARDINALITY
         );
         let mut suffix = W::ZERO;
         let mut remainder = set;

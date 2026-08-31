@@ -1,6 +1,6 @@
 //! Generators: methods that return iterators which yield [`BitSet`].
 
-use crate::*;
+use crate::{iters::MAX_SUBSET_CARDINALITY, *};
 use core::iter;
 
 impl<W: Word> BitSet<W> {
@@ -233,7 +233,7 @@ impl<W: Word> BitSet<W> {
         SubsetsOfSizeIter::<W>::new(self.0, size)
     }
 
-    /// Generate all subsets, with the cardinality growing slowly.
+    /// Generate all subsets (up to cardinality 128), with the cardinality growing slowly.
     ///
     /// If the iteration order is not important, use the faster [`Self::subsets`].
     ///
@@ -257,6 +257,6 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn subsets_by_size(self) -> impl Iterator<Item = Self> {
-        (0..=self.len()).flat_map(move |k| self.subsets_of_size(k))
+        (0..=self.len().min(MAX_SUBSET_CARDINALITY)).flat_map(move |k| self.subsets_of_size(k))
     }
 }
