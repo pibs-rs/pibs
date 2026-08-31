@@ -122,9 +122,11 @@ impl<W: Word> fmt::Debug for BitSet<W> {
     /// assert_eq!(format!("{:?}", set), "BitSet<usize>({0, 1, 10, 20})");
     /// ```
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple(type_name::<Self>().rsplit("::").next().unwrap())
-            // TODO: Once stable, use field_with instead of the helper struct:
-            // .field_with(|f| f.debug_set().entries(self.iter()).finish())
+        let name = type_name::<Self>();
+        let cut = name[..name.find('<').unwrap_or(name.len())]
+            .rfind("::")
+            .map_or(0, |index| index + 2);
+        f.debug_tuple(&name[cut..])
             .field(&DebugElements(*self))
             .finish()
     }
