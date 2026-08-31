@@ -1,4 +1,4 @@
-use pibs::{bitset, set, set128};
+use pibs::{Word, bitset, set, set128};
 
 /// A local struct defined for testing macro hygiene.
 #[allow(unused)]
@@ -38,6 +38,26 @@ fn test_macro_ranges() {
     assert_eq!(set128![two..3].word(), 0b100);
     assert_eq!(set128![two..2].word(), 0);
     assert_eq!(set128![two..1].word(), 0);
+}
+
+#[test]
+fn test_macro_generic_use() {
+    fn with_generic_word<W: Word>() {
+        assert_eq!(bitset![W; 1, 2, 3].len(), 3);
+    }
+
+    fn with_generic_element<const E: usize>() {
+        assert!(set![E].contains(E));
+    }
+
+    fn with_generic_range<const A: usize, const B: usize>() {
+        assert_eq!(set![A..B].len(), B - A);
+        assert_eq!(set![A..=B].len(), B + 1 - A);
+    }
+
+    with_generic_word::<usize>();
+    with_generic_element::<5>();
+    with_generic_range::<3, 5>();
 }
 
 #[test]

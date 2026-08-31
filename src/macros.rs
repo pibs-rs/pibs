@@ -49,10 +49,16 @@ macro_rules! bitset {
     // Parse a singleton.
     (@accum $word:expr; $ty:ty; $element:tt $(, $($rest:tt)*)?) => {
         $crate::bitset!(
-            @accum $word | ({
-                const _: () = assert!($element <= $crate::BitSet::<$ty>::MAX);
-                (1 as $ty) << $element
-            });
+            @accum $word | {
+                // Bounds-check the element at compile time.
+                let element: $crate::Element = const {
+                    let element: $crate::Element = $element;
+                    assert!(element <= $crate::BitSet::<$ty>::MAX);
+                    element
+                };
+
+                <$ty as num_traits::ConstOne>::ONE << element
+            };
             $ty;
             $($($rest)*)?
         )
@@ -61,14 +67,20 @@ macro_rules! bitset {
     // Parse a range.
     (@accum $word:expr; $ty:ty; $start:tt .. $end:tt $(, $($rest:tt)*)?) => {
         $crate::bitset!(
-            @accum $word | ({
-                const _: () = assert!($end <= $crate::BitSet::<$ty>::BITS);
-                if $end <= 0 {
+            @accum $word | {
+                // Bounds-check the range end at compile time.
+                let end: $crate::Element = const {
+                    let end: $crate::Element = $end;
+                    assert!(end <= $crate::BitSet::<$ty>::BITS);
+                    end
+                };
+
+                if end <= 0 {
                     <$ty as num_traits::ConstZero>::ZERO
                 } else {
-                    $crate::BitSet::<$ty>::interval($start, $end - 1).word()
+                    $crate::BitSet::<$ty>::interval($start, end - 1).word()
                 }
-            });
+            };
             $ty;
             $($($rest)*)?
         )
@@ -77,10 +89,16 @@ macro_rules! bitset {
     // Parse an inclusive range.
     (@accum $word:expr; $ty:ty; $start:tt ..= $last:tt $(, $($rest:tt)*)?) => {
         $crate::bitset!(
-            @accum $word | ({
-                const _: () = assert!($last <= $crate::BitSet::<$ty>::MAX);
-                $crate::BitSet::<$ty>::interval($start, $last).word()
-            });
+            @accum $word | {
+                // Bounds-check the last element at compile time.
+                let last: $crate::Element = const {
+                    let last: $crate::Element = $last;
+                    assert!(last <= $crate::BitSet::<$ty>::MAX);
+                    last
+                };
+
+                $crate::BitSet::<$ty>::interval($start, last).word()
+            };
             $ty;
             $($($rest)*)?
         )
