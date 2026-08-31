@@ -132,32 +132,32 @@
 //!
 //! | set             | short form      | long form | checked variant
 //! | --------------- | --------------- | --------- | ---------------
-//! | ∅               | `set![]`        | [`Set::new()`] |
-//! | {0}             | `set![0]`       | [`Set::singleton(0)`](BitSet::singleton) |
+//! | ∅               | `set![]`        | [`Set::new()`]
+//! | {0}             | `set![0]`       | [`Set::singleton(0)`](BitSet::singleton)
 //! | {a, b, c}       | `set![a, b, c]` | [`Set::from_unchecked([a, b, c])`](BitSet::from_unchecked) | [`Set::try_from([a, b, c])`](BitSet::try_from)
 //! | from `iter`     |                 | [`Set::from_unchecked(iter)`](BitSet::from_unchecked) | [`Set::try_from_iter(iter)`](BitSet::try_from_iter)
-//! | {m, ..., n}     | `set![m..=n]`   | [`Set::interval(m, n)`](BitSet::interval) |
-//! | {0, ..., n - 1} | `set![0..n]`    | [`Set::range(n)`](BitSet::range) |
-//! | {0, ..., M}     |                 | [`Set::full()`] |
+//! | {m, ..., n}     | `set![m..=n]`   | [`Set::interval(m, n)`](BitSet::interval)
+//! | {0, ..., n - 1} | `set![0..n]`    | [`Set::range(n)`](BitSet::range)
+//! | {0, ..., M}     |                 | [`Set::full()`]
 //!
 //! ### Queries
 //!
-//! | set          | short form | long form | unchecked variant | note
-//! | ------------ | ---------- | --------- | ----------------- | ----
-//! | \|A\|        |            | [`a.len()`](BitSet::len)
-//! | min A, max A |            | [`a.min()`](BitSet::min), [`a.max()`](BitSet::max)
-//! | ∑(x : x ∈ A) |            | [`a.sum()`](BitSet::sum)
-//! | A = ∅        |            | [`a.is_empty()`](BitSet::is_empty)
-//! | A ⊆ B        | `a <= b`   | [`a.is_subset(b)`](BitSet::is_subset)
-//! | A ⊇ B        | `a >= b`   | [`a.is_superset(b)`](BitSet::is_superset)
-//! | A ⊂ B        | `a < b`    | [`a.is_strict_subset(b)`](BitSet::is_strict_subset)
-//! | A ⊃ B        | `a > b`    | [`a.is_strict_superset(b)`](BitSet::is_strict_superset)
-//! | A ∩ B ≠ ∅    |            | [`a.intersects(b)`](BitSet::intersects)
-//! | A ∩ B = ∅    |            | [`a.is_disjoint(b)`](BitSet::is_disjoint)
-//! | x ∈ A        |            | [`a.contains(x)`](BitSet::contains)
-//! | \|A\| = max A - min A + 1 | | [`a.is_interval()`](BitSet::is_interval)
-//! | pos(x)       |            | [`a.position(x)`](BitSet::position) | [`a.position_unchecked(x)`](BitSet::rank) | indexed from zero
-//! | rank(x)      |            | [`a.rank(x)`](BitSet::rank) | [`a.rank_unchecked(x)`](BitSet::rank) | indexed from one
+//! | set             | short form | long form | unchecked variant | note
+//! | --------------- | ---------- | --------- | ----------------- | ----
+//! | \|A\|           |            | [`a.len()`](BitSet::len)
+//! | min A, max A    |            | [`a.min()`](BitSet::min), [`a.max()`](BitSet::max)
+//! | ∑(x : x ∈ A)    |            | [`a.sum()`](BitSet::sum)
+//! | A = ∅           |            | [`a.is_empty()`](BitSet::is_empty)
+//! | A ⊆ B           | `a <= b`   | [`a.is_subset(b)`](BitSet::is_subset)
+//! | A ⊇ B           | `a >= b`   | [`a.is_superset(b)`](BitSet::is_superset)
+//! | A ⊂ B           | `a < b`    | [`a.is_strict_subset(b)`](BitSet::is_strict_subset)
+//! | A ⊃ B           | `a > b`    | [`a.is_strict_superset(b)`](BitSet::is_strict_superset)
+//! | A ∩ B ≠ ∅       |            | [`a.intersects(b)`](BitSet::intersects)
+//! | A ∩ B = ∅       |            | [`a.is_disjoint(b)`](BitSet::is_disjoint)
+//! | x ∈ A           |            | [`a.contains(x)`](BitSet::contains)
+//! | A = {m, ..., n} |            | [`a.is_interval()`](BitSet::is_interval)
+//! | pos(x)          |            | [`a.position(x)`](BitSet::position) | [`a.position_unchecked(x)`](BitSet::position_unchecked) | indexed from zero
+//! | rank(x)         |            | [`a.rank(x)`](BitSet::rank) | [`a.rank_unchecked(x)`](BitSet::rank_unchecked) | indexed from one
 //!
 //! ### Set operations
 //!
