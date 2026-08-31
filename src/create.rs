@@ -27,7 +27,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn full() -> Self {
-        Self(W::one().wrapping_neg())
+        Self(W::ONE.wrapping_neg())
     }
 
     /// Create a singleton set.
@@ -45,7 +45,7 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn singleton(e: Element) -> Self {
         Self::debug_bound_check(e);
-        Self(W::one() << e)
+        Self(W::ONE << e)
     }
 
     /// Create a contiguous interval with given endpoints (included).
@@ -66,11 +66,11 @@ impl<W: Word> BitSet<W> {
     pub fn interval(first: Element, last: Element) -> Self {
         Self::debug_bound_check(last);
         if first > last {
-            Self(W::zero())
+            Self(W::ZERO)
         } else if last == Self::MAX {
-            Self(!W::zero() << first)
+            Self(!W::ZERO << first)
         } else {
-            Self(((W::one() << (last - first + 1)) - W::one()) << first)
+            Self(((W::ONE << (last - first + 1)) - W::ONE) << first)
         }
     }
 
@@ -92,9 +92,9 @@ impl<W: Word> BitSet<W> {
     pub fn range(stop: Element) -> Self {
         Self::debug_bound_check(if stop > 0 { stop - 1 } else { 0 });
         if stop == Self::BITS {
-            Self(!W::zero())
+            Self(!W::ZERO)
         } else {
-            Self((W::one() << stop) - W::one())
+            Self((W::ONE << stop) - W::ONE)
         }
     }
 

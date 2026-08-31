@@ -6,7 +6,7 @@ use core::{any::type_name, cmp::Ordering, fmt};
 impl<W: Word> Default for BitSet<W> {
     #[inline]
     fn default() -> Self {
-        Self(W::zero())
+        Self(W::ZERO)
     }
 }
 

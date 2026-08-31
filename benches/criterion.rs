@@ -16,7 +16,7 @@ use pibs::*;
 fn _evenly_spaced_bitmask<W: Word>() -> W {
     (0..8)
         .map(|e| e * size_of::<W>() + size_of::<W>() - 1)
-        .map(|e| W::one() << e)
+        .map(|e| W::ONE << e)
         .reduce(BitOr::bitor)
         .unwrap()
 }

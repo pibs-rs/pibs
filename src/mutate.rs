@@ -16,7 +16,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn clear(&mut self) {
-        self.0 = W::zero();
+        self.0 = W::ZERO;
     }
 
     /// Insert an element into the set (or leave it in).
@@ -39,7 +39,7 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn insert(&mut self, e: Element) {
         Self::debug_bound_check(e);
-        self.0 |= W::one() << e;
+        self.0 |= W::ONE << e;
     }
 
     /// Removes an element from the set (if it exists).
@@ -62,7 +62,7 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn remove(&mut self, e: Element) {
         Self::debug_bound_check(e);
-        self.0 &= !(W::one() << e);
+        self.0 &= !(W::ONE << e);
     }
 
     /// Toggles the presence of an element in the set.
@@ -84,7 +84,7 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn toggle(&mut self, e: Element) {
         Self::debug_bound_check(e);
-        self.0 ^= W::one() << e;
+        self.0 ^= W::ONE << e;
     }
 
     /// Insert every element from another set.

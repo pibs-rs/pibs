@@ -25,13 +25,13 @@ impl<W: Word> BitSet<W> {
         I: IntoIterator<Item = T>,
         T: TryInto<Element>,
     {
-        let mut word = W::zero();
+        let mut word = W::ZERO;
 
         for item in iter {
             if let Ok(e) = item.try_into()
                 && e <= Self::MAX
             {
-                word |= W::one() << e;
+                word |= W::ONE << e;
             } else {
                 return Err(Error::Irrepresentable);
             }
@@ -65,11 +65,11 @@ impl<W: Word> BitSet<W> {
     where
         I: IntoIterator<Item = Element>,
     {
-        let mut word = W::zero();
+        let mut word = W::ZERO;
 
         for e in iter {
             Self::debug_bound_check(e);
-            word |= W::one() << e;
+            word |= W::ONE << e;
         }
 
         Self(word)

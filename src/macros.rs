@@ -38,7 +38,7 @@ use crate::*;
 macro_rules! bitset {
     // Initialize.
     ($ty:ty; $($tt:tt)*) => {
-        $crate::bitset!(@accum 0 as $ty; $ty; $($tt)*)
+        $crate::bitset!(@accum <$ty as num_traits::ConstZero>::ZERO; $ty; $($tt)*)
     };
 
     // Finalize.
@@ -64,7 +64,7 @@ macro_rules! bitset {
             @accum $word | ({
                 const _: () = assert!($end <= $crate::BitSet::<$ty>::BITS);
                 if $end <= 0 {
-                    0 as $ty
+                    <$ty as num_traits::ConstZero>::ZERO
                 } else {
                     $crate::BitSet::<$ty>::interval($start, $end - 1).word()
                 }

@@ -108,7 +108,7 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn position_unchecked(self, e: Element) -> usize {
         debug_assert!(self.contains(e));
-        (self.0 & ((W::one() << e) - W::one())).count_ones() as usize
+        (self.0 & ((W::ONE << e) - W::ONE)).count_ones() as usize
     }
 
     /// Ordinal position of an element in the set, counted from one.
@@ -162,7 +162,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn sumset(self, other: Self) -> Result<Self, Error> {
-        let mut result = W::zero();
+        let mut result = W::ZERO;
 
         let (smaller, larger_word) = if self.len() < other.len() {
             (self, other.0)
@@ -200,7 +200,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn truncating_sumset(self, other: Self) -> Self {
-        let mut result = W::zero();
+        let mut result = W::ZERO;
 
         let (smaller, larger_word) = if self.len() < other.len() {
             (self, other.0)
@@ -240,7 +240,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn subset_sums(self) -> Result<Self, Error> {
-        let mut result = W::one();
+        let mut result = W::ONE;
         let mut e_max = result.leading_zeros() as Element;
 
         for e in self {
@@ -275,7 +275,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn truncating_subset_sums(self) -> Self {
-        let mut result = W::one();
+        let mut result = W::ONE;
         for e in self {
             result |= result << e;
         }

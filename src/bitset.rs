@@ -84,7 +84,7 @@ impl<W: Word> BitSet<W> {
     pub(crate) fn debug_bound_check(e: Element) {
         debug_assert_eq!(
             Self::BITS,
-            W::zero().count_zeros() as usize,
+            W::ZERO.count_zeros() as usize,
             "calculated bit length of {} does not match the bit length of its zero",
             type_name::<W>()
         );

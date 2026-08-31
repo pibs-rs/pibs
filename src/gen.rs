@@ -25,7 +25,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn iter_all() -> impl Iterator<Item = Self> {
-        let mut word = W::zero();
+        let mut word = W::ZERO;
         let mut stop = false;
 
         iter::from_fn(move || {
@@ -33,7 +33,7 @@ impl<W: Word> BitSet<W> {
                 None
             } else {
                 let next = word;
-                if let Some(next_word) = word.checked_add(&W::one()) {
+                if let Some(next_word) = word.checked_add(&W::ONE) {
                     word = next_word;
                 } else {
                     stop = true;
@@ -129,16 +129,16 @@ impl<W: Word> BitSet<W> {
 
         // TODO: Avoid cases via an unbounded shift once num_traits::UnboundedShl exists.
         let mut bits: W = if k == Self::BITS {
-            !W::zero()
+            !W::ZERO
         } else {
-            (W::one() << k) - W::one()
+            (W::ONE << k) - W::ONE
         };
 
         // TODO: Avoid cases via an unbounded shift once num_traits::UnboundedShl exists.
         let last: W = if k == 0 {
-            W::zero()
+            W::ZERO
         } else {
-            (!W::zero() << (Self::BITS - k)) >> (Self::BITS - n)
+            (!W::ZERO << (Self::BITS - k)) >> (Self::BITS - n)
         };
 
         let mut stop: bool = false;
@@ -158,7 +158,7 @@ impl<W: Word> BitSet<W> {
                 // The following equals the standard `(((r ^ b) >> 2) / c) | r` and might be faster.
                 bits = (r ^ b)
                     .checked_shr(2 + c.trailing_zeros())
-                    .unwrap_or(W::zero())
+                    .unwrap_or(W::ZERO)
                     | r;
                 Some(Self(b))
             }
@@ -190,7 +190,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn subsets(self) -> impl Iterator<Item = Self> {
-        let mut word = W::zero();
+        let mut word = W::ZERO;
         let mut stop = false;
 
         iter::from_fn(move || {
@@ -198,7 +198,7 @@ impl<W: Word> BitSet<W> {
                 None
             } else {
                 let next = word;
-                if let Some(x) = (word | !self.0).checked_add(&W::one()) {
+                if let Some(x) = (word | !self.0).checked_add(&W::ONE) {
                     word = x & self.0;
                 } else {
                     stop = true;

@@ -28,7 +28,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn is_empty(self) -> bool {
-        self.0 == W::zero()
+        self.0 == W::ZERO
     }
 
     /// Whether the set contains a given element.
@@ -47,7 +47,7 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn contains(self, e: Element) -> bool {
         Self::debug_bound_check(e);
-        self.0 & (W::one() << e) != W::zero()
+        self.0 & (W::ONE << e) != W::ZERO
     }
 
     /// Whether `self` is a (non-strict) subset of `other`.
@@ -64,7 +64,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn is_subset(self, other: Self) -> bool {
-        self.0 & !other.0 == W::zero()
+        self.0 & !other.0 == W::ZERO
     }
 
     /// Whether `self` is a (non-strict) superset of `other`.
@@ -81,7 +81,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn is_superset(self, other: Self) -> bool {
-        !self.0 & other.0 == W::zero()
+        !self.0 & other.0 == W::ZERO
     }
 
     /// Whether `self` is a strict subset of `other`.
@@ -129,7 +129,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn intersects(self, other: Self) -> bool {
-        self.0 & other.0 != W::zero()
+        self.0 & other.0 != W::ZERO
     }
 
     /// Whether `self` and `other` have no elements in common.
@@ -143,6 +143,6 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn is_disjoint(self, other: Self) -> bool {
-        self.0 & other.0 == W::zero()
+        self.0 & other.0 == W::ZERO
     }
 }

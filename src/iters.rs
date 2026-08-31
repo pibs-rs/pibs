@@ -14,11 +14,11 @@ impl<W: Word> Iterator for BitSetIter<W> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        if self.0 == W::zero() {
+        if self.0 == W::ZERO {
             return None;
         }
         let item = self.0.trailing_zeros() as Self::Item;
-        self.0 &= self.0 - W::one();
+        self.0 &= self.0 - W::ONE;
         Some(item)
     }
 
@@ -55,10 +55,10 @@ impl<W: Word> SubsetsOfSizeIter<W> {
         let mut suffixes = [const { MaybeUninit::uninit() }; SUFFIX_CACHE_SIZE];
         if size > set.count_ones() as usize {
             return Self {
-                suffixes,          // Unused.
-                size: 0,           // Unused.
-                set: W::zero(),    // Unused.
-                subset: W::zero(), // Unused.
+                suffixes,        // Unused.
+                size: 0,         // Unused.
+                set: W::ZERO,    // Unused.
+                subset: W::ZERO, // Unused.
                 stop: true,
             };
         }
@@ -67,11 +67,11 @@ impl<W: Word> SubsetsOfSizeIter<W> {
             "can only generate subsets of size less than {}",
             SUFFIX_CACHE_SIZE
         );
-        let mut suffix = W::zero();
+        let mut suffix = W::ZERO;
         let mut remainder = set;
         suffixes[0].write(suffix);
         for cell in suffixes.iter_mut().skip(1).take(size) {
-            let next_bit = W::one() << remainder.trailing_zeros() as usize;
+            let next_bit = W::ONE << remainder.trailing_zeros() as usize;
             suffix |= next_bit;
             remainder &= !next_bit;
             cell.write(suffix);
@@ -95,18 +95,18 @@ impl<W: Word> Iterator for SubsetsOfSizeIter<W> {
         if self.stop {
             None
         } else {
-            debug_assert!(self.subset & !self.set == W::zero());
+            debug_assert!(self.subset & !self.set == W::ZERO);
             debug_assert!(self.subset.count_ones() as usize == self.size);
             let next = self.subset;
             let bit = self.subset & self.subset.wrapping_neg();
-            if bit != W::zero()
+            if bit != W::ZERO
                 && let Some(x) = (self.subset | !self.set).checked_add(&bit)
             {
                 let prefix = x & self.set;
                 let lost = self.size - prefix.count_ones() as usize;
                 assert!(lost <= self.size); // SAFETY: self.suffixes is initialized up to self.size.
                 let suffix = unsafe { self.suffixes.get_unchecked(lost).assume_init() };
-                debug_assert!(prefix & suffix == W::zero());
+                debug_assert!(prefix & suffix == W::ZERO);
                 self.subset = prefix | suffix;
             } else {
                 self.stop = true;

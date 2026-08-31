@@ -42,7 +42,7 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn with(self, e: Element) -> Self {
         Self::debug_bound_check(e);
-        Self(self.0 | W::one() << e)
+        Self(self.0 | W::ONE << e)
     }
 
     /// The set with an element removed from it (if present).
@@ -64,7 +64,7 @@ impl<W: Word> BitSet<W> {
     #[inline]
     pub fn without(self, e: Element) -> Self {
         Self::debug_bound_check(e);
-        Self(self.0 & !(W::one() << e))
+        Self(self.0 & !(W::ONE << e))
     }
 
     /// The union of two sets.
