@@ -38,7 +38,7 @@ use crate::*;
 macro_rules! bitset {
     // Initialize.
     ($ty:ty; $($tt:tt)*) => {
-        $crate::bitset!(@accum <$ty as num_traits::ConstZero>::ZERO; $ty; $($tt)*)
+        $crate::bitset!(@accum <$ty as $crate::__macro_hygiene::ConstZero>::ZERO; $ty; $($tt)*)
     };
 
     // Finalize.
@@ -53,11 +53,11 @@ macro_rules! bitset {
                 // Bounds-check the element at compile time.
                 let element: $crate::Element = const {
                     let element: $crate::Element = $element;
-                    assert!(element <= $crate::BitSet::<$ty>::MAX);
+                    $crate::__macro_hygiene::assert!(element <= $crate::BitSet::<$ty>::MAX);
                     element
                 };
 
-                <$ty as num_traits::ConstOne>::ONE << element
+                <$ty as $crate::__macro_hygiene::ConstOne>::ONE << element
             };
             $ty;
             $($($rest)*)?
@@ -71,12 +71,12 @@ macro_rules! bitset {
                 // Bounds-check the range end at compile time.
                 let end: $crate::Element = const {
                     let end: $crate::Element = $end;
-                    assert!(end <= $crate::BitSet::<$ty>::BITS);
+                    $crate::__macro_hygiene::assert!(end <= $crate::BitSet::<$ty>::BITS);
                     end
                 };
 
                 if end <= 0 {
-                    <$ty as num_traits::ConstZero>::ZERO
+                    <$ty as $crate::__macro_hygiene::ConstZero>::ZERO
                 } else {
                     $crate::BitSet::<$ty>::interval($start, end - 1).word()
                 }
@@ -93,7 +93,7 @@ macro_rules! bitset {
                 // Bounds-check the last element at compile time.
                 let last: $crate::Element = const {
                     let last: $crate::Element = $last;
-                    assert!(last <= $crate::BitSet::<$ty>::MAX);
+                    $crate::__macro_hygiene::assert!(last <= $crate::BitSet::<$ty>::MAX);
                     last
                 };
 
@@ -139,7 +139,7 @@ macro_rules! bitset {
 #[macro_export]
 macro_rules! set {
     ($($tt:tt)*) => {
-        $crate::bitset!(usize; $($tt)*)
+        $crate::bitset!($crate::__macro_hygiene::usize; $($tt)*)
     };
 }
 
@@ -174,6 +174,6 @@ macro_rules! set {
 #[macro_export]
 macro_rules! set128 {
     ($($tt:tt)*) => {
-        $crate::bitset!(u128; $($tt)*)
+        $crate::bitset!($crate::__macro_hygiene::u128; $($tt)*)
     };
 }

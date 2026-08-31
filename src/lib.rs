@@ -330,6 +330,14 @@ use num_traits::{CheckedShl, CheckedShr, ConstOne, ConstZero, PrimInt, Unsigned,
 // Exports
 // -------
 
+/// Hygienic re-exports used in creation macros.
+#[doc(hidden)]
+pub mod __macro_hygiene {
+    pub use core::assert;
+    pub use core::primitive::{u128, usize};
+    pub use num_traits::{ConstOne, ConstZero};
+}
+
 /// Re-exports [`BitSet`], [`Set`], [`Set128`], and their creation macros.
 pub mod prelude {
     pub use crate::BitSet;
