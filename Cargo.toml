@@ -25,6 +25,7 @@ num-traits = { version = "0.2.19", default-features = false }
 serde = { version = "1.0.229", default-features = false, features = ["derive"], optional = true }
 
 [dev-dependencies]
+bnum = { version = "0.14.4", default-features = false, features = ["numtraits"] }
 criterion = "0.8.2"
 itertools = "0.15.0"
 
