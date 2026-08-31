@@ -8,6 +8,8 @@ use crate::*;
 /// Explicit elements and range ends must be constant expressions and are bounds-checked at compile
 /// time. Range starts may be runtime values.
 ///
+/// Compound range start expressions must be parenthesized.
+///
 /// # Examples
 ///
 /// ```
@@ -46,26 +48,8 @@ macro_rules! bitset {
         $crate::BitSet::<$ty>::from_word($word)
     };
 
-    // Parse a singleton.
-    (@accum $word:expr; $ty:ty; $element:tt $(, $($rest:tt)*)?) => {
-        $crate::bitset!(
-            @accum $word | {
-                // Bounds-check the element at compile time.
-                let element: $crate::Element = const {
-                    let element: $crate::Element = $element;
-                    $crate::__macro_hygiene::assert!(element <= $crate::BitSet::<$ty>::MAX);
-                    element
-                };
-
-                <$ty as $crate::__macro_hygiene::ConstOne>::ONE << element
-            };
-            $ty;
-            $($($rest)*)?
-        )
-    };
-
     // Parse a range.
-    (@accum $word:expr; $ty:ty; $start:tt .. $end:tt $(, $($rest:tt)*)?) => {
+    (@accum $word:expr; $ty:ty; $start:tt .. $end:expr $(, $($rest:tt)*)?) => {
         $crate::bitset!(
             @accum $word | {
                 // Bounds-check the range end at compile time.
@@ -87,7 +71,7 @@ macro_rules! bitset {
     };
 
     // Parse an inclusive range.
-    (@accum $word:expr; $ty:ty; $start:tt ..= $last:tt $(, $($rest:tt)*)?) => {
+    (@accum $word:expr; $ty:ty; $start:tt ..= $last:expr $(, $($rest:tt)*)?) => {
         $crate::bitset!(
             @accum $word | {
                 // Bounds-check the last element at compile time.
@@ -103,12 +87,32 @@ macro_rules! bitset {
             $($($rest)*)?
         )
     };
+
+    // Parse a singleton.
+    (@accum $word:expr; $ty:ty; $element:expr $(, $($rest:tt)*)?) => {
+        $crate::bitset!(
+            @accum $word | {
+                // Bounds-check the element at compile time.
+                let element: $crate::Element = const {
+                    let element: $crate::Element = $element;
+                    $crate::__macro_hygiene::assert!(element <= $crate::BitSet::<$ty>::MAX);
+                    element
+                };
+
+                <$ty as $crate::__macro_hygiene::ConstOne>::ONE << element
+            };
+            $ty;
+            $($($rest)*)?
+        )
+    };
 }
 
 /// Create a [`Set`] containing the arguments.
 ///
 /// Explicit elements and range ends must be constant expressions and are bounds-checked at compile
 /// time. Range starts may be runtime values.
+///
+/// Compound range start expressions must be parenthesized.
 ///
 /// # Examples
 ///
@@ -147,6 +151,8 @@ macro_rules! set {
 ///
 /// Explicit elements and range ends must be constant expressions and are bounds-checked at compile
 /// time. Range starts may be runtime values.
+///
+/// Compound range start expressions must be parenthesized.
 ///
 /// # Examples
 ///
