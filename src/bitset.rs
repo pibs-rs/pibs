@@ -27,6 +27,8 @@ impl<W: Word> BitSet<W> {
     /// # use pibs::prelude::*;
     /// assert_eq!(BitSet::<u32>::BITS, 32);
     /// ```
+    // FIXME: This need not work for any implementation of Word.
+    //        As soon as num_traits supports querying the bit length at compile time, use that.
     pub const BITS: usize = size_of::<W>() * 8;
 
     /// The smallest integer that can be stored in the set.
@@ -80,6 +82,12 @@ impl<W: Word> BitSet<W> {
 
     #[inline(always)]
     pub(crate) fn debug_bound_check(e: Element) {
+        debug_assert_eq!(
+            Self::BITS,
+            W::zero().count_zeros() as usize,
+            "calculated bit length of {} does not match the bit length of its zero",
+            type_name::<W>()
+        );
         debug_assert!(
             e <= Self::MAX,
             "element {} out of bounds for {}: maximum is {}",
