@@ -323,8 +323,8 @@ mod vec;
 // Imports
 // -------
 
-use core::ops::{AddAssign, BitAndAssign, BitOrAssign, BitXorAssign, ShlAssign, ShrAssign};
-use num_traits::{CheckedShl, CheckedShr, ConstOne, ConstZero, PrimInt, Unsigned, WrappingNeg};
+use core::ops::{BitAndAssign, BitOrAssign, BitXorAssign, ShlAssign, ShrAssign};
+use num_traits::{CheckedShr, ConstOne, ConstZero, PrimInt, Unsigned, WrappingNeg};
 
 // -------
 // Exports
@@ -373,13 +373,11 @@ pub trait Word:
     + Unsigned
     + ConstZero
     + ConstOne
-    + AddAssign
     + BitAndAssign
     + BitOrAssign
     + BitXorAssign
     + ShlAssign<Element>
     + ShrAssign<Element>
-    + CheckedShl
     + CheckedShr
     + WrappingNeg
 {
@@ -391,13 +389,11 @@ impl<T> Word for T where
         + Unsigned
         + ConstZero
         + ConstOne
-        + AddAssign
         + BitAndAssign
         + BitOrAssign
         + BitXorAssign
         + ShlAssign<Element>
         + ShrAssign<Element>
-        + CheckedShl
         + CheckedShr
         + WrappingNeg
 {
