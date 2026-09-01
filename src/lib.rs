@@ -237,17 +237,35 @@
 //! assert_eq!(a + x, set![1, 2, 3, 4]); // singleton union
 //! ```
 //!
-//! ### Precondition on the bit length of primitive integer types
+//! ### Bit-length precondition for non-builtin word types
 //!
-//! Currently, [`num_traits`] provides no trait that lets one infer the logical bit length of a
-//! [`Word`] `W` at compile time. For this reason, *pibs* computes the logical bit length from the
-//! physical one. This results in a precondition to using `BitSet<W>` that:
+//! Currently, [`num_traits`] provides no trait that exposes the logical bit length of a [`Word`]
+//! `W` at compile time. For this reason, *pibs* infers the logical bit length from the physical
+//! one. This results in a precondition to using `BitSet<W>` that:
 //!
 //! ```
 //! # use num_traits::Zero;
 //! # type W = usize;
 //! assert_eq!(size_of::<W>() * 8, W::zero().count_zeros() as usize);
 //! ```
+//!
+//! ## Support for non-builtin word types
+//!
+//! The storage word trait [`Word`] has a blanket implementation and allows [`BitSet<W>`] to be used
+//! with some non-builtin types `W`, say
+//! [`bnum::types::U256`](https://docs.rs/bnum/latest/bnum/types/type.U256.html). This is partially
+//! supported, with the following limitations:
+//!
+//! - There is a precondition on the word type `W`; see
+//!   [above](#bit-length-precondition-for-non-builtin-word-types).
+//! - The [`Word`] trait may change in the future as new features are added.
+//! - [`subsets_of_size`](BitSet::subsets_of_size) has a hard limit of 128 on the subset size,
+//!   regardless of [`Word`] type.
+//! - [`subsets_by_size`](BitSet::subsets_by_size) would, in theory, stop after generating all
+//!   subsets of size 128.
+//! - [`From<BitSet<W>>`](From::from) is only implemented for
+//!   [`Vec<T>`](https://doc.rust-lang.org/alloc/vec/struct.Vec.html) when `W` is a builtin type.
+//! - Testing of non-builtin word types is very limited; benchmarking is non-existent.
 //!
 //! ## Performance
 //! ### Impact of word size
@@ -358,7 +376,7 @@ pub use iters::{BitSetIter, SubsetsOfSizeIter};
 /// For numbers up to 127, use [`Set128`] at a possible performance cost.
 pub type Set = BitSet<usize>;
 
-/// Alias for [`BitSet<u128>`]; the set with the highest capacity.
+/// Alias for [`BitSet<u128>`]; the set with the highest capacity among builtin word types.
 ///
 /// This set can store integers between 0 and 127 (inclusive).
 /// For numbers smaller than the number of bits in a usize, use [`Set`] for best performance.

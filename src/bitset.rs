@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// # Preconditions
 ///
-/// It must be the case that `size_of::<W>() * 8 == W::zero().count_zeros()`.
+/// It must be the case that `size_of::<W>() * 8 == W::zero().count_zeros() as usize`.
 ///
 /// # Example conventions
 ///
