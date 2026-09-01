@@ -96,6 +96,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn iter_all_below(n: usize) -> impl Iterator<Item = Self> {
+        debug_assert!(n <= Self::BITS);
         (0..=n).flat_map(move |k| Self::iter_combinations(n, k))
     }
 
