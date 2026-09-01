@@ -87,7 +87,7 @@
 //!
 //! ## Minimum generating set
 //!
-//! The following computes by bruteforce a minimum-cardinality set of positive integers that
+//! The following computes by brute force a minimum-cardinality set of positive integers that
 //! generate (by taking any subset of the numbers and summing them) all elements of a target set.
 //! This is done using the [`iter_combinations(n, k)`](Set::iter_combinations) generator, which
 //! yields all subsets of `0..n` of size `k`, and the
@@ -200,14 +200,23 @@
 //! | [`set![2, 4, 6].subsets_by_size()`](Set::subsets_by_size)  | ∅, {2}, {4}, {6}, {2, 4}, {2, 6}, {4, 6}, {2, 4, 6}
 //! | [`set![2, 4, 6].subsets_of_size(2)`](Set::subsets_of_size) | {2, 4}, {2, 6}, {4, 6}
 //!
-//! ## Onboarding
+//! ## Installation
 //!
-//! Add *pibs* to your `Cargo.toml`:
+//! Via one of the following `cargo` commands:
+//!
+//! ```sh
+//! cargo add pibs                        # with default features
+//! cargo add pibs --no-default-features  # without default features
+//! cargo add pibs -F serde               # with 'serde' feature
+//! ```
+//!
+//! Or by adding one of the following lines to `Cargo.toml` (replace `0.1` with the latest version):
+//!
 //! ```toml
 //! [dependencies]
-//! pibs = "0.1"                                            # with default features
-//! # pibs = { version = "0.1", default-features = false }  # without default features
-//! # pibs = { version = "0.1", features = ["serde"] }      # with 'serde' feature
+//! pibs = "0.1"                                          # with default features
+//! pibs = { version = "0.1", default-features = false }  # without default features
+//! pibs = { version = "0.1", features = ["serde"] }      # with 'serde' feature
 //! ```
 //!
 //! ## Features and dependencies
