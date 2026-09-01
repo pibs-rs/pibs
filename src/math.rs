@@ -452,6 +452,7 @@ impl<W: Word> BitSet<W> {
     /// ```
     #[inline]
     pub fn truncating_translate(self, add: i32) -> Self {
+        debug_assert!(Element::try_from(add.unsigned_abs()).is_ok());
         if add >= 0 {
             self.truncating_map_add(add as Element)
         } else {
