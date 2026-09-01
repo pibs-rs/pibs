@@ -42,7 +42,7 @@ fn test_macro_ranges() {
 
 #[test]
 fn test_macro_expressions() {
-    assert_eq!(bitset![u8; 0 + 1, 1 + 2, 2 + 3, 3 + 4].word(), 0b10101010);
+    assert_eq!(bitset![u8; 1, 1 + 2, 2 + 3, 3 + 4].word(), 0b10101010);
     assert_eq!(bitset![u8; 2..2 + 2].word(), 0b1100);
     assert_eq!(bitset![u8; 2..=2 + 2].word(), 0b11100);
 }
