@@ -17,8 +17,12 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(set![3, 2, 1].to_vec(), vec![1, 2, 3]);
     /// ```
     ///
-    /// To produce a [`Vec<T>`] for a different primitive integer type `T`, use `into` or `from`
-    /// with a type hint.
+    /// # Alternatives
+    ///
+    /// To produce a [`Vec<T>`] for another builtin integer type `T`, use [`into`](Into::into) or
+    /// [`from`](From::from) with a type hint. These infallible conversions are only implemented for
+    /// [`BitSet<W>`] when `W` is itself a builtin unsigned integer type. For other [`Word`] types,
+    /// use [`to_vec`](BitSet::to_vec) and convert.
     ///
     /// ```
     /// # use pibs::prelude::*;
