@@ -1,15 +1,18 @@
 //! Conversion methods to [`BitSet`] from other types.
 
 use crate::*;
-use core::ops::{Range, RangeInclusive};
+use core::{
+    borrow::Borrow,
+    ops::{Range, RangeInclusive},
+};
 
 impl<W: Word> BitSet<W> {
-    /// Try to create a [`BitSet`] from an iterator.
+    /// Try to create a [`BitSet`] from an iterable.
     ///
     /// # Errors
     ///
-    /// If any item produced by the iterator fails to convert to an [`Element`] or is greater than
-    /// [`Self::MAX`].
+    /// If any item produced by the iterator fails to convert to an [`Element`] or if the resulting
+    /// [`Element`] is greater than [`Self::MAX`].
     ///
     /// # Examples
     ///
@@ -40,7 +43,7 @@ impl<W: Word> BitSet<W> {
         Ok(Self(word))
     }
 
-    /// Create a [`BitSet`] from a collection that implements [`IntoIterator<Item = Element>`].
+    /// Create a [`BitSet`] from an iterable whose items are (or borrow as) [`Element`].
     ///
     /// # Preconditions
     ///
@@ -56,18 +59,21 @@ impl<W: Word> BitSet<W> {
     /// let iter = once(0).chain(once(5)).chain(once(23));
     /// assert_eq!(Set::from_unchecked(iter), set![0, 5, 23]);
     ///
-    /// // Can also consume collections.
+    /// // Can also borrow or consume collections.
     /// let array = [0, 5, 23];
+    /// assert_eq!(Set::from_unchecked(&array), set![0, 5, 23]);
     /// assert_eq!(Set::from_unchecked(array), set![0, 5, 23]);
     /// ```
     #[inline]
     pub fn from_unchecked<I>(iter: I) -> Self
     where
-        I: IntoIterator<Item = Element>,
+        I: IntoIterator,
+        I::Item: Borrow<Element>,
     {
         let mut word = W::ZERO;
 
         for e in iter {
+            let e = *e.borrow();
             Self::debug_bound_check(e);
             word |= W::ONE << e;
         }
