@@ -23,10 +23,10 @@ impl<W: Word> BitSet<W> {
     /// assert_eq!(Set::try_from_iter(iter), Ok(set![0, 5, 23]));
     /// ```
     #[inline]
-    pub fn try_from_iter<I, T>(iter: I) -> Result<Self, Error>
+    pub fn try_from_iter<I>(iter: I) -> Result<Self, Error>
     where
-        I: IntoIterator<Item = T>,
-        T: TryInto<Element>,
+        I: IntoIterator,
+        I::Item: TryInto<Element>,
     {
         let mut word = W::ZERO;
 
