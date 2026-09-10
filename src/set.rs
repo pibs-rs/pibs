@@ -17,6 +17,7 @@ impl<W: Word> BitSet<W> {
     /// # use pibs::prelude::*;
     /// let set = set![7, 3..=5, 1];
     /// assert!(set.iter().eq([1, 3, 4, 5, 7]));
+    /// assert!(set.iter().rev().eq([7, 5, 4, 3, 1]));
     /// ```
     #[inline]
     pub fn iter(self) -> BitSetIter<W> {

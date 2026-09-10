@@ -29,6 +29,18 @@ impl<W: Word> Iterator for BitSetIter<W> {
     }
 }
 
+impl<W: Word> DoubleEndedIterator for BitSetIter<W> {
+    #[inline]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.0 == W::ZERO {
+            return None;
+        }
+        let item = BitSet::<W>::MAX - self.0.leading_zeros() as Self::Item;
+        self.0 &= !(W::ONE << item);
+        Some(item)
+    }
+}
+
 impl<W: Word> ExactSizeIterator for BitSetIter<W> {}
 
 impl<W: Word> FusedIterator for BitSetIter<W> {}
